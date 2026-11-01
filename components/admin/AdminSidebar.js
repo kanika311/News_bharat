@@ -75,17 +75,14 @@ export default function AdminSidebar({ isOpen, setIsOpen }) {
         {/* Brand header */}
         <div className="flex items-center justify-between h-16 px-5 border-b border-slate-800 bg-slate-950">
           <Link href="/admin" className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-lg bg-red-600 flex items-center justify-center font-black text-xl text-white shadow-md shadow-red-600/30">
-              SM
-            </div>
-            <div>
-              <span className="font-extrabold tracking-tight text-white text-lg">
-                SWAR<span className="text-red-500">MEDIA</span>
-              </span>
-              <span className="block text-[10px] text-slate-400 font-medium uppercase tracking-wider">
-                News CMS v2.0
-              </span>
-            </div>
+            <img
+              src="/logo.png"
+              alt="Swar Media"
+              className="h-10 w-auto object-contain drop-shadow"
+            />
+            <span className="text-[10px] text-slate-400 font-medium uppercase tracking-wider bg-slate-800/80 px-2 py-0.5 rounded">
+              CMS v2.0
+            </span>
           </Link>
         </div>
 

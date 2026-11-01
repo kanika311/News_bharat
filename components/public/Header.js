@@ -271,16 +271,18 @@ export default function Header() {
             <Menu className="w-5 h-5 sm:w-6 sm:h-6" />
           </button>
 
-          <Link href="/" className="flex items-center gap-2 group min-w-0">
-            <div className="w-8 h-8 sm:w-11 sm:h-11 bg-red-600 text-white rounded-xl flex items-center justify-center font-black text-lg sm:text-2xl shadow-md shadow-red-600/30 group-hover:scale-105 transition-transform shrink-0">
-              SM
-            </div>
-            <div className="truncate">
-              <div className="flex items-baseline gap-1">
+          <Link href="/" className="flex items-center gap-2 sm:gap-3 group min-w-0">
+            <img
+              src="/logo.png"
+              alt="Swar Media"
+              className="h-10 sm:h-12 md:h-14 w-auto object-contain drop-shadow-md group-hover:scale-105 transition-transform shrink-0"
+            />
+            <div className="hidden sm:block truncate">
+              <div className="flex items-baseline gap-1.5">
                 <span className="text-xl sm:text-2xl md:text-3xl font-black tracking-tight text-slate-900 dark:text-white leading-none">
                   SWAR<span className="text-red-600">MEDIA</span>
                 </span>
-                <span className="hidden sm:inline text-xs sm:text-sm font-bold text-red-600 font-hindi">
+                <span className="text-xs sm:text-sm font-bold text-red-600 font-hindi">
                   स्वर मीडिया
                 </span>
               </div>
@@ -462,9 +464,11 @@ export default function Header() {
             <div>
               <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg bg-red-600 text-white font-black flex items-center justify-center text-sm">
-                    SM
-                  </div>
+                  <img
+                    src="/logo.png"
+                    alt="Swar Media"
+                    className="h-10 w-auto object-contain"
+                  />
                   <span className="font-black text-slate-900 dark:text-white">SWAR MEDIA</span>
                 </div>
                 <button

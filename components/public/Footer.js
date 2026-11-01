@@ -102,17 +102,11 @@ export default function Footer() {
           {/* Col 1: Brand */}
           <div className="col-span-2 space-y-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-red-600 text-white rounded-xl flex items-center justify-center font-black text-xl">
-                SM
-              </div>
-              <div>
-                <span className="text-xl font-black text-white tracking-tight">
-                  SWAR<span className="text-red-500">MEDIA</span>
-                </span>
-                <p className="text-[10px] text-slate-400 font-hindi">
-                  सत्य, सुर और सरोकार • Voice of Truth & Integrity
-                </p>
-              </div>
+              <img
+                src="/logo.png"
+                alt="Swar Media Logo"
+                className="h-14 sm:h-16 w-auto object-contain drop-shadow-lg"
+              />
             </div>
 
             <p className="text-slate-400 leading-relaxed text-xs max-w-sm">

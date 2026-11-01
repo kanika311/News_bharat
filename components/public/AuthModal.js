@@ -87,9 +87,11 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
         {/* Header */}
         <div className="bg-red-600 px-4 sm:px-6 py-3.5 sm:py-5 text-white flex items-center justify-between">
           <div className="flex items-center gap-2.5 sm:gap-3">
-            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-white/20 flex items-center justify-center font-black text-lg sm:text-xl shrink-0">
-              SM
-            </div>
+            <img
+              src="/logo.png"
+              alt="Swar Media"
+              className="h-10 sm:h-12 w-auto object-contain bg-black/20 p-1 rounded-xl shadow-xs shrink-0"
+            />
             <div>
               <h3 className="text-base sm:text-lg font-black tracking-tight">
                 {lang === "hi" ? "स्वर मीडिया में स्वागत है" : "Welcome to Swar Media"}

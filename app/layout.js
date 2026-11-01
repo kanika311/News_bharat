@@ -23,11 +23,24 @@ export const metadata = {
   creator: "Swar Media",
   publisher: "Swar Media Network",
   metadataBase: new URL(process.env.SITE_URL || "http://localhost:3000"),
+  icons: {
+    icon: "/logo.png",
+    shortcut: "/logo.png",
+    apple: "/logo.png",
+  },
   openGraph: {
     title: "Swar Media | स्वर मीडिया - Truth & Integrity",
     description: "Leading bilingual news portal covering national and international affairs.",
     url: "/",
     siteName: "Swar Media",
+    images: [
+      {
+        url: "/logo.png",
+        width: 1200,
+        height: 675,
+        alt: "Swar Media",
+      },
+    ],
     locale: "hi_IN",
     type: "website",
   },
@@ -35,6 +48,7 @@ export const metadata = {
     card: "summary_large_image",
     title: "Swar Media | स्वर मीडिया",
     description: "Leading bilingual news portal covering national and international affairs.",
+    images: ["/logo.png"],
     creator: "@swarmedia",
   },
   robots: {

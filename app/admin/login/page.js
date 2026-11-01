@@ -44,10 +44,12 @@ export default function AdminLoginPage() {
     <div className="flex items-center justify-center min-h-screen p-4 bg-gradient-to-br from-slate-950 via-slate-900 to-red-950/40">
       <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 p-8">
         {/* Brand Header */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-red-600 text-white font-black text-2xl shadow-xl shadow-red-600/30 mb-3">
-            SM
-          </div>
+        <div className="text-center mb-8 flex flex-col items-center">
+          <img
+            src="/logo.png"
+            alt="Swar Media Logo"
+            className="h-16 w-auto object-contain drop-shadow-xl mb-3"
+          />
           <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
             SWAR<span className="text-red-600">MEDIA</span> CMS
           </h1>

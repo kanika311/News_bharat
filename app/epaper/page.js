@@ -126,11 +126,15 @@ export default function EPaperPage() {
               <span>NEW DELHI • {todayDate.toUpperCase()}</span>
               <span>16 PAGES • ₹ 5.00</span>
             </div>
-            <h2 className="text-4xl sm:text-6xl font-black tracking-tight text-red-700 font-hindi leading-none">
-              स्वर मीडिया
-            </h2>
+            <div className="flex justify-center py-2">
+              <img
+                src="/logo.png"
+                alt="Swar Media"
+                className="h-16 sm:h-20 md:h-24 w-auto object-contain drop-shadow"
+              />
+            </div>
             <p className="text-xs uppercase font-extrabold tracking-widest text-slate-800">
-              SWAR MEDIA • सत्य, सुर और सरोकार • VOICE OF TRUTH & INTEGRITY
+              सत्य, सुर और सरोकार • VOICE OF TRUTH & INTEGRITY
             </p>
           </div>
 
