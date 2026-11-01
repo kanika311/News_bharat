@@ -176,9 +176,9 @@ export default function NotificationDrawer({ isOpen, onClose }) {
         aria-hidden="true"
       />
 
-      <div className="fixed inset-y-0 right-0 max-w-full flex pl-10">
+      <div className="fixed inset-y-0 right-0 max-w-full flex pl-0 sm:pl-10">
         {/* Drawer Panel */}
-        <div className="w-screen max-w-md sm:max-w-lg bg-white dark:bg-slate-900 shadow-2xl flex flex-col h-full border-l border-slate-200 dark:border-slate-800 animate-in slide-in-from-right duration-300">
+        <div className="w-screen max-w-full sm:max-w-md md:max-w-lg bg-white dark:bg-slate-900 shadow-2xl flex flex-col h-full border-l border-slate-200 dark:border-slate-800 animate-in slide-in-from-right duration-300">
           
           {/* 1. Drawer Header */}
           <div className="p-4 sm:p-5 bg-gradient-to-r from-red-600 to-red-700 text-white flex items-center justify-between shadow-md">

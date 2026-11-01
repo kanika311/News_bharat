@@ -79,19 +79,19 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/70 backdrop-blur-xs animate-in fade-in duration-200 overflow-y-auto">
       <div
-        className="w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden"
+        className="w-full max-w-md bg-white dark:bg-slate-900 rounded-2xl sm:rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden my-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="bg-red-600 px-6 py-5 text-white flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center font-black text-xl">
+        <div className="bg-red-600 px-4 sm:px-6 py-3.5 sm:py-5 text-white flex items-center justify-between">
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-white/20 flex items-center justify-center font-black text-lg sm:text-xl shrink-0">
               BV
             </div>
             <div>
-              <h3 className="text-lg font-black tracking-tight">
+              <h3 className="text-base sm:text-lg font-black tracking-tight">
                 {lang === "hi" ? "भारत वार्ता में स्वागत है" : "Welcome to Bharat Varta"}
               </h3>
               <p className="text-xs text-red-100 font-medium">

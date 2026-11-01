@@ -67,29 +67,34 @@ export default function HomePage() {
         let heroList = [];
         if (leadIds.length > 0) {
           heroList = leadIds
-            .map((id) => (typeof id === "object" ? id : all.find((a) => a._id === id)))
+            .map((id) => {
+              const targetId = typeof id === "object" && id !== null ? String(id._id || id) : String(id);
+              return all.find((a) => String(a._id) === targetId);
+            })
             .filter(Boolean);
         }
         if (heroList.length < 5) {
-          const remaining = all.filter((a) => !heroList.some((h) => h._id === a._id));
+          const remaining = all.filter((a) => !heroList.some((h) => String(h._id) === String(a._id)));
           heroList = [...heroList, ...remaining.slice(0, 5 - heroList.length)];
         }
-        setLeadArticles(heroList);
+        setLeadArticles(heroList.length ? heroList : all.slice(0, 5));
 
         // 2. Top Stories
         const tops = all.filter((a) => a.isTopStory || a.isFeatured);
-        setTopStories(tops.length ? tops.slice(0, 4) : all.slice(5, 9));
+        setTopStories(tops.length ? tops.slice(0, 4) : all.slice(0, 4));
 
         // 3. Trending Articles (Most views)
         const sortedByViews = [...all].sort((a, b) => (b.viewCount || 0) - (a.viewCount || 0));
-        setTrendingArticles(sortedByViews.slice(0, 5));
+        setTrendingArticles(sortedByViews.length ? sortedByViews.slice(0, 5) : all.slice(0, 5));
 
-        // 4. Group by category
+        // 4. Group by category with String-safe ID matching
         const grouped = {};
         cats.forEach((cat) => {
-          grouped[cat._id] = all.filter(
-            (a) => a.category?._id === cat._id || a.category === cat._id
-          );
+          const catIdStr = String(cat._id);
+          grouped[cat._id] = all.filter((a) => {
+            const artCatId = a.category?._id ? String(a.category._id) : String(a.category || "");
+            return artCatId === catIdStr;
+          });
         });
         setCategoryArticles(grouped);
       } catch (err) {
@@ -117,7 +122,7 @@ export default function HomePage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-4 space-y-8">
+    <div className="max-w-7xl mx-auto px-3 sm:px-4 py-3 sm:py-6 space-y-6 sm:space-y-8">
       {/* 1. Header Leaderboard Ad */}
       <AdSlot slot="header" />
 

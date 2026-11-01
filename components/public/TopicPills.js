@@ -54,12 +54,12 @@ export default function TopicPills() {
   };
 
   return (
-    <div className="bg-slate-100 dark:bg-slate-900/90 border-b border-slate-200 dark:border-slate-800 select-none py-2 px-4 transition-colors">
-      <div className="max-w-7xl mx-auto flex items-center gap-2">
-        {/* Left Scroll Button */}
+    <div className="bg-slate-100 dark:bg-slate-900/90 border-b border-slate-200 dark:border-slate-800 select-none py-1.5 px-2 sm:px-4 transition-colors">
+      <div className="max-w-7xl mx-auto flex items-center gap-1.5 sm:gap-2">
+        {/* Left Scroll Button (Desktop) */}
         <button
           onClick={() => scroll("left")}
-          className="w-7 h-7 rounded-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 shadow-xs flex items-center justify-center text-slate-700 dark:text-slate-300 hover:bg-slate-200 shrink-0"
+          className="hidden sm:flex w-7 h-7 rounded-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 shadow-xs items-center justify-center text-slate-700 dark:text-slate-300 hover:bg-slate-200 shrink-0"
           aria-label="Scroll left"
         >
           <ChevronLeft className="w-4 h-4" />
@@ -68,14 +68,14 @@ export default function TopicPills() {
         {/* Scrollable Pills Container */}
         <div
           ref={scrollRef}
-          className="flex items-center gap-2 overflow-x-auto no-scrollbar scroll-smooth py-0.5"
-          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+          className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar scroll-smooth py-0.5 w-full"
+          style={{ scrollbarWidth: "none", msOverflowStyle: "none", WebkitOverflowScrolling: "touch" }}
         >
           {topics.map((topic, idx) => (
             <Link
               key={idx}
               href={`/search?q=${encodeURIComponent(topic.query)}`}
-              className={`px-3 py-1 text-xs rounded-full whitespace-nowrap font-medium transition-all duration-150 ${
+              className={`px-2.5 sm:px-3 py-1 text-[11px] sm:text-xs rounded-full whitespace-nowrap font-medium transition-all duration-150 ${
                 topic.isHot
                   ? "bg-red-600 text-white font-bold shadow-xs hover:bg-red-700"
                   : "bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:border-red-500 hover:text-red-600 dark:hover:text-red-400"
@@ -86,10 +86,10 @@ export default function TopicPills() {
           ))}
         </div>
 
-        {/* Right Scroll Button */}
+        {/* Right Scroll Button (Desktop) */}
         <button
           onClick={() => scroll("right")}
-          className="w-7 h-7 rounded-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 shadow-xs flex items-center justify-center text-slate-700 dark:text-slate-300 hover:bg-slate-200 shrink-0"
+          className="hidden sm:flex w-7 h-7 rounded-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 shadow-xs items-center justify-center text-slate-700 dark:text-slate-300 hover:bg-slate-200 shrink-0"
           aria-label="Scroll right"
         >
           <ChevronRight className="w-4 h-4" />

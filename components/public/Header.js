@@ -122,21 +122,18 @@ export default function Header() {
 
   return (
     <header className="w-full bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 transition-colors">
-      {/* 1. Aaj Tak Style Top Utility Header */}
-      <div className="bg-[#f8f9fa] dark:bg-slate-950 text-slate-700 dark:text-slate-300 text-[11px] py-1 px-4 border-b border-slate-200 dark:border-slate-800">
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-3 flex-wrap sm:flex-nowrap">
-          {/* Left: Live Timestamp + Network Links */}
-          <div className="flex items-center gap-3 overflow-x-auto no-scrollbar py-0.5">
-            {/* Live Timestamp (e.g. Nov 1, 2026 | 12:58 IST) */}
-            <span className="font-semibold text-slate-800 dark:text-slate-200 whitespace-nowrap flex items-center gap-1.5 font-mono text-[11px]">
-              <Calendar className="w-3.5 h-3.5 text-red-600 shrink-0" />
-              <span>{liveTimestamp || "Loading IST..."}</span>
+      {/* 1. Aaj Tak Style Top Utility Header (Single compact row on mobile) */}
+      <div className="bg-[#f8f9fa] dark:bg-slate-950 text-slate-700 dark:text-slate-300 text-[10px] sm:text-[11px] py-1 px-3 sm:px-4 border-b border-slate-200 dark:border-slate-800">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
+          {/* Left: Live Timestamp + Desktop Network Links */}
+          <div className="flex items-center gap-2 overflow-hidden">
+            <span className="font-semibold text-slate-800 dark:text-slate-200 whitespace-nowrap flex items-center gap-1 font-mono text-[10px] sm:text-[11px]">
+              <Calendar className="w-3 h-3 text-red-600 shrink-0" />
+              <span>{liveTimestamp || "IST"}</span>
             </span>
 
-            <span className="text-slate-300 dark:text-slate-700">|</span>
-
-            {/* Quick Network Links like Aaj Tak */}
-            <div className="flex items-center gap-2.5 font-medium whitespace-nowrap text-[11px]">
+            {/* Quick Network Links visible on md+ */}
+            <div className="hidden md:flex items-center gap-2.5 font-medium whitespace-nowrap text-[11px] border-l border-slate-300 dark:border-slate-700 pl-2.5">
               <Link href="/" className="font-bold text-red-600 hover:underline">
                 Bharat Varta
               </Link>
@@ -149,29 +146,29 @@ export default function Header() {
               </Link>
               <Link
                 href="/live/live-budget-preparation-economic-council"
-                className="hover:text-red-600 transition-colors hidden md:inline"
+                className="hover:text-red-600 transition-colors"
               >
                 {lang === "hi" ? "लाइव टीवी" : "Live TV"}
               </Link>
-              <Link href="/business" className="hover:text-red-600 transition-colors hidden lg:inline">
+              <Link href="/business" className="hover:text-red-600 transition-colors">
                 {lang === "hi" ? "कारोबार" : "Business"}
               </Link>
-              <Link href="/tech" className="hover:text-red-600 transition-colors hidden lg:inline">
+              <Link href="/tech" className="hover:text-red-600 transition-colors">
                 {lang === "hi" ? "टेक" : "Tech"}
               </Link>
-              <Link href="/videos" className="hover:text-red-600 transition-colors hidden sm:inline">
+              <Link href="/videos" className="hover:text-red-600 transition-colors">
                 {lang === "hi" ? "वीडियो" : "Videos"}
               </Link>
             </div>
           </div>
 
           {/* Right: Language switch + Dark mode + Aaj Tak Red Sign In Button */}
-          <div className="flex items-center gap-2.5 ml-auto shrink-0">
+          <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
             {/* Language Switcher */}
-            <div className="flex items-center bg-slate-200 dark:bg-slate-800 rounded-lg p-0.5 text-[10px] font-bold">
+            <div className="flex items-center bg-slate-200 dark:bg-slate-800 rounded-lg p-0.5 text-[9px] sm:text-[10px] font-bold">
               <button
                 onClick={() => setLang("hi")}
-                className={`px-2 py-0.5 rounded transition-colors ${
+                className={`px-1.5 sm:px-2 py-0.5 rounded transition-colors ${
                   lang === "hi" ? "bg-red-600 text-white" : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
                 }`}
               >
@@ -179,11 +176,11 @@ export default function Header() {
               </button>
               <button
                 onClick={() => setLang("en")}
-                className={`px-2 py-0.5 rounded transition-colors ${
+                className={`px-1.5 sm:px-2 py-0.5 rounded transition-colors ${
                   lang === "en" ? "bg-red-600 text-white" : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
                 }`}
               >
-                English
+                EN
               </button>
             </div>
 
@@ -193,7 +190,7 @@ export default function Header() {
               className="p-1 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white rounded"
               title="Toggle Dark Mode"
             >
-              {darkMode ? <Sun className="w-3.5 h-3.5 text-amber-400" /> : <Moon className="w-3.5 h-3.5" />}
+              {darkMode ? <Sun className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-400" /> : <Moon className="w-3 h-3 sm:w-3.5 sm:h-3.5" />}
             </button>
 
             {/* User Sign In / Profile Button (Aaj Tak Style Red Button) */}
@@ -201,11 +198,11 @@ export default function Header() {
               <div className="relative">
                 <button
                   onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                  className="flex items-center gap-1.5 px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded-md text-xs font-bold shadow-xs transition-colors"
+                  className="flex items-center gap-1 px-2 sm:px-3 py-0.5 sm:py-1 bg-red-600 hover:bg-red-700 text-white rounded-md text-[10px] sm:text-xs font-bold shadow-xs transition-colors"
                 >
-                  <User className="w-3.5 h-3.5" />
-                  <span className="max-w-[100px] truncate">{currentUser.name || "Reader"}</span>
-                  <ChevronDown className="w-3 h-3 opacity-80" />
+                  <User className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                  <span className="max-w-[70px] sm:max-w-[100px] truncate">{currentUser.name || "Reader"}</span>
+                  <ChevronDown className="w-2.5 h-2.5 sm:w-3 sm:h-3 opacity-80" />
                 </button>
 
                 {userDropdownOpen && (
@@ -252,62 +249,62 @@ export default function Header() {
             ) : (
               <button
                 onClick={() => setAuthModalOpen(true)}
-                className="flex items-center gap-1.5 px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded-md text-xs font-bold shadow-xs transition-colors hover:scale-105 active:scale-95"
+                className="flex items-center gap-1 px-2 sm:px-3 py-0.5 sm:py-1 bg-red-600 hover:bg-red-700 text-white rounded-md text-[10px] sm:text-xs font-bold shadow-xs transition-colors hover:scale-105 active:scale-95"
               >
-                <User className="w-3.5 h-3.5" />
-                <span>{lang === "hi" ? "Sign In" : "Sign In"}</span>
+                <User className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                <span>Sign In</span>
               </button>
             )}
           </div>
         </div>
       </div>
 
-      {/* 2. Main Branding & Action Bar (Aaj Tak style with Icons) */}
-      <div className="max-w-7xl mx-auto px-4 py-2.5 sm:py-3.5 flex items-center justify-between gap-4">
+      {/* 2. Main Branding & Action Bar (Clean & compact on mobile) */}
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 py-2 sm:py-3 flex items-center justify-between gap-2">
         {/* Left: Mobile hamburger + Brand Logo */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3 shrink min-w-0">
           <button
             onClick={() => setMobileMenuOpen(true)}
-            className="p-1.5 lg:hidden rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+            className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 shrink-0"
             aria-label="Open menu"
           >
-            <Menu className="w-6 h-6" />
+            <Menu className="w-5 h-5 sm:w-6 sm:h-6" />
           </button>
 
-          <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-red-600 text-white rounded-xl flex items-center justify-center font-black text-2xl shadow-lg shadow-red-600/30 group-hover:scale-105 transition-transform">
+          <Link href="/" className="flex items-center gap-2 group min-w-0">
+            <div className="w-8 h-8 sm:w-11 sm:h-11 bg-red-600 text-white rounded-xl flex items-center justify-center font-black text-lg sm:text-2xl shadow-md shadow-red-600/30 group-hover:scale-105 transition-transform shrink-0">
               BV
             </div>
-            <div>
-              <div className="flex items-baseline gap-1.5">
-                <span className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white leading-none">
+            <div className="truncate">
+              <div className="flex items-baseline gap-1">
+                <span className="text-xl sm:text-2xl md:text-3xl font-black tracking-tight text-slate-900 dark:text-white leading-none">
                   BHARAT<span className="text-red-600">VARTA</span>
                 </span>
-                <span className="text-xs sm:text-sm font-bold text-red-600 font-hindi">
+                <span className="hidden sm:inline text-xs sm:text-sm font-bold text-red-600 font-hindi">
                   भारत वार्ता
                 </span>
               </div>
-              <p className="text-[10px] sm:text-[11px] font-semibold text-slate-500 dark:text-slate-400 mt-0.5">
+              <p className="hidden md:block text-[10px] sm:text-[11px] font-semibold text-slate-500 dark:text-slate-400 mt-0.5">
                 सत्य, साहस और सरोकार • Truth & Integrity
               </p>
             </div>
           </Link>
         </div>
 
-        {/* Right: Aaj Tak Style Header Badges (EDITION, E-PAPER, AQI, RADIO, NOTIFICATIONS, LIVE TV, SEARCH) */}
-        <div className="flex items-center gap-2 sm:gap-3">
-          {/* Edition Pill */}
+        {/* Right: Aaj Tak Style Header Badges */}
+        <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
+          {/* Edition Pill (Desktop only) */}
           <div className="hidden xl:flex items-center gap-1 px-2.5 py-1 bg-slate-100 dark:bg-slate-800 rounded-lg text-[11px] font-bold text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
             <span>EDITION</span>
             <span className="text-red-600">🇮🇳 IN ▾</span>
           </div>
 
-          {/* E-PAPER Prominent Badge */}
+          {/* E-PAPER Prominent Badge (Visible on sm+) */}
           <Link
             href="/epaper"
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-red-50 dark:bg-red-950/60 border border-red-200 dark:border-red-800 hover:border-red-500 text-red-600 dark:text-red-400 rounded-xl text-xs font-bold transition-all shadow-xs hover:scale-105"
+            className="hidden sm:flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 bg-red-50 dark:bg-red-950/60 border border-red-200 dark:border-red-800 hover:border-red-500 text-red-600 dark:text-red-400 rounded-xl text-[11px] sm:text-xs font-bold transition-all shadow-xs hover:scale-105"
           >
-            <Newspaper className="w-4 h-4 text-red-600" />
+            <Newspaper className="w-3.5 h-3.5 text-red-600" />
             <span className="font-extrabold">{lang === "hi" ? "ई-पेपर" : "E-PAPER"}</span>
           </Link>
 
@@ -331,12 +328,12 @@ export default function Header() {
           <div className="relative">
             <button
               onClick={() => setNotificationDrawerOpen(true)}
-              className="p-2 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors relative"
+              className="p-1.5 sm:p-2 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors relative"
               title="Notifications Drawer"
               aria-label="Open notifications"
             >
-              <Bell className="w-5 h-5 text-slate-800 dark:text-slate-200" />
-              <span className="absolute top-1 right-1 w-4 h-4 bg-red-600 text-white text-[9px] font-black rounded-full flex items-center justify-center shadow-xs animate-pulse">
+              <Bell className="w-4 h-4 sm:w-5 sm:h-5 text-slate-800 dark:text-slate-200" />
+              <span className="absolute top-0.5 right-0.5 sm:top-1 sm:right-1 w-3.5 h-3.5 sm:w-4 sm:h-4 bg-red-600 text-white text-[8px] sm:text-[9px] font-black rounded-full flex items-center justify-center shadow-xs animate-pulse">
                 7
               </span>
             </button>
@@ -345,27 +342,27 @@ export default function Header() {
           {/* Live TV Button */}
           <Link
             href="/live/live-budget-preparation-economic-council"
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-full text-xs font-bold shadow-md shadow-red-600/20 transition-transform hover:scale-105"
+            className="flex items-center gap-1 px-2.5 py-1 sm:px-3 sm:py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-full text-[10px] sm:text-xs font-bold shadow-md shadow-red-600/20 transition-transform hover:scale-105"
           >
-            <span className="w-2 h-2 rounded-full bg-white animate-ping shrink-0" />
-            <Tv className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">LIVE</span>
+            <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-white animate-ping shrink-0" />
+            <Tv className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+            <span>LIVE</span>
           </Link>
 
           {/* Search Trigger */}
           <div className="relative">
             <button
               onClick={() => setSearchOpen(!searchOpen)}
-              className="p-2 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full"
+              className="p-1.5 sm:p-2 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full"
               title="Search News"
             >
-              <Search className="w-5 h-5" />
+              <Search className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
 
             {searchOpen && (
               <form
                 onSubmit={handleSearchSubmit}
-                className="absolute right-0 top-12 z-50 w-72 sm:w-80 p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl animate-in fade-in zoom-in-95"
+                className="absolute right-0 top-10 sm:top-12 z-50 w-72 sm:w-80 p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl animate-in fade-in zoom-in-95"
               >
                 <div className="relative">
                   <input
@@ -384,23 +381,26 @@ export default function Header() {
         </div>
       </div>
 
-      {/* 3. Sticky Category Navigation Bar (Aaj Tak style with ई-पेपर and categories) */}
+      {/* 3. Sticky Category Navigation Bar (Smooth touch swipe on mobile) */}
       <nav className="sticky top-0 z-40 bg-red-600 text-white shadow-md">
-        <div className="max-w-7xl mx-auto px-4 flex items-center justify-between">
-          <div className="flex items-center overflow-x-auto no-scrollbar scroll-smooth space-x-1 py-1">
+        <div className="max-w-7xl mx-auto px-2 sm:px-4 flex items-center justify-between">
+          <div
+            className="flex items-center overflow-x-auto no-scrollbar scroll-smooth space-x-1 py-1"
+            style={{ WebkitOverflowScrolling: "touch" }}
+          >
             <Link
               href="/"
-              className={`px-3 py-2 rounded-lg text-xs font-black tracking-wide whitespace-nowrap transition-colors ${
+              className={`px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs font-black tracking-wide whitespace-nowrap transition-colors ${
                 pathname === "/" ? "bg-red-800 text-white" : "hover:bg-red-700 text-white/95"
               }`}
             >
               {t("home")}
             </Link>
 
-            {/* Microdrama / Special desk */}
+            {/* Microdrama */}
             <Link
               href="/search?q=microdrama"
-              className="px-3 py-2 rounded-lg text-xs font-bold whitespace-nowrap hover:bg-red-700 text-white/95 transition-colors"
+              className="px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs font-bold whitespace-nowrap hover:bg-red-700 text-white/95 transition-colors"
             >
               {lang === "hi" ? "माइक्रोड्रामा" : "Microdrama"}
             </Link>
@@ -408,7 +408,7 @@ export default function Header() {
             {/* Direct ePaper tab in navbar */}
             <Link
               href="/epaper"
-              className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-black whitespace-nowrap transition-colors ${
+              className={`flex items-center gap-1 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs font-black whitespace-nowrap transition-colors ${
                 pathname === "/epaper"
                   ? "bg-red-800 text-white"
                   : "bg-red-700/60 hover:bg-red-800 text-yellow-300 font-bold"
@@ -425,7 +425,7 @@ export default function Header() {
                 <Link
                   key={cat._id}
                   href={`/${cat.slug}`}
-                  className={`px-3 py-2 rounded-lg text-xs font-bold whitespace-nowrap transition-colors ${
+                  className={`px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs font-bold whitespace-nowrap transition-colors ${
                     active ? "bg-red-800 text-white" : "hover:bg-red-700 text-white/90"
                   }`}
                 >
@@ -436,7 +436,7 @@ export default function Header() {
 
             <Link
               href="/videos"
-              className={`px-3 py-2 rounded-lg text-xs font-bold whitespace-nowrap transition-colors ${
+              className={`px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs font-bold whitespace-nowrap transition-colors ${
                 pathname === "/videos" ? "bg-red-800 text-white" : "hover:bg-red-700 text-white/90"
               }`}
             >
@@ -445,7 +445,7 @@ export default function Header() {
 
             <Link
               href="/photos"
-              className={`px-3 py-2 rounded-lg text-xs font-bold whitespace-nowrap transition-colors ${
+              className={`px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs font-bold whitespace-nowrap transition-colors ${
                 pathname === "/photos" ? "bg-red-800 text-white" : "hover:bg-red-700 text-white/90"
               }`}
             >
