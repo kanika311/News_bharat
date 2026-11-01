@@ -146,11 +146,11 @@ export default function ArticleDetailPage() {
             "dateModified": article.updatedAt,
             "author": [{
               "@type": "Person",
-              "name": article.author?.name || "Bharat Varta Desk",
+              "name": article.author?.name || "Swar Media Desk",
             }],
             "publisher": {
               "@type": "NewsMediaOrganization",
-              "name": "Bharat Varta",
+              "name": "Swar Media",
               "logo": {
                 "@type": "ImageObject",
                 "url": "http://localhost:3000/logo.png"
@@ -206,7 +206,7 @@ export default function ArticleDetailPage() {
                   href={`/author/${article.author?._id}`}
                   className="font-bold text-slate-900 dark:text-white hover:text-red-600 transition-colors"
                 >
-                  {article.author?.name || "Bharat Varta Desk"}
+                  {article.author?.name || "Swar Media Desk"}
                 </Link>
                 <div className="flex items-center gap-2 text-[11px] text-slate-400 mt-0.5">
                   <Clock className="w-3 h-3" />

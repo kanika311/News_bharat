@@ -54,7 +54,7 @@ async function startServer() {
 
     const listenOnPort = (p) => {
       server.listen(p, () => {
-        console.log(`> Bharat Varta News Server ready on http://localhost:${p}`);
+        console.log(`> Swar Media News Server ready on http://localhost:${p}`);
         console.log(`> Admin CMS available at: http://localhost:${p}/admin`);
         console.log(`> REST APIs mounted at: http://localhost:${p}/api/*`);
       });

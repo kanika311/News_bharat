@@ -19,7 +19,7 @@ function AdminLayoutInner({ children }) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-slate-900 text-white gap-3">
         <Loader2 className="w-8 h-8 text-red-500 animate-spin" />
-        <p className="text-xs uppercase tracking-widest text-slate-400">Loading Bharat Varta CMS...</p>
+        <p className="text-xs uppercase tracking-widest text-slate-400">Loading Swar Media CMS...</p>
       </div>
     );
   }

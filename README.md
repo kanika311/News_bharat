@@ -1,8 +1,8 @@
-# 🇮🇳 Bharat Varta (भारत वार्ता) - Production-Ready Hindi & English News Portal with Full Admin CMS
+# 🎙️ Swar Media (स्वर मीडिया) - Production-Ready Hindi & English News Portal with Full Admin CMS
 
 A high-performance, bilingual digital news platform and complete content management system (CMS), inspired by the layout, user experience, and visual standards of top Indian news networks like **Aaj Tak**.
 
-Built with an original brand identity: **"सत्य, साहस और सरोकार | Truth, Courage & Integrity"**.
+Built with an original brand identity: **"सत्य, सुर और सरोकार | Voice of Truth & Integrity"**.
 
 ---
 

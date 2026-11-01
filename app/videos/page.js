@@ -31,7 +31,7 @@ export default function VideosPage() {
         </div>
         <div>
           <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
-            {t("videos")} • Bharat Varta Video Desk
+            {t("videos")} • Swar Media Video Desk
           </h1>
           <p className="text-xs text-slate-500">
             Exclusive ground reports, prime time debates, and video bulletins

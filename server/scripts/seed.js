@@ -15,7 +15,7 @@ const Setting = require("../models/Setting");
 const Ad = require("../models/Ad");
 
 async function seed(exitOnComplete = true) {
-  console.log("--- Starting Bharat Varta Database Seeding ---");
+  console.log("--- Starting Swar Media Database Seeding ---");
   await connectDB();
 
   // Clear existing data
@@ -424,14 +424,14 @@ async function seed(exitOnComplete = true) {
       titleHi: "हमारे बारे में",
       slug: "about",
       content: `
-        <h2>About Bharat Varta</h2>
-        <p>Bharat Varta is India's premier bilingual digital news portal committed to high-quality, impartial, and courageous journalism. Founded with a vision to deliver unbiased reporting across politics, governance, economics, sports, culture, and science, our newsroom operates around the clock to inform, empower, and enlighten millions of readers in Hindi and English.</p>
-        <p>Our commitment remains steadfast: Truth, Courage, and Public Interest.</p>
+        <h2>About Swar Media</h2>
+        <p>Swar Media is India's premier bilingual digital news portal committed to high-quality, impartial, and courageous journalism. Founded with a vision to deliver unbiased reporting across politics, governance, economics, sports, culture, and science, our newsroom operates around the clock to inform, empower, and enlighten millions of readers in Hindi and English.</p>
+        <p>Our commitment remains steadfast: Voice of Truth & Integrity.</p>
       `,
       contentHi: `
-        <h2>भारत वार्ता के बारे में</h2>
-        <p>भारत वार्ता देश का प्रतिष्ठित द्विभाषी डिजिटल समाचार मंच है जो निष्पक्ष, साहसिक और जनसरोकार से जुड़ी पत्रकारिता के लिए समर्पित है। हमारा संकल्प है कि बिना किसी पूर्वाग्रह के हर नागरिक तक सटीक तथ्य और बेबाक विश्लेषण पहुंचे।</p>
-        <p>हमारा ध्येय वाक्य: सत्य, साहस और सरोकार।</p>
+        <h2>स्वर मीडिया के बारे में</h2>
+        <p>स्वर मीडिया देश का प्रतिष्ठित द्विभाषी डिजिटल समाचार मंच है जो निष्पक्ष, साहसिक और जनसरोकार से जुड़ी पत्रकारिता के लिए समर्पित है। हमारा संकल्प है कि बिना किसी पूर्वाग्रह के हर नागरिक तक सटीक तथ्य और बेबाक विश्लेषण पहुंचे।</p>
+        <p>हमारा ध्येय वाक्य: सत्य, सुर और सरोकार।</p>
       `,
     },
     {
@@ -440,11 +440,11 @@ async function seed(exitOnComplete = true) {
       slug: "privacy-policy",
       content: `
         <h2>Privacy Policy</h2>
-        <p>At Bharat Varta, we value and respect your privacy. We collect minimal personal information necessary to deliver content, personalize your experience, and provide newsletter updates. We never sell your personal information to third parties.</p>
+        <p>At Swar Media, we value and respect your privacy. We collect minimal personal information necessary to deliver content, personalize your experience, and provide newsletter updates. We never sell your personal information to third parties.</p>
       `,
       contentHi: `
         <h2>गोपनीयता नीति</h2>
-        <p>भारत वार्ता आपकी निजता का पूर्ण सम्मान करता है। हम केवल वही जानकारी एकत्र करते हैं जो आपके अनुभव को बेहतर बनाने और समाचार बुलेटिन प्रेषित करने के लिए आवश्यक है।</p>
+        <p>स्वर मीडिया आपकी निजता का पूर्ण सम्मान करता है। हम केवल वही जानकारी एकत्र करते हैं जो आपके अनुभव को बेहतर बनाने और समाचार बुलेटिन प्रेषित करने के लिए आवश्यक है।</p>
       `,
     },
     {
@@ -453,11 +453,11 @@ async function seed(exitOnComplete = true) {
       slug: "terms",
       content: `
         <h2>Terms & Conditions</h2>
-        <p>By accessing Bharat Varta, you agree to comply with our community standards and digital terms of service. All editorial content is protected under Indian intellectual property laws.</p>
+        <p>By accessing Swar Media, you agree to comply with our community standards and digital terms of service. All editorial content is protected under Indian intellectual property laws.</p>
       `,
       contentHi: `
         <h2>नियम और शर्तें</h2>
-        <p>भारत वार्ता का उपयोग करते समय सभी पाठकों और उपयोगकर्ताओं से अपेक्षा की जाती है कि वे डिजिटल आचार संहिता और बौद्धिक संपदा अधिकारों का सम्मान करें।</p>
+        <p>स्वर मीडिया का उपयोग करते समय सभी पाठकों और उपयोगकर्ताओं से अपेक्षा की जाती है कि वे डिजिटल आचार संहिता और बौद्धिक संपदा अधिकारों का सम्मान करें।</p>
       `,
     },
     {
@@ -466,11 +466,11 @@ async function seed(exitOnComplete = true) {
       slug: "contact",
       content: `
         <h2>Contact Editorial Desk</h2>
-        <p>For news tips, press releases, editorial feedback, or general inquiries, write to contact@bharatvarta.in or visit our headquarters in New Delhi.</p>
+        <p>For news tips, press releases, editorial feedback, or general inquiries, write to contact@swarmedia.in or visit our headquarters in New Delhi.</p>
       `,
       contentHi: `
         <h2>संपादकीय डेस्क से संपर्क करें</h2>
-        <p>समाचार सुझाव, प्रेस विज्ञप्ति अथवा प्रतिक्रिया के लिए contact@bharatvarta.in पर संपर्क करें।</p>
+        <p>समाचार सुझाव, प्रेस विज्ञप्ति अथवा प्रतिक्रिया के लिए contact@swarmedia.in पर संपर्क करें।</p>
       `,
     },
     {
@@ -478,12 +478,12 @@ async function seed(exitOnComplete = true) {
       titleHi: "विज्ञापन दें",
       slug: "advertise",
       content: `
-        <h2>Advertise With Bharat Varta</h2>
-        <p>Reach over 5 million educated, engaged readers monthly through native content, display banners, video sponsorships, and newsletter integrations. Contact ads@bharatvarta.in for our media kit.</p>
+        <h2>Advertise With Swar Media</h2>
+        <p>Reach over 5 million educated, engaged readers monthly through native content, display banners, video sponsorships, and newsletter integrations. Contact ads@swarmedia.in for our media kit.</p>
       `,
       contentHi: `
-        <h2>भारत वार्ता पर विज्ञापन दें</h2>
-        <p>लाखों जागरूक पाठकों तक अपने ब्रांड का संदेश पहुंचाएं। हमारे डिजिटल एड नेटवर्क से जुड़ने के लिए ads@bharatvarta.in पर ईमेल करें।</p>
+        <h2>स्वर मीडिया पर विज्ञापन दें</h2>
+        <p>लाखों जागरूक पाठकों तक अपने ब्रांड का संदेश पहुंचाएं। हमारे डिजिटल एड नेटवर्क से जुड़ने के लिए ads@swarmedia.in पर ईमेल करें।</p>
       `,
     },
   ]);
@@ -496,7 +496,7 @@ async function seed(exitOnComplete = true) {
       slot: "header",
       type: "image",
       imageUrl: "https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=1200&q=80",
-      targetUrl: "https://bharatvarta.in",
+      targetUrl: "https://swarmedia.in",
       isActive: true,
     },
     {
@@ -504,7 +504,7 @@ async function seed(exitOnComplete = true) {
       slot: "sidebar",
       type: "image",
       imageUrl: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=600&q=80",
-      targetUrl: "https://bharatvarta.in",
+      targetUrl: "https://swarmedia.in",
       isActive: true,
     },
   ]);
@@ -512,25 +512,25 @@ async function seed(exitOnComplete = true) {
   // 11. Create Site Settings
   console.log("Creating default site settings...");
   await Setting.create({
-    siteName: "Bharat Varta",
-    siteNameHi: "भारत वार्ता",
-    tagLine: "Truth, Courage & Integrity",
-    tagLineHi: "सत्य, साहस और सरोकार",
-    contactEmail: "contact@bharatvarta.in",
+    siteName: "Swar Media",
+    siteNameHi: "स्वर मीडिया",
+    tagLine: "Voice of Truth & Integrity",
+    tagLineHi: "सत्य, सुर और सरोकार",
+    contactEmail: "contact@swarmedia.in",
     contactPhone: "+91 11 2345 6789",
     leadStoryIds: createdArticles.slice(0, 5).map((a) => a._id),
     socialLinks: {
-      facebook: "https://facebook.com/bharatvarta",
-      twitter: "https://x.com/bharatvarta",
-      youtube: "https://youtube.com/bharatvarta",
-      instagram: "https://instagram.com/bharatvarta",
-      telegram: "https://t.me/bharatvarta",
-      whatsapp: "https://whatsapp.com/channel/bharatvarta",
+      facebook: "https://facebook.com/swarmedia",
+      twitter: "https://x.com/swarmedia",
+      youtube: "https://youtube.com/swarmedia",
+      instagram: "https://instagram.com/swarmedia",
+      telegram: "https://t.me/swarmedia",
+      whatsapp: "https://whatsapp.com/channel/swarmedia",
     },
   });
 
   console.log("=== Database Seed Complete Successfully! ===");
-  console.log("Super Admin Account: admin@bharatvarta.in / AdminPassword123!");
+  console.log("Super Admin Account: admin@swarmedia.in / AdminPassword123!");
   if (exitOnComplete) {
     process.exit(0);
   }

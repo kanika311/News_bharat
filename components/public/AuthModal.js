@@ -88,11 +88,11 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
         <div className="bg-red-600 px-4 sm:px-6 py-3.5 sm:py-5 text-white flex items-center justify-between">
           <div className="flex items-center gap-2.5 sm:gap-3">
             <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-white/20 flex items-center justify-center font-black text-lg sm:text-xl shrink-0">
-              BV
+              SM
             </div>
             <div>
               <h3 className="text-base sm:text-lg font-black tracking-tight">
-                {lang === "hi" ? "भारत वार्ता में स्वागत है" : "Welcome to Bharat Varta"}
+                {lang === "hi" ? "स्वर मीडिया में स्वागत है" : "Welcome to Swar Media"}
               </h3>
               <p className="text-xs text-red-100 font-medium">
                 {lang === "hi" ? "सत्य, निष्पक्षता और त्वरित समाचार" : "Truth, Courage & Fast News"}

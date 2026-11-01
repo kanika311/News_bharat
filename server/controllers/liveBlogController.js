@@ -81,7 +81,7 @@ exports.addEntry = async (req, res) => {
     const newEntry = {
       title,
       content,
-      authorName: authorName || (req.user ? req.user.name : "Bharat Varta Desk"),
+      authorName: authorName || (req.user ? req.user.name : "Swar Media Desk"),
       timestamp: new Date(),
     };
 

@@ -82,7 +82,7 @@ export default function AdminDashboardPage() {
           <span className="inline-block px-2.5 py-0.5 rounded-full bg-white/20 text-white text-[11px] font-bold uppercase tracking-wider mb-2">
             Newsroom Desk
           </span>
-          <h1 className="text-2xl font-black tracking-tight">Bharat Varta Editorial Command</h1>
+          <h1 className="text-2xl font-black tracking-tight">Swar Media Editorial Command</h1>
           <p className="text-sm text-red-100 mt-1 max-w-xl">
             Real-time multi-channel overview across national, state, and digital publication feeds.
           </p>

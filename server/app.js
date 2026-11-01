@@ -71,7 +71,7 @@ app.use("/api/activity", activityRoutes);
 app.get("/api/health", (req, res) => {
   res.json({
     status: "ok",
-    app: "Bharat Varta News API",
+    app: "Swar Media News API",
     time: new Date().toISOString(),
   });
 });

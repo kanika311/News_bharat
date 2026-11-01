@@ -128,7 +128,7 @@ export default function StaticPagesManager() {
                 required
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="About Bharat Varta"
+                placeholder="About Swar Media"
                 className="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-red-500"
               />
             </div>

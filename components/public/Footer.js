@@ -103,20 +103,20 @@ export default function Footer() {
           <div className="col-span-2 space-y-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-red-600 text-white rounded-xl flex items-center justify-center font-black text-xl">
-                BV
+                SM
               </div>
               <div>
                 <span className="text-xl font-black text-white tracking-tight">
-                  BHARAT<span className="text-red-500">VARTA</span>
+                  SWAR<span className="text-red-500">MEDIA</span>
                 </span>
                 <p className="text-[10px] text-slate-400 font-hindi">
-                  सत्य, साहस और सरोकार • Truth & Integrity
+                  सत्य, सुर और सरोकार • Voice of Truth & Integrity
                 </p>
               </div>
             </div>
 
             <p className="text-slate-400 leading-relaxed text-xs max-w-sm">
-              Bharat Varta is India's premier bilingual news portal delivering real-time national,
+              Swar Media is India's premier bilingual news portal delivering real-time national,
               international, political, sports, and business reporting with highest editorial
               standards.
             </p>
@@ -249,7 +249,7 @@ export default function Footer() {
 
         {/* Bottom Copyright */}
         <div className="pt-8 border-t border-slate-900 text-[11px] text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p>© 2026 Bharat Varta Media Network. All Rights Reserved. • सर्वाधिकार सुरक्षित।</p>
+          <p>© 2026 Swar Media Network. All Rights Reserved. • सर्वाधिकार सुरक्षित।</p>
           <div className="flex items-center gap-4">
             <Link href="/sitemap.xml" className="hover:underline">
               Sitemap

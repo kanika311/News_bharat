@@ -48,7 +48,7 @@ export default function EPaperPage() {
           <div>
             <div className="flex items-center gap-2">
               <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">
-                BHARAT VARTA e-PAPER
+                SWAR MEDIA e-PAPER
               </h1>
               <span className="text-xs bg-red-100 text-red-700 font-bold px-2 py-0.5 rounded-full font-hindi">
                 ई-पेपर
@@ -79,7 +79,7 @@ export default function EPaperPage() {
           </div>
 
           <button
-            onClick={() => alert("Downloading PDF edition of Bharat Varta e-Paper...")}
+            onClick={() => alert("Downloading PDF edition of Swar Media e-Paper...")}
             className="flex items-center gap-1.5 px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-xl transition-colors shadow-md shadow-red-600/20"
           >
             <Download className="w-4 h-4" />
@@ -127,10 +127,10 @@ export default function EPaperPage() {
               <span>16 PAGES • ₹ 5.00</span>
             </div>
             <h2 className="text-4xl sm:text-6xl font-black tracking-tight text-red-700 font-hindi leading-none">
-              भारत वार्ता
+              स्वर मीडिया
             </h2>
             <p className="text-xs uppercase font-extrabold tracking-widest text-slate-800">
-              BHARAT VARTA • सत्य, साहस और सरोकार • TRUTH, COURAGE & INTEGRITY
+              SWAR MEDIA • सत्य, सुर और सरोकार • VOICE OF TRUTH & INTEGRITY
             </p>
           </div>
 

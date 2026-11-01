@@ -60,7 +60,7 @@ export default function AuthorPage() {
           </div>
 
           <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed max-w-2xl">
-            {lang === "hi" && author.bioHi ? author.bioHi : author.bio || "Senior Journalist at Bharat Varta."}
+            {lang === "hi" && author.bioHi ? author.bioHi : author.bio || "Senior Journalist at Swar Media."}
           </p>
 
           <p className="text-xs text-slate-400 font-semibold pt-1">

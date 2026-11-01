@@ -6,10 +6,10 @@ async function getOrCreateSettings() {
   let settings = await Setting.findOne();
   if (!settings) {
     settings = await Setting.create({
-      siteName: "Bharat Varta",
-      siteNameHi: "भारत वार्ता",
-      tagLine: "Truth, Courage & Integrity",
-      tagLineHi: "सत्य, साहस और सरोकार",
+      siteName: "Swar Media",
+      siteNameHi: "स्वर मीडिया",
+      tagLine: "Voice of Truth & Integrity",
+      tagLineHi: "सत्य, सुर और सरोकार",
     });
   }
   return settings;

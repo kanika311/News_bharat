@@ -7,16 +7,16 @@ import ImageUploader from "@/components/admin/ImageUploader";
 
 export default function SiteSettingsPage() {
   const [settings, setSettings] = useState({
-    siteName: "Bharat Varta",
-    siteNameHi: "भारत वार्ता",
-    tagLine: "Truth, Courage & Integrity",
-    tagLineHi: "सत्य, साहस और सरोकार",
+    siteName: "Swar Media",
+    siteNameHi: "स्वर मीडिया",
+    tagLine: "Voice of Truth & Integrity",
+    tagLineHi: "सत्य, सुर और सरोकार",
     logo: "",
     favicon: "",
-    contactEmail: "contact@bharatvarta.in",
+    contactEmail: "contact@swarmedia.in",
     contactPhone: "+91 11 2345 6789",
-    footerText: "© 2026 Bharat Varta Media Network. All rights reserved.",
-    footerTextHi: "© 2026 भारत वार्ता मीडिया नेटवर्क। सर्वाधिकार सुरक्षित।",
+    footerText: "© 2026 Swar Media Network. All rights reserved.",
+    footerTextHi: "© 2026 स्वर मीडिया नेटवर्क। सर्वाधिकार सुरक्षित।",
     analyticsId: "",
     socialLinks: {
       facebook: "",

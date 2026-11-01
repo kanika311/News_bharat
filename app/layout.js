@@ -3,13 +3,14 @@ import PublicLayoutWrapper from "@/components/public/PublicLayoutWrapper";
 
 export const metadata = {
   title: {
-    default: "Bharat Varta | भारत वार्ता - Hindi & English Latest News",
-    template: "%s | Bharat Varta",
+    default: "Swar Media | स्वर मीडिया - Hindi & English Latest News",
+    template: "%s | Swar Media",
   },
   description:
-    "Bharat Varta is India's premier bilingual news portal delivering breaking news, in-depth politics, sports, business, and entertainment stories with truth and courage.",
+    "Swar Media is India's premier bilingual news portal delivering breaking news, in-depth politics, sports, business, and entertainment stories with truth and courage.",
   keywords: [
-    "Bharat Varta",
+    "Swar Media",
+    "स्वर मीडिया",
     "Hindi News",
     "ताज़ा खबर",
     "Breaking News",
@@ -18,23 +19,23 @@ export const metadata = {
     "Business News",
     "Aaj Tak layout",
   ],
-  authors: [{ name: "Bharat Varta Editorial Board" }],
-  creator: "Bharat Varta Media",
-  publisher: "Bharat Varta Media Network",
+  authors: [{ name: "Swar Media Editorial Board" }],
+  creator: "Swar Media",
+  publisher: "Swar Media Network",
   metadataBase: new URL(process.env.SITE_URL || "http://localhost:3000"),
   openGraph: {
-    title: "Bharat Varta | भारत वार्ता - Truth & Integrity",
+    title: "Swar Media | स्वर मीडिया - Truth & Integrity",
     description: "Leading bilingual news portal covering national and international affairs.",
     url: "/",
-    siteName: "Bharat Varta",
+    siteName: "Swar Media",
     locale: "hi_IN",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Bharat Varta | भारत वार्ता",
+    title: "Swar Media | स्वर मीडिया",
     description: "Leading bilingual news portal covering national and international affairs.",
-    creator: "@bharatvarta",
+    creator: "@swarmedia",
   },
   robots: {
     index: true,
@@ -56,13 +57,13 @@ export default function RootLayout({ children }) {
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "NewsMediaOrganization",
-              "name": "Bharat Varta",
+              "name": "Swar Media",
               "url": "http://localhost:3000",
               "logo": "http://localhost:3000/logo.png",
               "sameAs": [
-                "https://facebook.com/bharatvarta",
-                "https://twitter.com/bharatvarta",
-                "https://youtube.com/bharatvarta",
+                "https://facebook.com/swarmedia",
+                "https://twitter.com/swarmedia",
+                "https://youtube.com/swarmedia",
               ],
             }),
           }}

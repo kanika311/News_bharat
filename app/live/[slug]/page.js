@@ -79,7 +79,7 @@ export default function LiveBlogDetailPage() {
           {lang === "hi" && liveBlog.titleHi ? liveBlog.titleHi : liveBlog.title}
         </h1>
         <p className="text-xs text-red-100">
-          Auto-updating timeline • Real-time minute-by-minute reporting from Bharat Varta editorial desk
+          Auto-updating timeline • Real-time minute-by-minute reporting from Swar Media editorial desk
         </p>
       </div>
 

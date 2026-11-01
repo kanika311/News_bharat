@@ -41,7 +41,7 @@ export async function GET() {
     xml += `    <loc>${baseUrl}/${catSlug}/${art.slug}</loc>\n`;
     xml += `    <news:news>\n`;
     xml += `      <news:publication>\n`;
-    xml += `        <news:name>Bharat Varta</news:name>\n`;
+    xml += `        <news:name>Swar Media</news:name>\n`;
     xml += `        <news:language>${art.language || "hi"}</news:language>\n`;
     xml += `      </news:publication>\n`;
     xml += `      <news:publication_date>${new Date(art.publishedAt).toISOString()}</news:publication_date>\n`;

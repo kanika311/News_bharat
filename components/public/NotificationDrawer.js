@@ -56,8 +56,8 @@ const INITIAL_NOTIFICATIONS = [
     category: "epaper",
     categoryLabelHi: "ई-पेपर संस्करण",
     categoryLabelEn: "e-Paper Edition",
-    titleHi: "आज का भारत वार्ता ई-पेपर डिजिटल एडिशन अब पढ़ने के लिए उपलब्ध है",
-    titleEn: "Today's Bharat Varta digital e-Paper edition is now available",
+    titleHi: "आज का स्वर मीडिया ई-पेपर डिजिटल एडिशन अब पढ़ने के लिए उपलब्ध है",
+    titleEn: "Today's Swar Media digital e-Paper edition is now available",
     snippetHi: "दिल्ली, मुंबई, लखनऊ और पटना संस्करण के सभी 8 पृष्ठ उच्च गुणवत्ता में पढ़ें।",
     snippetEn: "Flip through all 8 pages of Delhi, Mumbai, Lucknow & UP editions or download PDF.",
     timeHi: "45 मिनट पहले",
@@ -203,7 +203,7 @@ export default function NotificationDrawer({ isOpen, onClose }) {
                   )}
                 </div>
                 <p className="text-[11px] text-red-100 font-medium">
-                  {lang === "hi" ? "भारत वार्ता 24x7 संपादकीय अलर्ट" : "Bharat Varta 24x7 Editorial Alerts"}
+                  {lang === "hi" ? "स्वर मीडिया 24x7 संपादकीय अलर्ट" : "Swar Media 24x7 Editorial Alerts"}
                 </p>
               </div>
             </div>

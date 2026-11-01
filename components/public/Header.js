@@ -135,7 +135,7 @@ export default function Header() {
             {/* Quick Network Links visible on md+ */}
             <div className="hidden md:flex items-center gap-2.5 font-medium whitespace-nowrap text-[11px] border-l border-slate-300 dark:border-slate-700 pl-2.5">
               <Link href="/" className="font-bold text-red-600 hover:underline">
-                Bharat Varta
+                Swar Media
               </Link>
               <Link
                 href="/epaper"
@@ -273,19 +273,19 @@ export default function Header() {
 
           <Link href="/" className="flex items-center gap-2 group min-w-0">
             <div className="w-8 h-8 sm:w-11 sm:h-11 bg-red-600 text-white rounded-xl flex items-center justify-center font-black text-lg sm:text-2xl shadow-md shadow-red-600/30 group-hover:scale-105 transition-transform shrink-0">
-              BV
+              SM
             </div>
             <div className="truncate">
               <div className="flex items-baseline gap-1">
                 <span className="text-xl sm:text-2xl md:text-3xl font-black tracking-tight text-slate-900 dark:text-white leading-none">
-                  BHARAT<span className="text-red-600">VARTA</span>
+                  SWAR<span className="text-red-600">MEDIA</span>
                 </span>
                 <span className="hidden sm:inline text-xs sm:text-sm font-bold text-red-600 font-hindi">
-                  भारत वार्ता
+                  स्वर मीडिया
                 </span>
               </div>
               <p className="hidden md:block text-[10px] sm:text-[11px] font-semibold text-slate-500 dark:text-slate-400 mt-0.5">
-                सत्य, साहस और सरोकार • Truth & Integrity
+                सत्य, सुर और सरोकार • Voice of Truth & Integrity
               </p>
             </div>
           </Link>
@@ -318,7 +318,7 @@ export default function Header() {
           <Link
             href="/videos"
             className="hidden md:flex items-center gap-1 p-2 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full"
-            title="Bharat Varta Radio"
+            title="Swar Media Radio"
           >
             <Radio className="w-4 h-4 text-red-600" />
             <span className="text-[10px] font-bold uppercase hidden xl:inline">RADIO</span>
@@ -463,9 +463,9 @@ export default function Header() {
               <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 rounded-lg bg-red-600 text-white font-black flex items-center justify-center text-sm">
-                    BV
+                    SM
                   </div>
-                  <span className="font-black text-slate-900 dark:text-white">BHARAT VARTA</span>
+                  <span className="font-black text-slate-900 dark:text-white">SWAR MEDIA</span>
                 </div>
                 <button
                   onClick={() => setMobileMenuOpen(false)}

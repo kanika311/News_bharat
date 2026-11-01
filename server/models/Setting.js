@@ -4,19 +4,19 @@ const SettingSchema = new mongoose.Schema(
   {
     siteName: {
       type: String,
-      default: "Bharat Varta",
+      default: "Swar Media",
     },
     siteNameHi: {
       type: String,
-      default: "भारत वार्ता",
+      default: "स्वर मीडिया",
     },
     tagLine: {
       type: String,
-      default: "Truth, Courage & Integrity",
+      default: "Voice of Truth & Integrity",
     },
     tagLineHi: {
       type: String,
-      default: "सत्य, साहस और सरोकार",
+      default: "सत्य, सुर और सरोकार",
     },
     logo: {
       type: String,
@@ -28,27 +28,27 @@ const SettingSchema = new mongoose.Schema(
     },
     contactEmail: {
       type: String,
-      default: "contact@bharatvarta.in",
+      default: "contact@swarmedia.in",
     },
     contactPhone: {
       type: String,
       default: "+91 11 2345 6789",
     },
     socialLinks: {
-      facebook: { type: String, default: "https://facebook.com" },
-      twitter: { type: String, default: "https://x.com" },
-      youtube: { type: String, default: "https://youtube.com" },
-      instagram: { type: String, default: "https://instagram.com" },
-      telegram: { type: String, default: "https://telegram.org" },
+      facebook: { type: String, default: "https://facebook.com/swarmedia" },
+      twitter: { type: String, default: "https://x.com/swarmedia" },
+      youtube: { type: String, default: "https://youtube.com/swarmedia" },
+      instagram: { type: String, default: "https://instagram.com/swarmedia" },
+      telegram: { type: String, default: "https://t.me/swarmedia" },
       whatsapp: { type: String, default: "https://whatsapp.com" },
     },
     footerText: {
       type: String,
-      default: "© 2026 Bharat Varta Media Network. All rights reserved.",
+      default: "© 2026 Swar Media Network. All rights reserved.",
     },
     footerTextHi: {
       type: String,
-      default: "© 2026 भारत वार्ता मीडिया नेटवर्क। सर्वाधिकार सुरक्षित।",
+      default: "© 2026 स्वर मीडिया नेटवर्क। सर्वाधिकार सुरक्षित।",
     },
     analyticsId: {
       type: String,
@@ -57,7 +57,7 @@ const SettingSchema = new mongoose.Schema(
     seoDefaults: {
       metaTitle: {
         type: String,
-        default: "Bharat Varta | भारत वार्ता - Hindi & English Latest News",
+        default: "Swar Media | स्वर मीडिया - Hindi & English Latest News",
       },
       metaDescription: {
         type: String,

@@ -15,7 +15,7 @@ exports.subscribe = async (req, res) => {
         existing.isActive = true;
         await existing.save();
       }
-      return res.json({ success: true, message: "You are already subscribed to Bharat Varta newsletter!" });
+      return res.json({ success: true, message: "You are already subscribed to Swar Media newsletter!" });
     }
 
     const sub = new Subscriber({ email: email.toLowerCase() });

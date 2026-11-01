@@ -115,7 +115,7 @@ export default function HomePage() {
       <div className="flex flex-col items-center justify-center min-h-[500px] gap-3">
         <Loader2 className="w-8 h-8 text-red-600 animate-spin" />
         <p className="text-xs uppercase tracking-widest text-slate-500 font-semibold">
-          लोड हो रहा है • Loading Bharat Varta...
+          लोड हो रहा है • Loading Swar Media...
         </p>
       </div>
     );
@@ -198,7 +198,7 @@ export default function HomePage() {
                 )}
                 <div className="flex items-center justify-between text-[11px] text-slate-400 pt-2 border-t border-slate-100 dark:border-slate-800">
                   <div className="flex items-center gap-2">
-                    <span>{mainLead.author?.name || "Bharat Varta Desk"}</span>
+                    <span>{mainLead.author?.name || "Swar Media Desk"}</span>
                     <span>•</span>
                     <span className="flex items-center gap-1">
                       <Clock className="w-3 h-3" />

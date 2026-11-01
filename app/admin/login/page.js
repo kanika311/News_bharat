@@ -46,13 +46,13 @@ export default function AdminLoginPage() {
         {/* Brand Header */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-red-600 text-white font-black text-2xl shadow-xl shadow-red-600/30 mb-3">
-            BV
+            SM
           </div>
           <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
-            BHARAT<span className="text-red-600">VARTA</span> CMS
+            SWAR<span className="text-red-600">MEDIA</span> CMS
           </h1>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Editorial Management Portal • सत्य, साहस और सरोकार
+            Editorial Management Portal • सत्य, सुर और सरोकार
           </p>
         </div>
 
