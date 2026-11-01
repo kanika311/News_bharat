@@ -1,0 +1,100 @@
+"use client";
+
+import React, { useRef } from "react";
+import Link from "next/link";
+import { ChevronLeft, ChevronRight, TrendingUp } from "lucide-react";
+import { useLang } from "@/lib/langContext";
+
+export default function TopicPills() {
+  const { lang } = useLang();
+  const scrollRef = useRef(null);
+
+  const topicsHi = [
+    { label: "माइक्रोड्रामा", query: "माइक्रोड्रामा", isHot: true },
+    { label: "उठो अनारकली", query: "अनारकली" },
+    { label: "राहुल गांधी", query: "राहुल गांधी" },
+    { label: "इंडिया ब्लॉक", query: "इंडिया ब्लॉक" },
+    { label: "ज्ञानेश कुमार", query: "ज्ञानेश कुमार" },
+    { label: "अहोई अष्टमी", query: "अहोई अष्टमी" },
+    { label: "मल्लिकार्जुन खड़गे", query: "खड़गे" },
+    { label: "चुनाव आयोग", query: "चुनाव आयोग" },
+    { label: "पीएम मोदी", query: "मोदी" },
+    { label: "वायु प्रदूषण", query: "प्रदूषण" },
+    { label: "शेयर बाजार", query: "शेयर बाजार" },
+    { label: "सोना-चांदी भाव", query: "सोना भाव" },
+    { label: "T20 वर्ल्ड कप", query: "क्रिकेट" },
+    { label: "AI टेक्नोलॉजी", query: "AI" },
+  ];
+
+  const topicsEn = [
+    { label: "Microdrama", query: "microdrama", isHot: true },
+    { label: "Parliament Session", query: "parliament" },
+    { label: "Rahul Gandhi", query: "Rahul Gandhi" },
+    { label: "INDIA Bloc", query: "INDIA bloc" },
+    { label: "Election Commission", query: "election" },
+    { label: "PM Modi", query: "Modi" },
+    { label: "Air Pollution", query: "pollution" },
+    { label: "Stock Market Rally", query: "sensex" },
+    { label: "ISRO Space Mission", query: "isro" },
+    { label: "Gold & Silver Rate", query: "gold" },
+    { label: "Cricket Updates", query: "cricket" },
+    { label: "AI Innovations", query: "AI" },
+  ];
+
+  const topics = lang === "hi" ? topicsHi : topicsEn;
+
+  const scroll = (direction) => {
+    if (scrollRef.current) {
+      const scrollAmount = 260;
+      scrollRef.current.scrollBy({
+        left: direction === "left" ? -scrollAmount : scrollAmount,
+        behavior: "smooth",
+      });
+    }
+  };
+
+  return (
+    <div className="bg-slate-100 dark:bg-slate-900/90 border-b border-slate-200 dark:border-slate-800 select-none py-2 px-4 transition-colors">
+      <div className="max-w-7xl mx-auto flex items-center gap-2">
+        {/* Left Scroll Button */}
+        <button
+          onClick={() => scroll("left")}
+          className="w-7 h-7 rounded-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 shadow-xs flex items-center justify-center text-slate-700 dark:text-slate-300 hover:bg-slate-200 shrink-0"
+          aria-label="Scroll left"
+        >
+          <ChevronLeft className="w-4 h-4" />
+        </button>
+
+        {/* Scrollable Pills Container */}
+        <div
+          ref={scrollRef}
+          className="flex items-center gap-2 overflow-x-auto no-scrollbar scroll-smooth py-0.5"
+          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+        >
+          {topics.map((topic, idx) => (
+            <Link
+              key={idx}
+              href={`/search?q=${encodeURIComponent(topic.query)}`}
+              className={`px-3 py-1 text-xs rounded-full whitespace-nowrap font-medium transition-all duration-150 ${
+                topic.isHot
+                  ? "bg-red-600 text-white font-bold shadow-xs hover:bg-red-700"
+                  : "bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:border-red-500 hover:text-red-600 dark:hover:text-red-400"
+              }`}
+            >
+              {topic.label}
+            </Link>
+          ))}
+        </div>
+
+        {/* Right Scroll Button */}
+        <button
+          onClick={() => scroll("right")}
+          className="w-7 h-7 rounded-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 shadow-xs flex items-center justify-center text-slate-700 dark:text-slate-300 hover:bg-slate-200 shrink-0"
+          aria-label="Scroll right"
+        >
+          <ChevronRight className="w-4 h-4" />
+        </button>
+      </div>
+    </div>
+  );
+}
