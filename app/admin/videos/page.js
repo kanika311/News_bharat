@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { Video, Plus, Trash2, Edit2, Loader2, Save, Play, ExternalLink } from "lucide-react";
 import { apiFetch } from "@/lib/api";
 import ImageUploader from "@/components/admin/ImageUploader";
+import VideoUploader from "@/components/admin/VideoUploader";
 import ConfirmModal from "@/components/admin/ConfirmModal";
 
 export default function VideosPage() {
@@ -100,12 +101,20 @@ export default function VideosPage() {
   };
 
   const confirmDelete = async () => {
+    const idToDelete = confirmModal.id;
+    if (!idToDelete) return;
     try {
-      await apiFetch(`/api/videos/${confirmModal.id}`, { method: "DELETE" });
+      const res = await apiFetch(`/api/videos/${idToDelete}`, { method: "DELETE" });
+      if (res && res.success === false) {
+        throw new Error(res.message || "Failed to delete video");
+      }
+      setVideos((prev) => prev.filter((v) => v._id !== idToDelete));
       setConfirmModal({ isOpen: false, id: null });
       loadData();
     } catch (e) {
-      alert("Error deleting video");
+      console.error("Delete video error:", e);
+      alert("Error deleting video: " + (e.message || "Something went wrong. Please check your admin privileges."));
+      setConfirmModal({ isOpen: false, id: null });
     }
   };
 
@@ -156,19 +165,15 @@ export default function VideosPage() {
               />
             </div>
 
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                Video Embed URL <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                required
-                value={videoUrl}
-                onChange={(e) => setVideoUrl(e.target.value)}
-                placeholder="https://www.youtube.com/watch?v=..."
-                className="w-full px-3 py-2 text-xs font-mono bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-red-500"
-              />
-            </div>
+            {/* Video Source Uploader & Media Library Picker */}
+            <VideoUploader
+              value={videoUrl}
+              onChange={setVideoUrl}
+              onDurationDetected={(detectedDur) => {
+                if (!duration || duration === "03:15") setDuration(detectedDur);
+              }}
+              label="Video Source (वीडियो अपलोड या मीडिया से चुनें)"
+            />
 
             <div className="grid grid-cols-2 gap-3">
               <div>

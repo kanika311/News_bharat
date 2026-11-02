@@ -133,8 +133,10 @@ export default function CategoryPage() {
         </div>
 
         {/* Sidebar (4 cols) */}
-        <aside className="lg:col-span-4 space-y-6">
-          <AdSlot slot="sidebar" />
+        <aside className="lg:col-span-4">
+          <div className="sticky top-28 space-y-6">
+            <AdSlot slot="sidebar" />
+          </div>
         </aside>
       </div>
     </div>

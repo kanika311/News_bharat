@@ -9,6 +9,7 @@ import {
   FolderTree,
   Tags,
   Radio,
+  Tv,
   Video,
   Image,
   Flame,
@@ -29,9 +30,9 @@ import { useAuth } from "@/lib/authContext";
 const navItems = [
   { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
   { label: "Articles", href: "/admin/articles", icon: FileText },
-  { label: "Categories", href: "/admin/categories", icon: FolderTree },
-  { label: "Tags", href: "/admin/tags", icon: Tags },
+  { label: "Categories & Tags", href: "/admin/categories", icon: FolderTree },
   { label: "Breaking Ticker", href: "/admin/ticker", icon: Radio },
+  { label: "Live Broadcast Studio", href: "/admin/live-broadcast", icon: Tv },
   { label: "Videos", href: "/admin/videos", icon: Video },
   { label: "Photo Galleries", href: "/admin/galleries", icon: Image },
   { label: "Live Blogs", href: "/admin/live-blogs", icon: Flame },
@@ -111,7 +112,7 @@ export default function AdminSidebar({ isOpen, setIsOpen }) {
             const isActive =
               item.href === "/admin"
                 ? pathname === "/admin"
-                : pathname.startsWith(item.href);
+                : pathname.startsWith(item.href) || (item.href === "/admin/categories" && pathname.startsWith("/admin/tags"));
 
             return (
               <Link

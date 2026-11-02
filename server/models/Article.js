@@ -34,6 +34,11 @@ const ArticleSchema = new mongoose.Schema(
       default: "",
       trim: true,
     },
+    location: {
+      type: String,
+      default: "",
+      trim: true,
+    },
     category: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Category",
@@ -113,6 +118,11 @@ const ArticleSchema = new mongoose.Schema(
       index: true,
     },
     viewCount: {
+      type: Number,
+      default: 0,
+      index: true,
+    },
+    likesCount: {
       type: Number,
       default: 0,
       index: true,

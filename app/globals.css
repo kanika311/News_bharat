@@ -45,9 +45,12 @@ body {
 }
 
 .animate-ticker {
-  display: inline-block;
-  white-space: nowrap;
-  animation: ticker 35s linear infinite;
+  display: inline-flex !important;
+  align-items: center;
+  flex-wrap: nowrap !important;
+  white-space: nowrap !important;
+  animation: ticker 45s linear infinite;
+  will-change: transform;
 }
 
 .animate-ticker:hover {

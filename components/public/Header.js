@@ -7,9 +7,9 @@ import {
   Search,
   Moon,
   Sun,
-  Menu,
   X,
   Radio,
+  Video,
   Flame,
   Globe,
   TrendingUp,
@@ -25,10 +25,10 @@ import {
   Bookmark,
   ChevronDown,
   ShieldCheck,
+  UserPlus,
 } from "lucide-react";
 import { useLang } from "@/lib/langContext";
 import { apiFetch } from "@/lib/api";
-import AuthModal from "./AuthModal";
 import NotificationDrawer from "./NotificationDrawer";
 
 export default function Header() {
@@ -45,7 +45,6 @@ export default function Header() {
   
   // User Auth State
   const [currentUser, setCurrentUser] = useState(null);
-  const [authModalOpen, setAuthModalOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
 
   // Notification Drawer State
@@ -121,7 +120,7 @@ export default function Header() {
   };
 
   return (
-    <header className="w-full bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 transition-colors">
+    <header className="sticky top-0 z-40 w-full bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-md transition-colors">
       {/* 1. Aaj Tak Style Top Utility Header (Single compact row on mobile) */}
       <div className="bg-[#f8f9fa] dark:bg-slate-950 text-slate-700 dark:text-slate-300 text-[10px] sm:text-[11px] py-1 px-3 sm:px-4 border-b border-slate-200 dark:border-slate-800">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
@@ -162,7 +161,7 @@ export default function Header() {
             </div>
           </div>
 
-          {/* Right: Language switch + Dark mode + Aaj Tak Red Sign In Button */}
+          {/* Right: Language switch + Dark mode + Sign In / Register Buttons */}
           <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
             {/* Language Switcher */}
             <div className="flex items-center bg-slate-200 dark:bg-slate-800 rounded-lg p-0.5 text-[9px] sm:text-[10px] font-bold">
@@ -193,7 +192,7 @@ export default function Header() {
               {darkMode ? <Sun className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-400" /> : <Moon className="w-3 h-3 sm:w-3.5 sm:h-3.5" />}
             </button>
 
-            {/* User Sign In / Profile Button (Aaj Tak Style Red Button) */}
+            {/* User Sign In / Profile Button */}
             {currentUser ? (
               <div className="relative">
                 <button
@@ -247,49 +246,37 @@ export default function Header() {
                 )}
               </div>
             ) : (
-              <button
-                onClick={() => setAuthModalOpen(true)}
-                className="flex items-center gap-1 px-2 sm:px-3 py-0.5 sm:py-1 bg-red-600 hover:bg-red-700 text-white rounded-md text-[10px] sm:text-xs font-bold shadow-xs transition-colors hover:scale-105 active:scale-95"
-              >
-                <User className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-                <span>Sign In</span>
-              </button>
+              <div className="flex items-center gap-1.5">
+                <Link
+                  href="/login"
+                  className="flex items-center gap-1 px-2.5 sm:px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded-md text-[10px] sm:text-xs font-bold shadow-xs transition-transform hover:scale-105 active:scale-95"
+                >
+                  <User className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                  <span>{lang === "hi" ? "साइन इन" : "Sign In"}</span>
+                </Link>
+                <Link
+                  href="/register"
+                  className="hidden md:flex items-center gap-1 px-2.5 sm:px-3 py-1 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-md text-[10px] sm:text-xs font-bold border border-slate-200 dark:border-slate-700 transition-colors"
+                >
+                  <UserPlus className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-red-600" />
+                  <span>{lang === "hi" ? "रजिस्टर" : "Register"}</span>
+                </Link>
+              </div>
             )}
           </div>
         </div>
       </div>
 
-      {/* 2. Main Branding & Action Bar (Clean & compact on mobile) */}
+      {/* 2. Main Branding & Action Bar (Clean white background) */}
       <div className="max-w-7xl mx-auto px-3 sm:px-4 py-2 sm:py-3 flex items-center justify-between gap-2">
-        {/* Left: Mobile hamburger + Brand Logo */}
+        {/* Left: Brand Logo */}
         <div className="flex items-center gap-2 sm:gap-3 shrink min-w-0">
-          <button
-            onClick={() => setMobileMenuOpen(true)}
-            className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 shrink-0"
-            aria-label="Open menu"
-          >
-            <Menu className="w-5 h-5 sm:w-6 sm:h-6" />
-          </button>
-
-          <Link href="/" className="flex items-center gap-2 sm:gap-3 group min-w-0">
+          <Link href="/" className="flex items-center group shrink-0" aria-label="Swar Media Home">
             <img
               src="/logo.png"
-              alt="Swar Media"
-              className="h-10 sm:h-12 md:h-14 w-auto object-contain drop-shadow-md group-hover:scale-105 transition-transform shrink-0"
+              alt="Swar Media Logo"
+              className="h-11 sm:h-13 md:h-15 w-auto object-contain drop-shadow-md group-hover:scale-105 transition-transform shrink-0"
             />
-            <div className="hidden sm:block truncate">
-              <div className="flex items-baseline gap-1.5">
-                <span className="text-xl sm:text-2xl md:text-3xl font-black tracking-tight text-slate-900 dark:text-white leading-none">
-                  SWAR<span className="text-red-600">MEDIA</span>
-                </span>
-                <span className="text-xs sm:text-sm font-bold text-red-600 font-hindi">
-                  स्वर मीडिया
-                </span>
-              </div>
-              <p className="hidden md:block text-[10px] sm:text-[11px] font-semibold text-slate-500 dark:text-slate-400 mt-0.5">
-                सत्य, सुर और सरोकार • Voice of Truth & Integrity
-              </p>
-            </div>
           </Link>
         </div>
 
@@ -316,17 +303,27 @@ export default function Header() {
             <span>AQI: 168</span>
           </div>
 
-          {/* Radio */}
+          {/* Videos */}
           <Link
             href="/videos"
-            className="hidden md:flex items-center gap-1 p-2 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full"
-            title="Swar Media Radio"
+            className="hidden md:flex items-center gap-1.5 px-2.5 py-1 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors"
+            title="Swar Media Videos"
           >
-            <Radio className="w-4 h-4 text-red-600" />
-            <span className="text-[10px] font-bold uppercase hidden xl:inline">RADIO</span>
+            <Video className="w-4 h-4 text-red-600" />
+            <span className="text-[11px] font-extrabold uppercase hidden xl:inline">VIDEOS</span>
           </Link>
 
-          {/* Notifications Bell (Opens Right-Side Drawer) */}
+          {/* Live Blog Badge */}
+          <Link
+            href="/live-blogs"
+            className="hidden lg:flex items-center gap-1 px-2.5 py-1 bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/60 rounded-full text-[11px] font-extrabold border border-amber-200 dark:border-amber-800 transition-all hover:scale-105"
+            title="Live Blogs - Real-time Text Updates"
+          >
+            <Flame className="w-3.5 h-3.5 text-amber-500 animate-pulse" />
+            <span>{lang === "hi" ? "लाइव ब्लॉग" : "LIVE BLOGS"}</span>
+          </Link>
+
+          {/* Notifications Bell */}
           <div className="relative">
             <button
               onClick={() => setNotificationDrawerOpen(true)}
@@ -341,13 +338,14 @@ export default function Header() {
             </button>
           </div>
 
-          {/* Live TV Button */}
+          {/* Live News Video Streaming Button */}
           <Link
-            href="/live/live-budget-preparation-economic-council"
-            className="flex items-center gap-1 px-2.5 py-1 sm:px-3 sm:py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-full text-[10px] sm:text-xs font-bold shadow-md shadow-red-600/20 transition-transform hover:scale-105"
+            href="/live"
+            className="flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-full text-[10px] sm:text-xs font-black shadow-md shadow-red-600/25 transition-transform hover:scale-105"
+            title="Live News Video Streaming"
           >
-            <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-white animate-ping shrink-0" />
-            <Tv className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+            <span className="w-2 h-2 rounded-full bg-white animate-ping shrink-0" />
+            <Tv className="w-3.5 h-3.5" />
             <span>LIVE</span>
           </Link>
 
@@ -383,8 +381,8 @@ export default function Header() {
         </div>
       </div>
 
-      {/* 3. Sticky Category Navigation Bar (Smooth touch swipe on mobile) */}
-      <nav className="sticky top-0 z-40 bg-red-600 text-white shadow-md">
+      {/* 3. Category Navigation Bar (Smooth touch swipe on mobile) */}
+      <nav className="relative bg-red-600 text-white shadow-xs">
         <div className="max-w-7xl mx-auto px-2 sm:px-4 flex items-center justify-between">
           <div
             className="flex items-center overflow-x-auto no-scrollbar scroll-smooth space-x-1 py-1"
@@ -436,6 +434,33 @@ export default function Header() {
               );
             })}
 
+            {/* Live TV Video Streaming */}
+            <Link
+              href="/live"
+              className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs font-black whitespace-nowrap transition-colors ${
+                pathname === "/live"
+                  ? "bg-red-950 text-white shadow-inner"
+                  : "bg-red-700/80 hover:bg-red-800 text-white font-extrabold"
+              }`}
+            >
+              <span className="w-2 h-2 rounded-full bg-white animate-ping shrink-0" />
+              <Tv className="w-3.5 h-3.5" />
+              <span>{lang === "hi" ? "लाइव टीवी" : "Live TV"}</span>
+            </Link>
+
+            {/* Live Blog */}
+            <Link
+              href="/live-blogs"
+              className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs font-black whitespace-nowrap transition-colors ${
+                pathname.startsWith("/live-blogs")
+                  ? "bg-red-950 text-white shadow-inner"
+                  : "hover:bg-red-700 text-amber-200 hover:text-white"
+              }`}
+            >
+              <Flame className="w-3.5 h-3.5 text-amber-400" />
+              <span>{lang === "hi" ? "लाइव ब्लॉग" : "Live Blog"}</span>
+            </Link>
+
             <Link
               href="/videos"
               className={`px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs font-bold whitespace-nowrap transition-colors ${
@@ -463,14 +488,18 @@ export default function Header() {
           <div className="w-80 max-w-[85%] bg-white dark:bg-slate-900 h-full p-6 flex flex-col justify-between overflow-y-auto">
             <div>
               <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
-                <div className="flex items-center gap-2">
+                <Link
+                  href="/"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center"
+                  aria-label="Swar Media Home"
+                >
                   <img
                     src="/logo.png"
-                    alt="Swar Media"
-                    className="h-10 w-auto object-contain"
+                    alt="Swar Media Logo"
+                    className="h-10 sm:h-12 w-auto object-contain drop-shadow"
                   />
-                  <span className="font-black text-slate-900 dark:text-white">SWAR MEDIA</span>
-                </div>
+                </Link>
                 <button
                   onClick={() => setMobileMenuOpen(false)}
                   className="p-1 rounded-lg text-slate-500 hover:bg-slate-100"
@@ -493,13 +522,34 @@ export default function Header() {
                   {t("home")}
                 </Link>
 
+                {/* Mobile Live TV */}
+                <Link
+                  href="/live"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-2 px-3 py-2 text-sm font-bold text-red-600 bg-red-50 dark:bg-red-950/40 rounded-xl"
+                >
+                  <span className="w-2 h-2 rounded-full bg-red-600 animate-ping" />
+                  <Tv className="w-4 h-4" />
+                  <span>{lang === "hi" ? "🔴 लाइव टीवी (Live TV)" : "🔴 Live TV Stream"}</span>
+                </Link>
+
+                {/* Mobile Live Blog */}
+                <Link
+                  href="/live-blogs"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-2 px-3 py-2 text-sm font-bold text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950/40 rounded-xl"
+                >
+                  <Flame className="w-4 h-4 text-amber-500" />
+                  <span>{lang === "hi" ? "लाइव ब्लॉग (Live Blogs)" : "Live Blogs"}</span>
+                </Link>
+
                 {/* Mobile ePaper */}
                 <Link
                   href="/epaper"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center gap-2 px-3 py-2 text-sm font-bold text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-xl"
+                  className="flex items-center gap-2 px-3 py-2 text-sm font-bold text-slate-800 dark:text-slate-200 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-xl"
                 >
-                  <Newspaper className="w-4 h-4" />
+                  <Newspaper className="w-4 h-4 text-red-600" />
                   <span>{lang === "hi" ? "ई-पेपर (Digital ePaper)" : "e-Paper Edition"}</span>
                 </Link>
 
@@ -549,16 +599,24 @@ export default function Header() {
                   </button>
                 </div>
               ) : (
-                <button
-                  onClick={() => {
-                    setMobileMenuOpen(false);
-                    setAuthModalOpen(true);
-                  }}
-                  className="w-full py-2.5 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-2 shadow-md shadow-red-600/30"
-                >
-                  <User className="w-4 h-4" />
-                  <span>{lang === "hi" ? "रीडर साइन इन / खाता बनाएं" : "Sign In / Register"}</span>
-                </button>
+                <div className="space-y-2">
+                  <Link
+                    href="/login"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="w-full py-2.5 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-2 shadow-md shadow-red-600/30"
+                  >
+                    <User className="w-4 h-4" />
+                    <span>{lang === "hi" ? "साइन इन (Sign In)" : "Sign In"}</span>
+                  </Link>
+                  <Link
+                    href="/register"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="w-full py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs rounded-xl flex items-center justify-center gap-2 border border-slate-200 dark:border-slate-700"
+                  >
+                    <UserPlus className="w-3.5 h-3.5 text-red-600" />
+                    <span>{lang === "hi" ? "नया खाता बनाएं (Register)" : "Register New Account"}</span>
+                  </Link>
+                </div>
               )}
 
               <Link
@@ -575,14 +633,6 @@ export default function Header() {
         </div>
       )}
 
-      {/* User Auth Modal */}
-      <AuthModal
-        isOpen={authModalOpen}
-        onClose={() => setAuthModalOpen(false)}
-        onAuthSuccess={(user) => {
-          setCurrentUser(user);
-        }}
-      />
 
       {/* Right-Side Sliding Notification Drawer */}
       <NotificationDrawer

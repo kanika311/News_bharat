@@ -445,3 +445,27 @@ exports.getRelatedArticles = async (req, res) => {
     return res.status(500).json({ success: false, message: err.message });
   }
 };
+
+// POST /api/articles/:id/like (Public reader like)
+exports.likeArticle = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const article = await Article.findByIdAndUpdate(
+      id,
+      { $inc: { likesCount: 1 } },
+      { new: true }
+    );
+
+    if (!article) {
+      return res.status(404).json({ success: false, message: "Article not found" });
+    }
+
+    return res.json({
+      success: true,
+      likesCount: article.likesCount || 1,
+      message: "Article liked successfully",
+    });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};

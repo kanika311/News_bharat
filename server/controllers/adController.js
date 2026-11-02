@@ -7,19 +7,15 @@ exports.getAdBySlot = async (req, res) => {
     const { slot } = req.params;
     const now = new Date();
 
-    const ad = await Ad.findOne({
+    const ads = await Ad.find({
       slot,
       isActive: true,
       $or: [{ startDate: { $lte: now }, endDate: { $gte: now } }, { endDate: null }],
     }).sort("-updatedAt");
 
-    if (ad) {
-      // Async increment impression
-      ad.impressions += 1;
-      await ad.save();
-    }
+    const ad = ads[0] || null;
 
-    return res.json({ success: true, ad });
+    return res.json({ success: true, ad, ads });
   } catch (err) {
     return res.status(500).json({ success: false, message: err.message });
   }

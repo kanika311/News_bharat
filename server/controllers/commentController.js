@@ -37,7 +37,7 @@ exports.createComment = async (req, res) => {
       name: name.trim(),
       email: email.trim().toLowerCase(),
       content: content.trim(),
-      status: isSpam ? "spam" : "pending",
+      status: isSpam ? "spam" : "approved",
     });
 
     await comment.save();
@@ -46,7 +46,7 @@ exports.createComment = async (req, res) => {
       success: true,
       message: isSpam
         ? "Comment flagged for moderation."
-        : "Thank you! Your comment is awaiting editor moderation.",
+        : "Thank you! Your comment has been published.",
       comment,
     });
   } catch (err) {

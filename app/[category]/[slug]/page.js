@@ -15,6 +15,8 @@ import {
   ChevronRight,
   Loader2,
   AlertCircle,
+  Heart,
+  ThumbsUp,
 } from "lucide-react";
 import { apiFetch } from "@/lib/api";
 import { useLang } from "@/lib/langContext";
@@ -31,6 +33,10 @@ export default function ArticleDetailPage() {
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  // Likes state
+  const [likesCount, setLikesCount] = useState(0);
+  const [isLiked, setIsLiked] = useState(false);
 
   // Comment submission state
   const [name, setName] = useState("");
@@ -50,6 +56,22 @@ export default function ArticleDetailPage() {
         const res = await apiFetch(`/api/articles/slug/${slug}`);
         if (res.success && res.article) {
           setArticle(res.article);
+          setLikesCount(res.article.likesCount || 0);
+
+          if (typeof window !== "undefined") {
+            const hasLiked = localStorage.getItem(`liked_article_${res.article._id}`);
+            if (hasLiked) setIsLiked(true);
+          }
+
+          // Pre-fill user details if logged in
+          apiFetch("/api/auth/me")
+            .then((uRes) => {
+              if (uRes.success && uRes.user) {
+                setName((prev) => prev || uRes.user.name || "");
+                setEmail((prev) => prev || uRes.user.email || "");
+              }
+            })
+            .catch(() => {});
 
           // Fetch related stories and comments
           const [relRes, comRes] = await Promise.all([
@@ -71,6 +93,25 @@ export default function ArticleDetailPage() {
 
     loadArticleData();
   }, [slug]);
+
+  const handleLike = async () => {
+    if (!article || isLiked) return;
+    setIsLiked(true);
+    setLikesCount((prev) => prev + 1);
+
+    if (typeof window !== "undefined") {
+      localStorage.setItem(`liked_article_${article._id}`, "true");
+    }
+
+    try {
+      const res = await apiFetch(`/api/articles/${article._id}/like`, { method: "POST" });
+      if (res.success && res.likesCount) {
+        setLikesCount(res.likesCount);
+      }
+    } catch (e) {
+      console.error("Like error", e);
+    }
+  };
 
   const handleCopyLink = () => {
     if (typeof window !== "undefined") {
@@ -96,9 +137,12 @@ export default function ArticleDetailPage() {
           content,
         }),
       });
-      setCommentMessage(res.message || "Comment submitted for moderation.");
-      setName("");
-      setEmail("");
+      if (res.success && res.comment) {
+        setComments((prev) => [res.comment, ...prev]);
+        setCommentMessage(lang === "hi" ? "आपकी प्रतिक्रिया प्रकाशित हो गई है!" : "Your comment has been published!");
+      } else {
+        setCommentMessage(res.message || "Comment submitted.");
+      }
       setContent("");
     } catch (err) {
       setCommentMessage(err.message || "Error submitting comment.");
@@ -217,8 +261,22 @@ export default function ArticleDetailPage() {
               </div>
             </div>
 
-            {/* Social Sharing Buttons */}
+            {/* Social Sharing & Like Buttons */}
             <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={handleLike}
+                className={`px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 shadow-sm transition-transform active:scale-90 ${
+                  isLiked
+                    ? "bg-red-600 text-white shadow-red-600/30 ring-2 ring-red-400"
+                    : "bg-red-50 hover:bg-red-100 text-red-600 dark:bg-red-950/40 dark:text-red-400 border border-red-200 dark:border-red-900/60"
+                }`}
+                title="Like this story"
+              >
+                <Heart className={`w-3.5 h-3.5 ${isLiked ? "fill-white" : ""}`} />
+                <span>{likesCount}</span>
+              </button>
+
               <a
                 href={`https://api.whatsapp.com/send?text=${encodeURIComponent(article.title + " " + currentUrl)}`}
                 target="_blank"
@@ -300,8 +358,45 @@ export default function ArticleDetailPage() {
             </div>
           )}
 
+          {/* READER ENGAGEMENT & LIKE CARD */}
+          <div className="p-6 bg-gradient-to-r from-red-50 via-white to-red-50/40 dark:from-slate-900 dark:via-slate-900 dark:to-slate-900 rounded-3xl border border-red-100 dark:border-slate-800 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-3.5">
+              <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg transition-transform ${
+                isLiked ? "bg-red-600 text-white shadow-red-600/30 scale-105" : "bg-red-100 dark:bg-red-950 text-red-600"
+              }`}>
+                <Heart className={`w-6 h-6 ${isLiked ? "fill-white animate-pulse" : ""}`} />
+              </div>
+              <div>
+                <h3 className="text-sm sm:text-base font-black text-slate-900 dark:text-white">
+                  {lang === "hi" ? "क्या आपको यह खबर पसंद आई?" : "Did you like this news report?"}
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  {lang === "hi"
+                    ? `${likesCount} लोगों ने इसे पसंद किया • अपनी राय भी अवश्य दें`
+                    : `${likesCount} readers appreciated this story • Share your thoughts below`}
+                </p>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleLike}
+              className={`px-5 py-2.5 rounded-2xl font-bold text-xs flex items-center gap-2 shadow-md transition-all active:scale-95 ${
+                isLiked
+                  ? "bg-red-600 text-white shadow-red-600/30"
+                  : "bg-white dark:bg-slate-800 text-red-600 border border-red-200 dark:border-red-900 hover:bg-red-50"
+              }`}
+            >
+              <Heart className={`w-4 h-4 ${isLiked ? "fill-white" : ""}`} />
+              <span>{isLiked ? (lang === "hi" ? "लाइक किया" : "Liked") : (lang === "hi" ? "लाइक करें" : "Like Story")}</span>
+              <span className="px-2 py-0.5 rounded-full text-[10px] bg-red-100 dark:bg-red-950 text-red-700 dark:text-red-300 font-extrabold">
+                {likesCount}
+              </span>
+            </button>
+          </div>
+
           {/* COMMENTS SECTION */}
-          <section className="pt-8 border-t border-slate-200 dark:border-slate-800 space-y-6">
+          <section className="pt-4 border-t border-slate-200 dark:border-slate-800 space-y-6">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
                 <MessageSquare className="w-5 h-5 text-red-600" />
@@ -385,45 +480,47 @@ export default function ArticleDetailPage() {
           </section>
         </div>
 
-        {/* Sidebar (4 cols) */}
-        <aside className="lg:col-span-4 space-y-6">
-          <AdSlot slot="sidebar" />
+        {/* Sidebar (4 cols) - Sticky along full height reading flow */}
+        <aside className="lg:col-span-4">
+          <div className="sticky top-28 space-y-6">
+            <AdSlot slot="sidebar" />
 
-          {/* Related Articles Card */}
-          {relatedArticles.length > 0 && (
-            <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xs p-5 space-y-4">
-              <h3 className="text-sm font-black text-slate-900 dark:text-white border-b border-slate-100 dark:border-slate-800 pb-2 flex items-center gap-2">
-                <span className="w-2.5 h-2.5 bg-red-600 rounded-full" />
-                <span>{t("relatedArticles")}</span>
-              </h3>
+            {/* Related Articles Card */}
+            {relatedArticles.length > 0 && (
+              <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xs p-5 space-y-4">
+                <h3 className="text-sm font-black text-slate-900 dark:text-white border-b border-slate-100 dark:border-slate-800 pb-2 flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 bg-red-600 rounded-full" />
+                  <span>{t("relatedArticles")}</span>
+                </h3>
 
-              <div className="divide-y divide-slate-100 dark:divide-slate-800">
-                {relatedArticles.map((rel) => (
-                  <Link
-                    key={rel._id}
-                    href={`/${rel.category?.slug || "news"}/${rel.slug}`}
-                    className="py-3 flex items-start gap-3 group"
-                  >
-                    {rel.featuredImage?.url && (
-                      <img
-                        src={rel.featuredImage.url}
-                        alt=""
-                        className="w-16 h-16 rounded-xl object-cover shrink-0 border border-slate-100"
-                      />
-                    )}
-                    <div className="space-y-1">
-                      <h4 className="text-xs font-bold text-slate-900 dark:text-white group-hover:text-red-600 transition-colors line-clamp-2">
-                        {rel.title}
-                      </h4>
-                      <span className="text-[10px] text-slate-400 block">
-                        {new Date(rel.publishedAt || rel.createdAt).toLocaleDateString()}
-                      </span>
-                    </div>
-                  </Link>
-                ))}
+                <div className="divide-y divide-slate-100 dark:divide-slate-800">
+                  {relatedArticles.map((rel) => (
+                    <Link
+                      key={rel._id}
+                      href={`/${rel.category?.slug || "news"}/${rel.slug}`}
+                      className="py-3 flex items-start gap-3 group"
+                    >
+                      {rel.featuredImage?.url && (
+                        <img
+                          src={rel.featuredImage.url}
+                          alt=""
+                          className="w-16 h-16 rounded-xl object-cover shrink-0 border border-slate-100"
+                        />
+                      )}
+                      <div className="space-y-1">
+                        <h4 className="text-xs font-bold text-slate-900 dark:text-white group-hover:text-red-600 transition-colors line-clamp-2">
+                          {rel.title}
+                        </h4>
+                        <span className="text-[10px] text-slate-400 block">
+                          {new Date(rel.publishedAt || rel.createdAt).toLocaleDateString()}
+                        </span>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </aside>
       </div>
     </article>

@@ -22,29 +22,29 @@ export default function Ticker() {
   if (tickers.length === 0 || dismissed) return null;
 
   return (
-    <div className="bg-red-600 text-white border-y border-red-700 text-xs overflow-hidden select-none relative shadow-xs">
-      <div className="max-w-7xl mx-auto flex items-center">
+    <div className="bg-red-600 text-white border-y border-red-700 text-xs overflow-hidden select-none relative shadow-xs h-9 sm:h-10 flex items-center">
+      <div className="w-full max-w-7xl mx-auto flex items-center h-full">
         {/* Aaj Tak Style BREAKING NEWS Badge */}
-        <div className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-4 py-1.5 sm:py-2 bg-red-800 font-black tracking-wider uppercase shrink-0 shadow-md z-10">
-          <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-white animate-ping shrink-0" />
-          <span className="text-white font-black tracking-wide text-[10px] sm:text-xs">
-            {lang === "hi" ? "BREAKING" : "BREAKING"}
+        <div className="h-full flex items-center gap-1.5 px-3 sm:px-4 bg-red-800 text-white font-black tracking-wider uppercase shrink-0 shadow-md z-10 border-r border-red-700/60">
+          <span className="w-2 h-2 rounded-full bg-white animate-ping shrink-0" />
+          <span className="text-white font-black tracking-wide text-[10px] sm:text-xs whitespace-nowrap">
+            {lang === "hi" ? "बड़ी खबर" : "BREAKING"}
           </span>
         </div>
 
-        {/* Marquee Track */}
-        <div className="overflow-hidden whitespace-nowrap flex-1 py-1 sm:py-1.5 relative text-[11px] sm:text-xs">
-          <div className="animate-ticker inline-flex items-center gap-8 sm:gap-12 font-medium">
-            {tickers.concat(tickers).map((item, idx) => {
+        {/* Marquee Track (Guaranteed single horizontal scrolling line) */}
+        <div className="overflow-hidden whitespace-nowrap flex-1 h-full flex items-center relative text-[11px] sm:text-xs min-w-0">
+          <div className="animate-ticker inline-flex items-center font-medium h-full flex-nowrap whitespace-nowrap">
+            {[...tickers, ...tickers, ...tickers, ...tickers].map((item, idx) => {
               const displayContent = lang === "hi" && item.textHi ? item.textHi : item.text;
               return (
                 <Link
                   key={idx}
                   href={item.link || "#"}
-                  className="hover:text-yellow-200 hover:underline flex items-center gap-1.5 sm:gap-2"
+                  className="inline-flex items-center gap-2 shrink-0 whitespace-nowrap px-4 hover:text-yellow-200 transition-colors"
                 >
-                  <span className="w-1.5 h-1.5 rounded-full bg-white/60 inline-block shrink-0" />
-                  <span className={lang === "hi" ? "font-hindi font-semibold" : ""}>
+                  <span className="w-1.5 h-1.5 rounded-full bg-yellow-300 inline-block shrink-0" />
+                  <span className={`whitespace-nowrap shrink-0 ${lang === "hi" ? "font-hindi font-semibold" : ""}`}>
                     {displayContent}
                   </span>
                 </Link>
@@ -56,7 +56,7 @@ export default function Ticker() {
         {/* Aaj Tak Style Close 'x' button */}
         <button
           onClick={() => setDismissed(true)}
-          className="px-2 sm:px-3 py-1.5 sm:py-2 text-white/80 hover:text-white hover:bg-red-700 transition-colors shrink-0"
+          className="h-full px-2.5 sm:px-3 flex items-center justify-center text-white/80 hover:text-white hover:bg-red-700 transition-colors shrink-0 z-10 border-l border-red-700/40"
           title="Close breaking news"
           aria-label="Close"
         >

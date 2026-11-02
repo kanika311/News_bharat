@@ -7,6 +7,7 @@ const { requireAuth, checkRole } = require("../middleware/auth");
 router.get("/", articleController.getArticles);
 router.get("/slug/:slug", articleController.getArticleBySlug);
 router.get("/related/:id", articleController.getRelatedArticles);
+router.post("/:id/like", articleController.likeArticle);
 router.get("/:id", articleController.getArticleById);
 
 // Protected endpoints (reporters, editors, superadmins)
