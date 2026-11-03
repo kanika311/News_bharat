@@ -91,6 +91,15 @@ export default function HomePage() {
   useEffect(() => {
     async function loadHomeContent() {
       try {
+        const safeFetch = async (url) => {
+          try {
+            return await apiFetch(url);
+          } catch (err) {
+            console.error("Home fetch failed:", url, err);
+            return {};
+          }
+        };
+
         const [
           articlesRes,
           catsRes,
@@ -99,12 +108,12 @@ export default function HomePage() {
           liveRes,
           settingsRes,
         ] = await Promise.all([
-          apiFetch("/api/articles?status=published&limit=50"),
-          apiFetch("/api/categories"),
-          apiFetch("/api/videos?limit=4"),
-          apiFetch("/api/galleries?limit=3"),
-          apiFetch("/api/live-blogs?status=live&limit=1"),
-          apiFetch("/api/settings"),
+          safeFetch("/api/articles?status=published&limit=50"),
+          safeFetch("/api/categories"),
+          safeFetch("/api/videos?limit=4"),
+          safeFetch("/api/galleries?limit=3"),
+          safeFetch("/api/live-blogs?status=live&limit=1"),
+          safeFetch("/api/settings"),
         ]);
 
         const all = articlesRes.articles || [];
@@ -212,12 +221,12 @@ export default function HomePage() {
   const sideLeads = leadArticles.slice(1, 5);
 
   return (
-    <div className="max-w-7xl mx-auto px-2 sm:px-4 py-3 sm:py-5 space-y-6">
+    <div className="w-full space-y-0">
       {/* 1. LIVE BLOG ALERT TICKER (if any active live blog) */}
       {liveBlog && (
         <Link
           href={`/live/${liveBlog.slug}`}
-          className="flex items-center gap-3 p-3 sm:p-3.5 bg-gradient-to-r from-red-600 via-rose-600 to-amber-600 text-white rounded-2xl shadow-sm hover:shadow-md transition-all group overflow-hidden"
+          className="flex items-center gap-3 p-3 sm:p-3.5 bg-gradient-to-r from-red-600 via-rose-600 to-amber-600 text-white shadow-sm hover:shadow-md transition-all group overflow-hidden w-full rounded-none"
         >
           <span className="flex items-center gap-1.5 px-2.5 py-1 bg-white/20 backdrop-blur-md rounded-full text-[10px] sm:text-xs font-black tracking-wider uppercase shrink-0">
             <span className="w-2 h-2 rounded-full bg-white animate-ping" />
@@ -234,12 +243,12 @@ export default function HomePage() {
       )}
 
       {/* 2. 3-COLUMN LAYOUT: VISIBLE RIGHT FROM THE TOP (LEFT & RIGHT STICKY, CENTER SCROLLS) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 items-stretch w-full">
         {/* ============================================================== */}
         {/* COLUMN 1: LEFT SIDEBAR - TOPICS / CATEGORY FILTER (3 Cols)   */}
         {/* ============================================================== */}
-        <aside className="lg:col-span-3 lg:sticky lg:top-4 self-start">
-          <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-800 p-4 shadow-sm max-h-[calc(100vh-2rem)] overflow-y-auto no-scrollbar space-y-4">
+        <aside className="lg:col-span-3 lg:sticky lg:top-0 self-start h-full">
+          <div className="bg-white dark:bg-slate-900 border-b lg:border-b-0 lg:border-r border-slate-200 dark:border-slate-800 p-3 sm:p-4 lg:min-h-[calc(100vh-9rem)] max-h-none lg:max-h-[calc(100vh-9rem)] overflow-y-auto no-scrollbar space-y-4 rounded-none shadow-none">
             {/* Header */}
             <div className="flex items-center justify-between pb-3 mb-1 border-b border-slate-100 dark:border-slate-800">
               <div className="flex items-center gap-2">
@@ -323,7 +332,7 @@ export default function HomePage() {
         {/* ============================================================== */}
         {/* COLUMN 2: CENTER - NEWS FEED (ONLY THIS COLUMN SCROLLS)       */}
         {/* ============================================================== */}
-        <main className="lg:col-span-6 space-y-5 min-w-0">
+        <main className="lg:col-span-6 space-y-4 min-w-0 px-3 sm:px-4 py-3 bg-slate-50 dark:bg-slate-950">
           {/* Top Featured Lead Story (integrated into center column) */}
           {selectedTopic === "all" && mainLead && (
             <Link
@@ -501,9 +510,9 @@ export default function HomePage() {
         {/* ============================================================== */}
         {/* COLUMN 3: RIGHT SIDEBAR - SPONSORED ADS & TRENDING (3 Cols)   */}
         {/* ============================================================== */}
-        <aside className="lg:col-span-3 lg:sticky lg:top-4 self-start space-y-5">
+        <aside className="lg:col-span-3 lg:sticky lg:top-0 self-start h-full bg-white dark:bg-slate-900 border-t lg:border-t-0 lg:border-l border-slate-200 dark:border-slate-800">
           {/* Sticky Container so right panel stays pinned from top */}
-          <div className="max-h-[calc(100vh-2rem)] overflow-y-auto no-scrollbar space-y-5">
+          <div className="p-3 sm:p-4 lg:min-h-[calc(100vh-9rem)] max-h-none lg:max-h-[calc(100vh-9rem)] overflow-y-auto no-scrollbar space-y-4 rounded-none">
             {/* 1. Sponsored Ad Slider Card (Full height / carousel) */}
             <AdSlot slot="sidebar" />
 
@@ -605,7 +614,7 @@ export default function HomePage() {
 
       {/* 4. MULTIMEDIA VIDEO SECTION (4 Columns) */}
       {videos.length > 0 && (
-        <section className="bg-slate-900 text-white rounded-3xl p-6 sm:p-8 space-y-6 shadow-xl">
+        <section className="bg-slate-900 text-white rounded-none p-4 sm:p-6 space-y-6 shadow-none w-full">
           <div className="flex items-center justify-between border-b border-slate-800 pb-4">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg bg-red-600 flex items-center justify-center font-black">

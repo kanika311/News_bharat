@@ -20,7 +20,7 @@ export default function AdminLoginPage() {
 
     try {
       await login(email, password);
-      router.push("/admin");
+      router.push("/swar-media-admin");
     } catch (err) {
       setError(err.message || "Invalid credentials. Please verify and try again.");
     } finally {

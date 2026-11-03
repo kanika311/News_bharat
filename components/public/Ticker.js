@@ -23,7 +23,7 @@ export default function Ticker() {
 
   return (
     <div className="bg-red-600 text-white border-y border-red-700 text-xs overflow-hidden select-none relative shadow-xs h-9 sm:h-10 flex items-center">
-      <div className="w-full max-w-7xl mx-auto flex items-center h-full">
+      <div className="w-full flex items-center h-full">
         {/* Aaj Tak Style BREAKING NEWS Badge */}
         <div className="h-full flex items-center gap-1.5 px-3 sm:px-4 bg-red-800 text-white font-black tracking-wider uppercase shrink-0 shadow-md z-10 border-r border-red-700/60">
           <span className="w-2 h-2 rounded-full bg-white animate-ping shrink-0" />

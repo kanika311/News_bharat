@@ -4,6 +4,7 @@ export async function GET() {
   const content = `User-agent: *
 Allow: /
 Disallow: /admin/
+Disallow: /swar-media-admin/
 Disallow: /api/
 
 Sitemap: ${baseUrl}/sitemap.xml

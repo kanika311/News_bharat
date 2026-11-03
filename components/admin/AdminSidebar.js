@@ -26,25 +26,26 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { useAuth } from "@/lib/authContext";
+import { CMS_PATH } from "@/lib/cms";
 
 const navItems = [
-  { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
-  { label: "Articles", href: "/admin/articles", icon: FileText },
-  { label: "Categories & Tags", href: "/admin/categories", icon: FolderTree },
-  { label: "Breaking Ticker", href: "/admin/ticker", icon: Radio },
-  { label: "Live Broadcast Studio", href: "/admin/live-broadcast", icon: Tv },
-  { label: "Videos", href: "/admin/videos", icon: Video },
-  { label: "Photo Galleries", href: "/admin/galleries", icon: Image },
-  { label: "Live Blogs", href: "/admin/live-blogs", icon: Flame },
-  { label: "Comments", href: "/admin/comments", icon: MessageSquare },
-  { label: "Homepage Manager", href: "/admin/homepage", icon: Layers, roles: ["superadmin", "editor"] },
-  { label: "Advertisements", href: "/admin/ads", icon: BadgeDollarSign, roles: ["superadmin", "editor"] },
-  { label: "Static Pages", href: "/admin/pages", icon: FileCode, roles: ["superadmin", "editor"] },
-  { label: "Media Library", href: "/admin/media", icon: FolderArchive },
-  { label: "Authors & Roles", href: "/admin/users", icon: Users, roles: ["superadmin"] },
-  { label: "Subscribers", href: "/admin/subscribers", icon: Mail, roles: ["superadmin", "editor"] },
-  { label: "Site Settings", href: "/admin/settings", icon: Settings, roles: ["superadmin", "editor"] },
-  { label: "Activity Logs", href: "/admin/activity", icon: History, roles: ["superadmin", "editor"] },
+  { label: "Dashboard", href: CMS_PATH, icon: LayoutDashboard },
+  { label: "Articles", href: `${CMS_PATH}/articles`, icon: FileText },
+  { label: "Categories & Tags", href: `${CMS_PATH}/categories`, icon: FolderTree },
+  { label: "Breaking Ticker", href: `${CMS_PATH}/ticker`, icon: Radio },
+  { label: "Live Broadcast Studio", href: `${CMS_PATH}/live-broadcast`, icon: Tv },
+  { label: "Videos", href: `${CMS_PATH}/videos`, icon: Video },
+  { label: "Photo Galleries", href: `${CMS_PATH}/galleries`, icon: Image },
+  { label: "Live Blogs", href: `${CMS_PATH}/live-blogs`, icon: Flame },
+  { label: "Comments", href: `${CMS_PATH}/comments`, icon: MessageSquare },
+  { label: "Homepage Manager", href: `${CMS_PATH}/homepage`, icon: Layers, roles: ["superadmin", "editor"] },
+  { label: "Advertisements", href: `${CMS_PATH}/ads`, icon: BadgeDollarSign, roles: ["superadmin", "editor"] },
+  { label: "Static Pages", href: `${CMS_PATH}/pages`, icon: FileCode, roles: ["superadmin", "editor"] },
+  { label: "Media Library", href: `${CMS_PATH}/media`, icon: FolderArchive },
+  { label: "Authors & Roles", href: `${CMS_PATH}/users`, icon: Users, roles: ["superadmin"] },
+  { label: "Subscribers", href: `${CMS_PATH}/subscribers`, icon: Mail, roles: ["superadmin", "editor"] },
+  { label: "Site Settings", href: `${CMS_PATH}/settings`, icon: Settings, roles: ["superadmin", "editor"] },
+  { label: "Activity Logs", href: `${CMS_PATH}/activity`, icon: History, roles: ["superadmin", "editor"] },
 ];
 
 export default function AdminSidebar({ isOpen, setIsOpen }) {
@@ -75,7 +76,7 @@ export default function AdminSidebar({ isOpen, setIsOpen }) {
       >
         {/* Brand header */}
         <div className="flex items-center justify-between h-16 px-5 border-b border-slate-800 bg-slate-950">
-          <Link href="/admin" className="flex items-center gap-2.5">
+          <Link href={CMS_PATH} className="flex items-center gap-2.5">
             <img
               src="/logo.png"
               alt="Swar Media"
@@ -110,9 +111,9 @@ export default function AdminSidebar({ isOpen, setIsOpen }) {
           {filteredNavItems.map((item) => {
             const Icon = item.icon;
             const isActive =
-              item.href === "/admin"
-                ? pathname === "/admin"
-                : pathname.startsWith(item.href) || (item.href === "/admin/categories" && pathname.startsWith("/admin/tags"));
+              item.href === CMS_PATH
+                ? pathname === CMS_PATH
+                : pathname.startsWith(item.href) || (item.href === `${CMS_PATH}/categories` && pathname.startsWith(`${CMS_PATH}/tags`));
 
             return (
               <Link

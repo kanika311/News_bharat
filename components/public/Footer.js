@@ -56,8 +56,8 @@ export default function Footer() {
   };
 
   return (
-    <footer className="bg-slate-950 text-slate-300 pt-12 pb-8 border-t border-slate-900 mt-16">
-      <div className="max-w-7xl mx-auto px-4 space-y-12">
+    <footer className="bg-slate-950 text-slate-300 pt-12 pb-8 border-t border-slate-900 mt-0">
+      <div className="w-full px-3 sm:px-4 space-y-12">
         {/* Newsletter Banner */}
         <div className="p-8 bg-gradient-to-r from-red-900 via-red-800 to-slate-900 rounded-3xl text-white shadow-xl flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="max-w-xl">
@@ -230,11 +230,6 @@ export default function Footer() {
               <li>
                 <Link href="/pages/advertise" className="hover:text-red-500 transition-colors">
                   Advertise With Us (विज्ञापन दें)
-                </Link>
-              </li>
-              <li>
-                <Link href="/admin" className="text-red-400 hover:text-red-300 font-semibold">
-                  Editorial CMS Login
                 </Link>
               </li>
             </ul>

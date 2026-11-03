@@ -15,7 +15,6 @@ import {
   TrendingUp,
   Share2,
   Calendar,
-  Lock,
   User,
   Newspaper,
   Tv,
@@ -24,7 +23,6 @@ import {
   LogOut,
   Bookmark,
   ChevronDown,
-  ShieldCheck,
   UserPlus,
 } from "lucide-react";
 import { useLang } from "@/lib/langContext";
@@ -123,7 +121,7 @@ export default function Header() {
     <header className="sticky top-0 z-40 w-full bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-md transition-colors">
       {/* 1. Aaj Tak Style Top Utility Header (Single compact row on mobile) */}
       <div className="bg-[#f8f9fa] dark:bg-slate-950 text-slate-700 dark:text-slate-300 text-[10px] sm:text-[11px] py-1 px-3 sm:px-4 border-b border-slate-200 dark:border-slate-800">
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
+        <div className="w-full flex items-center justify-between gap-2">
           {/* Left: Live Timestamp + Desktop Network Links */}
           <div className="flex items-center gap-2 overflow-hidden">
             <span className="font-semibold text-slate-800 dark:text-slate-200 whitespace-nowrap flex items-center gap-1 font-mono text-[10px] sm:text-[11px]">
@@ -225,16 +223,6 @@ export default function Header() {
                       <span>{lang === "hi" ? "ई-पेपर पढ़ें" : "Read e-Paper"}</span>
                     </Link>
 
-                    {currentUser.role !== "reader" && (
-                      <Link
-                        href="/admin"
-                        className="flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-950 font-bold"
-                      >
-                        <ShieldCheck className="w-3.5 h-3.5" />
-                        <span>{lang === "hi" ? "एडमिन सीएमएस" : "Admin CMS"}</span>
-                      </Link>
-                    )}
-
                     <button
                       onClick={handleLogout}
                       className="w-full text-left flex items-center gap-2 px-4 py-2 text-slate-700 dark:text-slate-300 hover:bg-red-50 dark:hover:bg-red-950/40 text-red-600 transition-colors"
@@ -268,7 +256,7 @@ export default function Header() {
       </div>
 
       {/* 2. Main Branding & Action Bar (Clean white background) */}
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 py-2 sm:py-3 flex items-center justify-between gap-2">
+      <div className="w-full px-3 sm:px-4 py-2 sm:py-3 flex items-center justify-between gap-2">
         {/* Left: Brand Logo */}
         <div className="flex items-center gap-2 sm:gap-3 shrink min-w-0">
           <Link href="/" className="flex items-center group shrink-0" aria-label="Swar Media Home">
@@ -383,7 +371,7 @@ export default function Header() {
 
       {/* 3. Category Navigation Bar (Smooth touch swipe on mobile) */}
       <nav className="relative bg-red-600 text-white shadow-xs">
-        <div className="max-w-7xl mx-auto px-2 sm:px-4 flex items-center justify-between">
+        <div className="w-full px-2 sm:px-4 flex items-center justify-between">
           <div
             className="flex items-center overflow-x-auto no-scrollbar scroll-smooth space-x-1 py-1"
             style={{ WebkitOverflowScrolling: "touch" }}
@@ -618,14 +606,6 @@ export default function Header() {
                   </Link>
                 </div>
               )}
-
-              <Link
-                href="/admin"
-                className="w-full py-2 bg-slate-900 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-2"
-              >
-                <Lock className="w-3.5 h-3.5 text-red-500" />
-                <span>Editorial CMS Login</span>
-              </Link>
             </div>
           </div>
 

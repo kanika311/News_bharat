@@ -25,6 +25,7 @@ const dashboardRoutes = require("./routes/dashboardRoutes");
 const activityRoutes = require("./routes/activityRoutes");
 
 const app = express();
+app.set("trust proxy", 1);
 
 // Scope CORS, cookies and body parsing strictly to /api routes so Next.js static assets & CSS remain completely untouched
 const apiCors = cors({
@@ -37,6 +38,12 @@ const apiLimiter = rateLimit({
   max: 2000,
   standardHeaders: true,
   legacyHeaders: false,
+  validate: { ip: false, xForwardedForHeader: false },
+  keyGenerator: (req) => {
+    const forwarded = req.headers ? (req.headers["x-forwarded-for"] || req.headers["x-real-ip"]) : null;
+    if (forwarded) return Array.isArray(forwarded) ? forwarded[0] : forwarded.split(",")[0].trim();
+    return (req.socket && req.socket.remoteAddress) || "127.0.0.1";
+  },
   message: { success: false, message: "Too many requests. Please try again later." },
 });
 
@@ -75,6 +82,13 @@ app.get("/api/health", (req, res) => {
     status: "ok",
     app: "Swar Media News API",
     time: new Date().toISOString(),
+  });
+});
+
+app.use("/api", (req, res) => {
+  res.status(404).json({
+    success: false,
+    message: `API route not found: ${req.method} ${req.originalUrl || req.url}`,
   });
 });
 

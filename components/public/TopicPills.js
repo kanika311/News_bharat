@@ -55,7 +55,7 @@ export default function TopicPills() {
 
   return (
     <div className="bg-slate-100 dark:bg-slate-900/90 border-b border-slate-200 dark:border-slate-800 select-none py-1.5 px-2 sm:px-4 transition-colors">
-      <div className="max-w-7xl mx-auto flex items-center gap-1.5 sm:gap-2">
+      <div className="w-full flex items-center gap-1.5 sm:gap-2">
         {/* Left Scroll Button (Desktop) */}
         <button
           onClick={() => scroll("left")}

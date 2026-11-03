@@ -132,7 +132,7 @@ export default function ArticleForm({ initialData = null, isEdit = false }) {
         });
         setSuccess("Article successfully created!");
         setTimeout(() => {
-          router.push("/admin/articles");
+          router.push("/swar-media-admin/articles");
         }, 1000);
       }
     } catch (err) {
@@ -148,7 +148,7 @@ export default function ArticleForm({ initialData = null, isEdit = false }) {
       <div className="flex flex-wrap items-center justify-between gap-4 p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
         <div className="flex items-center gap-3">
           <Link
-            href="/admin/articles"
+            href="/swar-media-admin/articles"
             className="p-2 text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"
           >
             <ArrowLeft className="w-5 h-5" />
@@ -165,7 +165,7 @@ export default function ArticleForm({ initialData = null, isEdit = false }) {
 
         <div className="flex items-center gap-3">
           <Link
-            href="/admin/articles"
+            href="/swar-media-admin/articles"
             className="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl"
           >
             Cancel

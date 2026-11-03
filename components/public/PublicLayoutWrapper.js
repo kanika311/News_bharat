@@ -10,7 +10,7 @@ import { LangProvider } from "@/lib/langContext";
 
 export default function PublicLayoutWrapper({ children }) {
   const pathname = usePathname();
-  const isAdmin = pathname.startsWith("/admin");
+  const isAdmin = pathname.startsWith("/swar-media-admin");
 
   if (isAdmin) {
     return <>{children}</>;

@@ -13,7 +13,7 @@ function AdminLayoutInner({ children }) {
   const { user, loading } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const isLoginPage = pathname === "/admin/login";
+  const isLoginPage = pathname === "/swar-media-admin/login";
 
   if (loading) {
     return (
@@ -27,7 +27,7 @@ function AdminLayoutInner({ children }) {
   // If not logged in and not on login page, redirect to login
   if (!user && !isLoginPage) {
     if (typeof window !== "undefined") {
-      router.push("/admin/login");
+      router.push("/swar-media-admin/login");
     }
     return null;
   }

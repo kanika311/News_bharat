@@ -136,7 +136,7 @@ export default function LiveStreamingNewsPage() {
   // Start 1-Click Instant Camera Live (Bina publish kare direct live on site)
   const handleStartQuickLive = async () => {
     if (!user) {
-      router.push("/admin/login?redirect=/live");
+      router.push("/swar-media-admin/login?redirect=/live");
       return;
     }
     try {

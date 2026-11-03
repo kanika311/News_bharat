@@ -190,7 +190,7 @@ export default function ArticlesListPage() {
           </button>
 
           <Link
-            href="/admin/articles/new"
+            href="/swar-media-admin/"articles/new"
             className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white font-bold text-xs rounded-xl hover:bg-red-700 transition-colors shadow-md shadow-red-600/30"
           >
             <PlusCircle className="w-4 h-4" />
@@ -378,7 +378,7 @@ export default function ArticlesListPage() {
                           )}
                           <div>
                             <Link
-                              href={`/admin/articles/edit/${art._id}`}
+                              href={`/swar-media-admin/articles/edit/${art._id}`}
                               className="font-bold text-slate-900 dark:text-white hover:text-red-600 line-clamp-1 transition-colors"
                             >
                               {art.title}
@@ -441,7 +441,7 @@ export default function ArticlesListPage() {
                                 <Eye className="w-3.5 h-3.5" />
                               </Link>
                               <Link
-                                href={`/admin/articles/edit/${art._id}`}
+                                href={`/swar-media-admin/articles/edit/${art._id}`}
                                 className="p-1.5 text-blue-600 hover:text-blue-800 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-950/40"
                                 title="Edit"
                               >

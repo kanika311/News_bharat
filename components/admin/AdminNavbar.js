@@ -14,6 +14,7 @@ import {
   Globe,
 } from "lucide-react";
 import { useAuth } from "@/lib/authContext";
+import { CMS_PATH } from "@/lib/cms";
 
 export default function AdminNavbar({ toggleSidebar }) {
   const { user, logout } = useAuth();
@@ -50,7 +51,7 @@ export default function AdminNavbar({ toggleSidebar }) {
       <div className="flex items-center gap-3">
         {/* Quick action: Create Article */}
         <Link
-          href="/admin/articles/new"
+          href={`${CMS_PATH}/articles/new`}
           className="hidden sm:inline-flex items-center gap-2 px-3 py-1.5 text-xs font-semibold text-white bg-red-600 rounded-lg hover:bg-red-700 shadow-sm shadow-red-600/20 transition-all"
         >
           <PlusCircle className="w-4 h-4" />
@@ -110,7 +111,7 @@ export default function AdminNavbar({ toggleSidebar }) {
               </div>
 
               <Link
-                href="/admin/users"
+                href={`${CMS_PATH}/users`}
                 className="flex items-center gap-2.5 px-4 py-2 text-xs text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
               >
                 <Shield className="w-4 h-4 text-slate-400" />
