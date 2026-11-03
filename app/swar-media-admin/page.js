@@ -89,14 +89,14 @@ export default function AdminDashboardPage() {
         </div>
         <div className="flex items-center gap-2">
           <Link
-            href="/swar-media-admin/"articles/new"
+            href="/swar-media-admin/articles/new"
             className="flex items-center gap-2 px-4 py-2.5 bg-white text-red-600 font-bold text-xs rounded-xl hover:bg-red-50 transition-colors shadow-md shadow-black/10"
           >
             <PlusCircle className="w-4 h-4" />
             <span>Create Article</span>
           </Link>
           <Link
-            href="/swar-media-admin/"live-blogs"
+            href="/swar-media-admin/live-blogs"
             className="flex items-center gap-2 px-4 py-2.5 bg-red-800 text-white font-bold text-xs rounded-xl hover:bg-red-900 transition-colors"
           >
             <span>Live Coverage</span>
@@ -203,7 +203,7 @@ export default function AdminDashboardPage() {
         <div className="p-6 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xs">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-base font-bold text-slate-900 dark:text-white">Top Read Articles</h2>
-            <Link href="/swar-media-admin/"articles" className="text-xs font-semibold text-red-600 hover:underline">
+            <Link href="/swar-media-admin/articles" className="text-xs font-semibold text-red-600 hover:underline">
               View All
             </Link>
           </div>
@@ -245,7 +245,7 @@ export default function AdminDashboardPage() {
         <div className="p-6 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xs">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-base font-bold text-slate-900 dark:text-white">Recent Reader Comments</h2>
-            <Link href="/swar-media-admin/"comments" className="text-xs font-semibold text-red-600 hover:underline">
+            <Link href="/swar-media-admin/comments" className="text-xs font-semibold text-red-600 hover:underline">
               Manage
             </Link>
           </div>

@@ -190,7 +190,7 @@ export default function ArticlesListPage() {
           </button>
 
           <Link
-            href="/swar-media-admin/"articles/new"
+            href="/swar-media-admin/articles/new"
             className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white font-bold text-xs rounded-xl hover:bg-red-700 transition-colors shadow-md shadow-red-600/30"
           >
             <PlusCircle className="w-4 h-4" />
