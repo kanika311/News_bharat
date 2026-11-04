@@ -129,6 +129,14 @@ export default function CitizenJournalistDashboard() {
   // Toast / Share notification
   const [shareToast, setShareToast] = useState(false);
 
+  // Center column scroll ref & wheel forwarder for sticky sidebars
+  const centerRef = useRef(null);
+  const handleSidebarWheel = (e) => {
+    if (centerRef.current) {
+      centerRef.current.scrollTop += e.deltaY;
+    }
+  };
+
   // Load User & Data
   useEffect(() => {
     async function initDashboard() {
@@ -390,44 +398,7 @@ export default function CitizenJournalistDashboard() {
   const userScore = approvedReportsCount * 10 + 10;
 
   return (
-    <div className="bg-[#f8fafc] dark:bg-slate-950 text-slate-900 dark:text-slate-100 min-h-screen pb-12 transition-colors w-full max-w-full overflow-x-hidden">
-      {/* ============================================================== */}
-      {/* 1. TOP HEADER BANNER: BRAND RED-BLUE-WHITE JOURNALIST BANNER   */}
-      {/* ============================================================== */}
-      <div className="bg-gradient-to-r from-red-700 via-red-600 to-blue-900 text-white shadow-md border-b-2 border-red-500/80 w-full max-w-full overflow-hidden">
-        <div className="w-full max-w-full px-3 sm:px-6 lg:px-8 xl:px-10 py-3 sm:py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-          <div className="flex items-start sm:items-center gap-2.5 sm:gap-3 min-w-0">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center shrink-0 border border-white/25 shadow-xs">
-              <Edit3 className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-            </div>
-            <div className="min-w-0">
-              <div className="flex items-center gap-2">
-                <h1 className="text-sm sm:text-base md:text-lg font-black tracking-tight leading-tight truncate">
-                  नागरिक पत्रकार डैशबोर्ड
-                </h1>
-              </div>
-              <p className="text-[10px] sm:text-xs text-red-100 font-medium break-words">
-                अपनी ज़मीनी रिपोर्ट दर्ज करें, कम्युनिटी में विचार साझा करें एवं प्रकाशन स्थिति देखें।
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2 self-start sm:self-center shrink-0">
-            <Link
-              href="/"
-              className="flex items-center gap-1.5 px-3 py-1 bg-white/20 hover:bg-white/30 backdrop-blur-md text-white text-xs font-bold rounded-full border border-white/30 transition-all shadow-xs"
-            >
-              <span>मुख्य वेबसाइट</span>
-              <span>&rarr;</span>
-            </Link>
-            <span className="hidden md:flex items-center gap-1.5 px-2.5 sm:px-3 py-1 bg-white/15 backdrop-blur-md text-white text-[11px] sm:text-xs font-bold rounded-full border border-white/25 shadow-xs">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-              <span>लाइव पत्रकार पोर्टल</span>
-            </span>
-          </div>
-        </div>
-      </div>
-
+    <div className="bg-[#f8fafc] dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors w-full lg:h-full lg:overflow-hidden">
       {/* Share Toast Notification */}
       {shareToast && (
         <div className="fixed bottom-6 right-6 z-50 bg-slate-900 text-white px-4 py-2.5 rounded-2xl shadow-2xl flex items-center gap-2 text-xs font-bold animate-in fade-in slide-in-from-bottom-2">
@@ -437,14 +408,17 @@ export default function CitizenJournalistDashboard() {
       )}
 
       {/* ============================================================== */}
-      {/* 2. MAIN 3-PANEL LAYOUT CONTAINER (LEFT & RIGHT STICKY, CENTER SCROLLS) */}
+      {/* MAIN 3-PANEL LAYOUT CONTAINER (LEFT & RIGHT STICKY, CENTER SCROLLS) */}
       {/* ============================================================== */}
-      <div className="w-full max-w-full px-2.5 sm:px-4 lg:px-8 xl:px-10 py-4 sm:py-5 overflow-x-hidden">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5 items-start w-full max-w-full">
+      <div className="w-full max-w-full px-2.5 sm:px-4 lg:px-6 xl:px-8 py-3 lg:h-full">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-5 items-start w-full lg:h-full">
           {/* ========================================================== */}
           {/* PANEL 1: LEFT SIDEBAR (STICKY ON DESKTOP)                  */}
           {/* ========================================================== */}
-          <aside className="lg:col-span-3 lg:sticky lg:top-[76px] self-start max-h-[calc(100vh-5.5rem)] overflow-y-auto space-y-4 min-w-0 w-full no-scrollbar">
+          <aside
+            onWheel={handleSidebarWheel}
+            className="lg:col-span-3 lg:h-full lg:overflow-y-auto no-scrollbar space-y-4 min-w-0 w-full shrink-0"
+          >
             {/* User Profile Card */}
             <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 shadow-xs space-y-4">
               <div className="flex items-center gap-3">
@@ -628,7 +602,7 @@ export default function CitizenJournalistDashboard() {
           {/* ========================================================== */}
           {/* PANEL 2: CENTER WORKSPACE (Interactive Feed / News CMS)    */}
           {/* ========================================================== */}
-          <main className="lg:col-span-6 min-w-0 w-full space-y-4">
+          <main ref={centerRef} className="lg:col-span-6 min-w-0 w-full space-y-4 lg:h-full lg:overflow-y-auto pr-0.5 pb-16">
             {/* TAB 1: COMMUNITY FEED */}
             {activeTab === "feed" && (
               <div className="space-y-4">
@@ -1179,7 +1153,10 @@ export default function CitizenJournalistDashboard() {
           {/* ========================================================== */}
           {/* PANEL 3: RIGHT SIDEBAR (STICKY ON DESKTOP)                 */}
           {/* ========================================================== */}
-          <aside className="lg:col-span-3 lg:sticky lg:top-[76px] self-start max-h-[calc(100vh-5.5rem)] overflow-y-auto space-y-4 min-w-0 w-full no-scrollbar">
+          <aside
+            onWheel={handleSidebarWheel}
+            className="lg:col-span-3 lg:h-full lg:overflow-y-auto no-scrollbar space-y-4 min-w-0 w-full shrink-0"
+          >
             {/* 1. Sponsored Ad (Styled with Red/Blue/White) */}
             <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-xs">
               <div className="p-3 bg-slate-50 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-700/60 flex items-center justify-between text-[10px] font-bold text-slate-500">
