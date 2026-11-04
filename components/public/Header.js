@@ -139,7 +139,7 @@ export default function Header() {
   return (
     <header className="w-full bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 transition-colors">
       {/* Clean Single-Row Modern Header (Exact Swarnim Dastavej Layout) */}
-      <div className="w-full px-3 sm:px-6 py-2.5 flex items-center justify-between gap-3">
+      <div className="w-full px-2.5 sm:px-6 py-2 sm:py-2.5 flex items-center justify-between gap-1.5 sm:gap-3">
         {/* Left: Brand Logo & Dynamic Site Name with Timestamp (Exact Swarnim Dastavej Layout) */}
         <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           <Link href="/" className="flex items-center gap-2 group shrink-0" aria-label="Swar Media Home">
@@ -152,7 +152,7 @@ export default function Header() {
               <span className="text-xs sm:text-base font-black text-slate-900 dark:text-white leading-tight font-hindi">
                 {lang === "hi" ? (siteSettings?.siteNameHi || "स्वर मीडिया") : (siteSettings?.siteName || "Swar Media")}
               </span>
-              <span className="text-[9px] sm:text-[10px] text-slate-500 dark:text-slate-400 font-medium truncate max-w-[150px] sm:max-w-none">
+              <span className="hidden sm:inline text-[9px] sm:text-[10px] text-slate-500 dark:text-slate-400 font-medium truncate max-w-[150px] sm:max-w-none">
                 {liveTimestamp || "IST"}
               </span>
             </div>
@@ -216,9 +216,9 @@ export default function Header() {
         </nav>
 
         {/* Right: Search, Language, Dark Mode & Login */}
-        <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
+        <div className="flex items-center gap-1 sm:gap-2 shrink-0">
           {/* Search Trigger */}
-          <div className="relative">
+          <div className="relative shrink-0">
             <button
               onClick={() => setSearchOpen(!searchOpen)}
               className="p-1.5 sm:p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors"
@@ -248,7 +248,7 @@ export default function Header() {
           </div>
 
           {/* Language Switcher */}
-          <div className="flex items-center bg-slate-100 dark:bg-slate-800 rounded-lg p-0.5 text-[10px] sm:text-[11px] font-bold">
+          <div className="flex items-center bg-slate-100 dark:bg-slate-800 rounded-lg p-0.5 text-[9px] sm:text-[11px] font-bold shrink-0">
             <button
               onClick={() => setLang("hi")}
               className={`px-1.5 sm:px-2 py-0.5 rounded transition-colors ${
@@ -270,7 +270,7 @@ export default function Header() {
           {/* Dark mode */}
           <button
             onClick={toggleDark}
-            className="p-1.5 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            className="p-1 sm:p-1.5 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors shrink-0"
             title="Toggle Dark Mode"
           >
             {darkMode ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4" />}
@@ -281,7 +281,7 @@ export default function Header() {
             <Link
               href="/dashboard"
               title={lang === "hi" ? "डैशबोर्ड खोलें" : "Open Dashboard"}
-              className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1 bg-gradient-to-r from-red-50 to-amber-50 hover:from-red-100 hover:to-amber-100 dark:from-slate-800 dark:to-slate-800/80 dark:hover:from-red-950/40 border border-red-200/80 dark:border-slate-700 hover:border-red-400 rounded-full text-xs font-bold transition-all shadow-xs group cursor-pointer"
+              className="flex items-center gap-1 sm:gap-2 px-1.5 sm:px-3 py-1 bg-gradient-to-r from-red-50 to-amber-50 hover:from-red-100 hover:to-amber-100 dark:from-slate-800 dark:to-slate-800/80 dark:hover:from-red-950/40 border border-red-200/80 dark:border-slate-700 hover:border-red-400 rounded-full text-xs font-bold transition-all shadow-xs group cursor-pointer shrink-0"
             >
               <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-gradient-to-tr from-red-600 via-red-500 to-amber-500 text-white flex items-center justify-center font-black text-xs shadow-xs overflow-hidden shrink-0">
                 {activeUser.avatar ? (
@@ -300,7 +300,7 @@ export default function Header() {
           ) : (
             <Link
               href="/login"
-              className="flex items-center gap-1.5 px-3.5 sm:px-4 py-1.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white rounded-full text-xs font-bold shadow-xs transition-transform hover:scale-105 active:scale-95"
+              className="flex items-center gap-1 px-2.5 sm:px-4 py-1 sm:py-1.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white rounded-full text-[11px] sm:text-xs font-bold shadow-xs transition-transform hover:scale-105 active:scale-95 shrink-0"
             >
               <User className="w-3.5 h-3.5" />
               <span>{lang === "hi" ? "लॉगिन" : "Login"}</span>
@@ -311,10 +311,10 @@ export default function Header() {
           <button
             type="button"
             onClick={() => setMobileMenuOpen(true)}
-            className="md:hidden flex items-center justify-center p-2 text-slate-700 dark:text-slate-200 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors shadow-xs"
+            className="md:hidden flex items-center justify-center p-1.5 sm:p-2 text-slate-800 dark:text-slate-100 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors shadow-xs shrink-0 cursor-pointer"
             aria-label="Toggle Menu"
           >
-            <Menu className="w-5 h-5 text-slate-800 dark:text-slate-200" />
+            <Menu className="w-5 h-5 text-slate-900 dark:text-white" />
           </button>
         </div>
       </div>

@@ -288,7 +288,7 @@ export default function HomePage() {
             <button
               type="button"
               onClick={() => setMobileFilterOpen(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black text-white bg-amber-500 hover:bg-amber-600 active:scale-95 shadow-xs transition-all cursor-pointer shrink-0"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black text-white bg-red-600 hover:bg-red-700 active:scale-95 shadow-sm shadow-red-600/30 transition-all cursor-pointer shrink-0"
               title="विषय एवं फ़िल्टर"
             >
               <SlidersHorizontal className="w-3.5 h-3.5" />

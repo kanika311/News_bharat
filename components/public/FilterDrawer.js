@@ -54,23 +54,23 @@ export default function FilterDrawer({ isOpen, onClose, onSelectCategory, select
     <div className="fixed inset-0 z-50 flex animate-in fade-in duration-200">
       {/* Dark Backdrop */}
       <div
-        className="fixed inset-0 bg-black/70 backdrop-blur-xs transition-opacity"
+        className="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity"
         onClick={onClose}
       />
 
-      {/* Red Left Drawer */}
-      <div className="relative w-80 max-w-[85vw] h-full bg-gradient-to-b from-[#b91c1c] via-[#991b1b] to-[#1e1b4b] text-white shadow-2xl flex flex-col justify-between overflow-hidden z-10 border-r border-red-500/30 animate-in slide-in-from-left duration-300">
+      {/* Clean White Left Drawer with Red Active Accents */}
+      <div className="relative w-80 max-w-[85vw] h-full bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-2xl flex flex-col justify-between overflow-hidden z-10 border-r border-slate-200 dark:border-slate-800 animate-in slide-in-from-left duration-300">
         {/* Drawer Header */}
-        <div className="p-4 bg-black/20 backdrop-blur-md border-b border-white/15 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-white/15 flex items-center justify-center text-white">
-              <SlidersHorizontal className="w-4 h-4 text-white" />
+        <div className="p-4 bg-slate-50 dark:bg-slate-850 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-red-600 text-white flex items-center justify-center shadow-xs">
+              <SlidersHorizontal className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="text-sm font-black tracking-tight leading-tight">
+              <h2 className="text-sm font-black text-slate-900 dark:text-white tracking-tight leading-tight">
                 {lang === "hi" ? "फ़िल्टर एवं श्रेणियां" : "Filters & Categories"}
               </h2>
-              <p className="text-[10px] text-red-200">
+              <p className="text-[10px] text-slate-500 dark:text-slate-400">
                 {lang === "hi" ? "त्वरित नेविगेशन व ग्राउंड टॉपिक्स" : "Quick News Navigation"}
               </p>
             </div>
@@ -78,7 +78,7 @@ export default function FilterDrawer({ isOpen, onClose, onSelectCategory, select
 
           <button
             onClick={onClose}
-            className="p-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer"
+            className="p-1.5 rounded-full bg-slate-200/70 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors cursor-pointer"
             title="बंद करें"
           >
             <X className="w-4 h-4" />
@@ -89,21 +89,21 @@ export default function FilterDrawer({ isOpen, onClose, onSelectCategory, select
         <div className="flex-1 overflow-y-auto p-4 space-y-5 text-xs">
           {/* Section 1: Main Feature Links */}
           <div className="space-y-1.5">
-            <span className="text-[10px] font-black uppercase tracking-wider text-red-200 block">
+            <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500 block">
               {lang === "hi" ? "मुख्य आकर्षण (Featured)" : "Featured Desks"}
             </span>
-            <div className="space-y-1">
+            <div className="space-y-1.5">
               <Link
                 href="/live"
                 onClick={onClose}
-                className="flex items-center justify-between p-2 rounded-xl bg-white/10 hover:bg-white/20 transition-colors font-bold"
+                className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 hover:bg-red-50 dark:bg-slate-800/60 dark:hover:bg-red-950/30 border border-slate-200/80 dark:border-slate-700/60 text-slate-800 dark:text-slate-200 font-bold transition-colors"
               >
                 <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-red-400 animate-ping" />
-                  <Tv className="w-4 h-4 text-red-300" />
+                  <span className="w-2 h-2 rounded-full bg-red-600 animate-ping" />
+                  <Tv className="w-4 h-4 text-red-600" />
                   <span>{lang === "hi" ? "लाइव न्यूज़ प्रसारण" : "Live Broadcast TV"}</span>
                 </div>
-                <span className="text-[9px] px-1.5 py-0.5 rounded bg-red-500 text-white font-black">
+                <span className="text-[9px] px-1.5 py-0.5 rounded bg-red-600 text-white font-black">
                   LIVE
                 </span>
               </Link>
@@ -111,10 +111,10 @@ export default function FilterDrawer({ isOpen, onClose, onSelectCategory, select
               <Link
                 href="/epaper"
                 onClick={onClose}
-                className="flex items-center justify-between p-2 rounded-xl bg-white/10 hover:bg-white/20 transition-colors font-bold"
+                className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 dark:bg-slate-800/60 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-700/60 text-slate-800 dark:text-slate-200 font-bold transition-colors"
               >
                 <div className="flex items-center gap-2">
-                  <Newspaper className="w-4 h-4 text-amber-300" />
+                  <Newspaper className="w-4 h-4 text-red-600" />
                   <span>{lang === "hi" ? "आज का अखबार ई-पेपर" : "Today's e-Paper"}</span>
                 </div>
                 <span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-500 text-slate-950 font-black">
@@ -125,66 +125,66 @@ export default function FilterDrawer({ isOpen, onClose, onSelectCategory, select
               <Link
                 href="/videos"
                 onClick={onClose}
-                className="flex items-center justify-between p-2 rounded-xl bg-white/10 hover:bg-white/20 transition-colors font-bold"
+                className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 dark:bg-slate-800/60 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-700/60 text-slate-800 dark:text-slate-200 font-bold transition-colors"
               >
                 <div className="flex items-center gap-2">
-                  <Video className="w-4 h-4 text-emerald-300" />
+                  <Video className="w-4 h-4 text-red-600" />
                   <span>{lang === "hi" ? "विशेष वीडियो बुलेटिन" : "Video Bulletins"}</span>
                 </div>
-                <ChevronRight className="w-3.5 h-3.5 opacity-60" />
+                <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
               </Link>
 
               <Link
                 href="/live-blogs"
                 onClick={onClose}
-                className="flex items-center justify-between p-2 rounded-xl bg-white/10 hover:bg-white/20 transition-colors font-bold"
+                className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 dark:bg-slate-800/60 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-700/60 text-slate-800 dark:text-slate-200 font-bold transition-colors"
               >
                 <div className="flex items-center gap-2">
-                  <Flame className="w-4 h-4 text-orange-400" />
+                  <Flame className="w-4 h-4 text-amber-500" />
                   <span>{lang === "hi" ? "लाइव ब्लॉग्स कवरेज" : "Live Blogs"}</span>
                 </div>
-                <ChevronRight className="w-3.5 h-3.5 opacity-60" />
+                <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
               </Link>
 
               <Link
                 href="/dashboard"
                 onClick={onClose}
-                className="flex items-center justify-between p-2 rounded-xl bg-white/15 hover:bg-white/25 border border-white/20 transition-colors font-black"
+                className="flex items-center justify-between p-2.5 rounded-xl bg-red-50 hover:bg-red-100/80 dark:bg-red-950/40 dark:hover:bg-red-900/50 border border-red-200 dark:border-red-900 text-red-700 dark:text-red-300 font-black transition-colors"
               >
                 <div className="flex items-center gap-2">
-                  <LayoutDashboard className="w-4 h-4 text-white" />
+                  <LayoutDashboard className="w-4 h-4 text-red-600" />
                   <span>{lang === "hi" ? "नागरिक पत्रकार डैशबोर्ड" : "Citizen Journalist Desk"}</span>
                 </div>
-                <span className="text-[9px] px-1.5 py-0.5 rounded bg-white text-red-700 font-black">
+                <span className="text-[9px] px-1.5 py-0.5 rounded bg-red-600 text-white font-black">
                   NEW
                 </span>
               </Link>
             </div>
           </div>
 
-          {/* Section 2: News Categories Filter */}
+          {/* Section 2: News Categories Filter (White Background, Red Active Tab) */}
           <div className="space-y-1.5">
-            <span className="text-[10px] font-black uppercase tracking-wider text-red-200 block">
+            <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500 block">
               {lang === "hi" ? "विषय एवं श्रेणियां (Filter by Topic)" : "Filter by Topic"}
             </span>
             <div className="grid grid-cols-2 gap-1.5">
               <button
                 type="button"
                 onClick={(e) => handleCategoryClick(e, "all")}
-                className={`p-2 rounded-xl font-bold transition-all flex items-center justify-between text-left cursor-pointer ${
+                className={`p-2.5 rounded-xl transition-all flex items-center justify-between text-left cursor-pointer ${
                   selectedCategory === "all"
-                    ? "bg-white text-red-900 shadow-md ring-2 ring-white/60 font-black"
-                    : "bg-white/10 hover:bg-white/20 text-white"
+                    ? "bg-red-600 text-white shadow-md shadow-red-600/30 font-black border border-red-700 ring-2 ring-red-200 dark:ring-red-900"
+                    : "bg-slate-50 hover:bg-slate-100 dark:bg-slate-800/60 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700/70 font-semibold"
                 }`}
               >
                 <div className="flex items-center gap-1.5 truncate">
-                  <Flame className={`w-3.5 h-3.5 shrink-0 ${selectedCategory === "all" ? "text-red-600 fill-red-600" : "text-amber-400"}`} />
+                  <Flame className={`w-3.5 h-3.5 shrink-0 ${selectedCategory === "all" ? "text-white fill-white" : "text-red-500"}`} />
                   <span className="truncate">टॉप न्यूज़</span>
                 </div>
                 {selectedCategory === "all" ? (
-                  <Check className="w-3.5 h-3.5 text-red-700 shrink-0" />
+                  <Check className="w-3.5 h-3.5 text-white shrink-0" />
                 ) : (
-                  <ChevronRight className="w-3 h-3 opacity-60 shrink-0" />
+                  <ChevronRight className="w-3 h-3 text-slate-400 shrink-0" />
                 )}
               </button>
 
@@ -197,17 +197,17 @@ export default function FilterDrawer({ isOpen, onClose, onSelectCategory, select
                     key={cat._id}
                     type="button"
                     onClick={(e) => handleCategoryClick(e, cat.slug)}
-                    className={`p-2 rounded-xl font-bold transition-all flex items-center justify-between text-left truncate cursor-pointer ${
+                    className={`p-2.5 rounded-xl transition-all flex items-center justify-between text-left truncate cursor-pointer ${
                       isSelected
-                        ? "bg-white text-red-900 shadow-md ring-2 ring-white/60 font-black"
-                        : "bg-white/10 hover:bg-white/20 text-white"
+                        ? "bg-red-600 text-white shadow-md shadow-red-600/30 font-black border border-red-700 ring-2 ring-red-200 dark:ring-red-900"
+                        : "bg-slate-50 hover:bg-slate-100 dark:bg-slate-800/60 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700/70 font-semibold"
                     }`}
                   >
                     <span className="truncate">{label}</span>
                     {isSelected ? (
-                      <Check className="w-3.5 h-3.5 text-red-700 shrink-0" />
+                      <Check className="w-3.5 h-3.5 text-white shrink-0" />
                     ) : (
-                      <ChevronRight className="w-3 h-3 opacity-60 shrink-0" />
+                      <ChevronRight className="w-3 h-3 text-slate-400 shrink-0" />
                     )}
                   </button>
                 );
@@ -217,7 +217,7 @@ export default function FilterDrawer({ isOpen, onClose, onSelectCategory, select
 
           {/* Section 3: Trending Ground Hashtags */}
           <div className="space-y-1.5">
-            <span className="text-[10px] font-black uppercase tracking-wider text-red-200 block">
+            <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500 block">
               {lang === "hi" ? "ट्रेंडिंग मुद्दे (Topics)" : "Trending Topics"}
             </span>
             <div className="flex flex-wrap gap-1.5">
@@ -234,7 +234,7 @@ export default function FilterDrawer({ isOpen, onClose, onSelectCategory, select
                   key={idx}
                   href={`/search?q=${encodeURIComponent(item.q)}`}
                   onClick={onClose}
-                  className="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/25 text-[11px] font-bold text-red-100 hover:text-white transition-colors"
+                  className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-red-50 dark:bg-slate-800 dark:hover:bg-red-950/40 text-[11px] font-bold text-slate-700 hover:text-red-600 dark:text-slate-300 dark:hover:text-red-400 border border-slate-200/80 dark:border-slate-700 transition-colors"
                 >
                   {item.tag}
                 </Link>
@@ -244,11 +244,11 @@ export default function FilterDrawer({ isOpen, onClose, onSelectCategory, select
         </div>
 
         {/* Drawer Footer */}
-        <div className="p-3 bg-black/30 border-t border-white/15 flex items-center justify-between text-[11px] text-red-200">
+        <div className="p-3 bg-slate-50 dark:bg-slate-850 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-[11px] text-slate-500">
           <p className="font-hindi font-medium">स्वर मीडिया • सत्य, सुर और सरोकार</p>
           <button
             onClick={onClose}
-            className="px-2.5 py-1 rounded-lg bg-white/15 hover:bg-white/25 text-white font-bold cursor-pointer"
+            className="px-2.5 py-1 rounded-lg bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold cursor-pointer"
           >
             बंद करें
           </button>
@@ -257,4 +257,3 @@ export default function FilterDrawer({ isOpen, onClose, onSelectCategory, select
     </div>
   );
 }
-
