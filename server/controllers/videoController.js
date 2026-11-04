@@ -23,7 +23,7 @@ exports.getVideos = async (req, res) => {
 // POST /api/videos
 exports.createVideo = async (req, res) => {
   try {
-    const { title, titleHi, videoUrl, thumbnail, category, duration, isFeatured } = req.body;
+    const { title, titleHi, videoUrl, thumbnail, category, duration, isFeatured, socialLinks } = req.body;
     if (!title || !videoUrl) {
       return res.status(400).json({ success: false, message: "Title and video URL are required." });
     }
@@ -36,6 +36,7 @@ exports.createVideo = async (req, res) => {
       category: category || null,
       duration: duration || "02:30",
       isFeatured: Boolean(isFeatured),
+      socialLinks: socialLinks || {},
     });
 
     await video.save();
@@ -55,7 +56,7 @@ exports.updateVideo = async (req, res) => {
       return res.status(404).json({ success: false, message: "Video not found" });
     }
 
-    const { title, titleHi, videoUrl, thumbnail, category, duration, isFeatured } = req.body;
+    const { title, titleHi, videoUrl, thumbnail, category, duration, isFeatured, socialLinks } = req.body;
     if (title !== undefined) video.title = title;
     if (titleHi !== undefined) video.titleHi = titleHi;
     if (videoUrl !== undefined) video.videoUrl = videoUrl;
@@ -63,6 +64,7 @@ exports.updateVideo = async (req, res) => {
     if (category !== undefined) video.category = category || null;
     if (duration !== undefined) video.duration = duration;
     if (isFeatured !== undefined) video.isFeatured = Boolean(isFeatured);
+    if (socialLinks !== undefined) video.socialLinks = socialLinks;
 
     await video.save();
     await logActivity(req, "UPDATE_VIDEO", "video", `Updated video: "${video.title}"`);

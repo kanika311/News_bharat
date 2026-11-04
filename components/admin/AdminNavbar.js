@@ -77,6 +77,16 @@ export default function AdminNavbar({ toggleSidebar }) {
           <Globe className="w-4 h-4" />
         </Link>
 
+        {/* Direct visible Log Out button */}
+        <button
+          onClick={logout}
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-red-600 hover:text-white bg-red-50 hover:bg-red-600 dark:bg-red-950/40 dark:hover:bg-red-600 dark:text-red-400 dark:hover:text-white rounded-lg border border-red-200 dark:border-red-900/50 transition-all cursor-pointer shadow-xs"
+          title="लॉगआउट करें (Log Out)"
+        >
+          <LogOut className="w-3.5 h-3.5" />
+          <span className="hidden sm:inline">लॉगआउट</span>
+        </button>
+
         {/* Profile menu dropdown */}
         <div className="relative">
           <button

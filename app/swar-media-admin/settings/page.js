@@ -13,6 +13,7 @@ export default function SiteSettingsPage() {
     tagLineHi: "सत्य, सुर और सरोकार",
     logo: "",
     favicon: "",
+    adminName: "Rajesh Sharma (प्रधान संपादक)",
     contactEmail: "contact@swarmedia.in",
     contactPhone: "+91 11 2345 6789",
     footerText: "© 2026 Swar Media Network. All rights reserved.",
@@ -187,7 +188,20 @@ export default function SiteSettingsPage() {
             <span>Contact & Legal Footnote</span>
           </h2>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                Chief Editor / Admin Name (प्रधान संपादक)
+              </label>
+              <input
+                type="text"
+                value={settings.adminName || ""}
+                onChange={(e) => setSettings({ ...settings, adminName: e.target.value })}
+                placeholder="उदा. Rajesh Sharma (प्रधान संपादक)"
+                className="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-red-500 font-hindi"
+              />
+            </div>
+
             <div>
               <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                 Editorial Contact Email

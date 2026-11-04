@@ -327,33 +327,33 @@ export default function LiveStreamingNewsPage() {
   const isCameraStream = stream?.streamType === "camera";
 
   return (
-    <div className="bg-slate-950 text-white min-h-screen py-6 sm:py-8">
+    <div className="bg-[#f8fafc] dark:bg-slate-950 text-slate-900 dark:text-slate-100 min-h-screen py-6 sm:py-8 transition-colors">
       <div className="max-w-7xl mx-auto px-3 sm:px-4 space-y-6">
         {/* Top Channel Bar */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-900/90 border border-slate-800 p-4 rounded-2xl shadow-xl">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 rounded-2xl shadow-xs">
           <div className="flex items-center gap-3">
-            <div className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-red-600 text-white shadow-lg shadow-red-600/30">
+            <div className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-red-600 text-white shadow-md shadow-red-600/30">
               <Tv className="w-5 h-5" />
               {isLive && (
-                <span className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-400 border-2 border-slate-900 rounded-full animate-ping" />
+                <span className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-500 border-2 border-white dark:border-slate-900 rounded-full animate-ping" />
               )}
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-lg sm:text-xl font-black text-white tracking-tight">
+                <h1 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white tracking-tight">
                   {lang === "hi" ? "स्वर मीडिया 24x7 सीधा प्रसारण" : "Swar Media 24x7 Live Stream"}
                 </h1>
                 {isLive ? (
-                  <span className="px-2 py-0.5 rounded-full bg-red-600 text-[10px] font-black tracking-widest uppercase animate-pulse">
+                  <span className="px-2 py-0.5 rounded-full bg-red-600 text-white text-[10px] font-black tracking-widest uppercase animate-pulse">
                     LIVE
                   </span>
                 ) : (
-                  <span className="px-2 py-0.5 rounded-full bg-slate-700 text-[10px] font-bold tracking-widest uppercase">
+                  <span className="px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 text-[10px] font-bold tracking-widest uppercase">
                     OFFLINE
                   </span>
                 )}
               </div>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-slate-500 dark:text-slate-400">
                 {lang === "hi"
                   ? "ग्राउंड जीरो से संवाददाताओं की लाइव रिपोर्टिंग एवं ब्रेकिंग डिबेट"
                   : "Live field reporter dispatches, breaking debate, and continuous news streaming"}
@@ -366,7 +366,7 @@ export default function LiveStreamingNewsPage() {
             {isBroadcasting ? (
               <button
                 onClick={handleStopQuickLive}
-                className="flex items-center gap-1.5 px-3.5 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-black shadow-lg shadow-rose-600/30 transition-all hover:scale-105 animate-pulse cursor-pointer"
+                className="flex items-center gap-1.5 px-3.5 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-black shadow-md shadow-rose-600/30 transition-all hover:scale-105 animate-pulse cursor-pointer"
               >
                 <Square className="w-3.5 h-3.5 fill-white" />
                 <span>लाइव बंद करें ({formatTimer(broadcastDuration)})</span>
@@ -374,7 +374,7 @@ export default function LiveStreamingNewsPage() {
             ) : (
               <button
                 onClick={handleStartQuickLive}
-                className="flex items-center gap-1.5 px-3.5 py-1.5 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white rounded-xl text-xs font-black shadow-lg shadow-red-600/30 transition-all hover:scale-105 cursor-pointer"
+                className="flex items-center gap-1.5 px-3.5 py-1.5 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white rounded-xl text-xs font-black shadow-md shadow-red-600/30 transition-all hover:scale-105 cursor-pointer"
                 title="बिना फॉर्म भरे सीधे कैमरा से लाइव जाएं"
               >
                 <Camera className="w-3.5 h-3.5" />
@@ -383,20 +383,20 @@ export default function LiveStreamingNewsPage() {
             )}
 
             {/* Viewers Counter */}
-            <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-800 rounded-xl border border-slate-700 text-xs font-bold text-slate-200">
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-800 dark:text-slate-200">
               <Eye className="w-4 h-4 text-red-500 animate-pulse" />
               <span>
                 {stream?.viewers ? Number(stream.viewers).toLocaleString("en-IN") : "1,420"}{" "}
-                <span className="text-slate-400 font-normal">{lang === "hi" ? "लाइव दर्शक" : "Watching"}</span>
+                <span className="text-slate-500 dark:text-slate-400 font-normal">{lang === "hi" ? "लाइव दर्शक" : "Watching"}</span>
               </span>
             </div>
 
             {/* Share */}
             <button
               onClick={handleShare}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white rounded-xl text-xs font-bold transition-all shadow-md"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white rounded-xl text-xs font-bold transition-all shadow-xs"
             >
-              {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Share2 className="w-3.5 h-3.5" />}
+              {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Share2 className="w-3.5 h-3.5" />}
               <span>{copied ? (lang === "hi" ? "लिंक कॉपी!" : "Copied!") : (lang === "hi" ? "शेयर" : "Share")}</span>
             </button>
           </div>
@@ -611,14 +611,14 @@ export default function LiveStreamingNewsPage() {
             </div>
 
             {/* Broadcast Details & Quick Reactions */}
-            <div className="bg-slate-900 border border-slate-800 p-5 rounded-3xl space-y-4">
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 rounded-3xl shadow-xs space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="space-y-1">
-                  <h2 className="text-xl font-black text-white tracking-tight">
+                  <h2 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">
                     {lang === "hi" ? stream?.titleHi || stream?.title : stream?.title}
                   </h2>
-                  <div className="flex flex-wrap items-center gap-3 text-xs text-slate-400">
-                    <span className="flex items-center gap-1 text-red-400 font-semibold">
+                  <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500 dark:text-slate-400">
+                    <span className="flex items-center gap-1 text-red-600 font-semibold">
                       <Clock className="w-3.5 h-3.5" />
                       <span>
                         {lang === "hi" ? "प्रसारण समय: " : "Broadcasted: "}
@@ -637,7 +637,7 @@ export default function LiveStreamingNewsPage() {
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => triggerReaction("fire", "🔥")}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 rounded-xl text-xs font-bold text-amber-400 border border-slate-700 transition-all hover:scale-105"
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-xl text-xs font-bold text-amber-600 dark:text-amber-400 border border-slate-200 dark:border-slate-700 transition-all hover:scale-105"
                   >
                     <span>🔥</span>
                     <span>{reactions.fire}</span>
@@ -645,7 +645,7 @@ export default function LiveStreamingNewsPage() {
 
                   <button
                     onClick={() => triggerReaction("heart", "❤️")}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 rounded-xl text-xs font-bold text-rose-400 border border-slate-700 transition-all hover:scale-105"
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-xl text-xs font-bold text-rose-600 dark:text-rose-400 border border-slate-200 dark:border-slate-700 transition-all hover:scale-105"
                   >
                     <span>❤️</span>
                     <span>{reactions.heart}</span>
@@ -653,7 +653,7 @@ export default function LiveStreamingNewsPage() {
 
                   <button
                     onClick={() => triggerReaction("clap", "👏")}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 rounded-xl text-xs font-bold text-emerald-400 border border-slate-700 transition-all hover:scale-105"
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-xl text-xs font-bold text-emerald-600 dark:text-emerald-400 border border-slate-200 dark:border-slate-700 transition-all hover:scale-105"
                   >
                     <span>👏</span>
                     <span>{reactions.clap}</span>
@@ -664,39 +664,39 @@ export default function LiveStreamingNewsPage() {
           </div>
 
           {/* Right Col: Live Chat & Viewer Q&A */}
-          <div className="flex flex-col bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-xl h-[560px]">
+          <div className="flex flex-col bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden shadow-xs h-[560px]">
             {/* Chat Header */}
-            <div className="p-4 bg-slate-800/80 border-b border-slate-700/60 flex items-center justify-between">
+            <div className="p-4 bg-slate-50 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-700/60 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <MessageSquare className="w-4 h-4 text-red-500" />
-                <h3 className="text-sm font-black text-white">
+                <MessageSquare className="w-4 h-4 text-red-600" />
+                <h3 className="text-sm font-black text-slate-900 dark:text-white">
                   {lang === "hi" ? "लाइव दर्शक संवाद (Live Chat)" : "Live Viewer Chat"}
                 </h3>
               </div>
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
             </div>
 
             {/* Chat Messages List */}
             <div className="flex-1 p-4 overflow-y-auto space-y-3 scroll-smooth">
               {chatMessages.map((msg) => (
-                <div key={msg.id} className="p-2.5 rounded-xl bg-slate-800/60 border border-slate-700/40 space-y-1">
+                <div key={msg.id} className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/40 space-y-1">
                   <div className="flex items-center justify-between text-[11px]">
-                    <span className="font-bold text-amber-400">{msg.user}</span>
-                    <span className="text-slate-500">{msg.time}</span>
+                    <span className="font-bold text-amber-600 dark:text-amber-400">{msg.user}</span>
+                    <span className="text-slate-400">{msg.time}</span>
                   </div>
-                  <p className="text-xs text-slate-200 leading-relaxed">{msg.text}</p>
+                  <p className="text-xs text-slate-700 dark:text-slate-200 leading-relaxed">{msg.text}</p>
                 </div>
               ))}
             </div>
 
             {/* Chat Input */}
-            <form onSubmit={handleSendChat} className="p-3 bg-slate-800/90 border-t border-slate-700/60 space-y-2">
+            <form onSubmit={handleSendChat} className="p-3 bg-slate-50 dark:bg-slate-800/90 border-t border-slate-200 dark:border-slate-700/60 space-y-2">
               <input
                 type="text"
                 placeholder={lang === "hi" ? "आपका नाम (वैकल्पिक)..." : "Your name (optional)..."}
                 value={senderName}
                 onChange={(e) => setSenderName(e.target.value)}
-                className="w-full px-3 py-1.5 bg-slate-950 border border-slate-700 rounded-lg text-xs text-white placeholder-slate-500 focus:outline-none focus:border-red-500"
+                className="w-full px-3 py-1.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-red-500"
               />
               <div className="flex items-center gap-2">
                 <input
@@ -704,11 +704,11 @@ export default function LiveStreamingNewsPage() {
                   placeholder={lang === "hi" ? "पत्रकार से सवाल पूछें / अपनी राय दें..." : "Ask reporter a question..."}
                   value={newChatText}
                   onChange={(e) => setNewChatText(e.target.value)}
-                  className="flex-1 px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-red-500"
+                  className="flex-1 px-3 py-2 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-red-500"
                 />
                 <button
                   type="submit"
-                  className="p-2 bg-red-600 hover:bg-red-700 text-white rounded-xl transition-colors shrink-0 shadow"
+                  className="p-2 bg-red-600 hover:bg-red-700 text-white rounded-xl transition-colors shrink-0 shadow-sm"
                 >
                   <Send className="w-4 h-4" />
                 </button>
@@ -717,62 +717,19 @@ export default function LiveStreamingNewsPage() {
           </div>
         </div>
 
-        {/* Section: Live Blogs (Minute-by-minute Text coverage) */}
-        {liveBlogs.length > 0 && (
-          <div className="pt-6 space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-              <div className="flex items-center gap-2">
-                <Flame className="w-5 h-5 text-amber-400" />
-                <h3 className="text-lg font-black text-white">
-                  {lang === "hi" ? "लाइव ब्लॉग्स (मिनट-दर-मिनट टेक्स्ट कवरेज)" : "Live Blogs (Minute-by-Minute Text Coverage)"}
-                </h3>
-              </div>
-              <Link
-                href="/live-blogs"
-                className="text-xs font-bold text-red-500 hover:text-red-400 transition-colors"
-              >
-                {lang === "hi" ? "सभी लाइव ब्लॉग देखें →" : "View All Live Blogs →"}
-              </Link>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {liveBlogs.map((b) => (
-                <Link
-                  key={b._id}
-                  href={`/live/${b.slug}`}
-                  className="p-4 rounded-2xl bg-slate-900 border border-slate-800 hover:border-amber-500 transition-all space-y-2 group"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="px-2 py-0.5 rounded-full bg-red-600/20 text-red-400 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
-                      LIVE BLOG
-                    </span>
-                    <span className="text-[11px] text-slate-500">
-                      {b.entries?.length || 0} {lang === "hi" ? "अपडेट्स" : "updates"}
-                    </span>
-                  </div>
-                  <h4 className="text-sm font-bold text-white group-hover:text-amber-400 line-clamp-2 transition-colors">
-                    {lang === "hi" ? b.titleHi || b.title : b.title}
-                  </h4>
-                </Link>
-              ))}
-            </div>
-          </div>
-        )}
-
         {/* Section: Top Video Bulletins */}
         {recentVideos.length > 0 && (
           <div className="pt-4 space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+            <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
               <div className="flex items-center gap-2">
-                <Play className="w-5 h-5 text-red-500" />
-                <h3 className="text-lg font-black text-white">
+                <Play className="w-5 h-5 text-red-600" />
+                <h3 className="text-lg font-black text-slate-900 dark:text-white">
                   {lang === "hi" ? "विशेष वीडियो बुलेटिन" : "Special Video Bulletins"}
                 </h3>
               </div>
               <Link
                 href="/videos"
-                className="text-xs font-bold text-red-500 hover:text-red-400 transition-colors"
+                className="text-xs font-bold text-red-600 hover:text-red-700 transition-colors"
               >
                 {lang === "hi" ? "सभी वीडियो देखें →" : "View All Videos →"}
               </Link>
@@ -783,7 +740,7 @@ export default function LiveStreamingNewsPage() {
                 <Link
                   key={v._id}
                   href="/videos"
-                  className="rounded-2xl bg-slate-900 border border-slate-800 overflow-hidden hover:border-red-500 transition-all group"
+                  className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 overflow-hidden hover:border-red-500 transition-all shadow-xs group"
                 >
                   <div className="aspect-video bg-black relative">
                     <img
@@ -798,7 +755,7 @@ export default function LiveStreamingNewsPage() {
                     </div>
                   </div>
                   <div className="p-3">
-                    <p className="text-xs font-bold text-white line-clamp-2 group-hover:text-red-400 transition-colors">
+                    <p className="text-xs font-bold text-slate-900 dark:text-white line-clamp-2 group-hover:text-red-600 transition-colors">
                       {lang === "hi" ? v.titleHi || v.title : v.title}
                     </p>
                   </div>

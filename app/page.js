@@ -33,10 +33,12 @@ import {
   Check,
   MapPin,
   ExternalLink,
+  SlidersHorizontal,
 } from "lucide-react";
 import { useLang } from "@/lib/langContext";
 import { apiFetch } from "@/lib/api";
 import AdSlot from "@/components/public/AdSlot";
+import FilterDrawer from "@/components/public/FilterDrawer";
 
 // Map icons to categories
 const getCategoryIcon = (slug) => {
@@ -78,22 +80,25 @@ export default function HomePage() {
   const [topStories, setTopStories] = useState([]);
   const [trendingArticles, setTrendingArticles] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [videos, setVideos] = useState([]);
-  const [galleries, setGalleries] = useState([]);
-  const [liveBlog, setLiveBlog] = useState(null);
   const [loading, setLoading] = useState(true);
 
   // Active Category / Topic Filter in Left Sidebar
   const [selectedTopic, setSelectedTopic] = useState("all"); // 'all' for Top News or category slug/id
+  const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
   const [bookmarkedIds, setBookmarkedIds] = useState(new Set());
   const [copiedId, setCopiedId] = useState(null);
 
   useEffect(() => {
+    // Safety timer: Never block visitor for more than 1.2s on loading screen
+    const safetyTimer = setTimeout(() => {
+      setLoading(false);
+    }, 1200);
+
     async function loadHomeContent() {
       try {
         const safeFetch = async (url) => {
           try {
-            return await apiFetch(url);
+            return await apiFetch(url, { timeout: 4000 });
           } catch (err) {
             console.error("Home fetch failed:", url, err);
             return {};
@@ -103,50 +108,32 @@ export default function HomePage() {
         const [
           articlesRes,
           catsRes,
-          vidsRes,
-          galsRes,
-          liveRes,
           settingsRes,
         ] = await Promise.all([
-          safeFetch("/api/articles?status=published&limit=50"),
+          safeFetch("/api/articles?status=published&limit=30"),
           safeFetch("/api/categories"),
-          safeFetch("/api/videos?limit=4"),
-          safeFetch("/api/galleries?limit=3"),
-          safeFetch("/api/live-blogs?status=live&limit=1"),
           safeFetch("/api/settings"),
         ]);
 
-        const all = articlesRes.articles || [];
+        const rawArticles = articlesRes.articles || [];
+        // Sort strictly by latest updated/published news first (Last updated on top)
+        const all = [...rawArticles].sort((a, b) => {
+          const timeA = new Date(a.updatedAt || a.publishedAt || a.createdAt || 0).getTime();
+          const timeB = new Date(b.updatedAt || b.publishedAt || b.createdAt || 0).getTime();
+          return timeB - timeA;
+        });
+
         const cats = catsRes.categories || [];
 
         setAllArticles(all);
         setCategories(cats);
-        setVideos(vidsRes.videos || []);
-        setGalleries(galsRes.galleries || []);
-        if (liveRes.liveBlogs?.length > 0) {
-          setLiveBlog(liveRes.liveBlogs[0]);
-        }
 
-        // Determine Hero & Top Stories
-        const leadIds = settingsRes.settings?.leadStoryIds || [];
-        let heroList = [];
-        if (leadIds.length > 0) {
-          heroList = leadIds
-            .map((id) => {
-              const targetId = typeof id === "object" && id !== null ? String(id._id || id) : String(id);
-              return all.find((a) => String(a._id) === targetId);
-            })
-            .filter(Boolean);
-        }
-        if (heroList.length < 5) {
-          const remaining = all.filter((a) => !heroList.some((h) => String(h._id) === String(a._id)));
-          heroList = [...heroList, ...remaining.slice(0, 5 - heroList.length)];
-        }
-        setLeadArticles(heroList.length ? heroList : all.slice(0, 5));
+        // Simple: Latest updated news is directly at the top (main lead)
+        setLeadArticles(all.slice(0, 5));
 
         // Top Stories
-        const tops = all.filter((a) => a.isTopStory || a.isFeatured);
-        setTopStories(tops.length ? tops.slice(0, 4) : all.slice(0, 4));
+        const tops = all.slice(1, 5);
+        setTopStories(tops);
 
         // Trending Articles (Most views)
         const sortedByViews = [...all].sort((a, b) => (b.viewCount || 0) - (a.viewCount || 0));
@@ -154,11 +141,14 @@ export default function HomePage() {
       } catch (err) {
         console.error("Home loading error:", err);
       } finally {
+        clearTimeout(safetyTimer);
         setLoading(false);
       }
     }
 
     loadHomeContent();
+
+    return () => clearTimeout(safetyTimer);
   }, []);
 
   // Filtered articles for the Center Column
@@ -222,61 +212,41 @@ export default function HomePage() {
 
   return (
     <div className="w-full space-y-0">
-      {/* 1. LIVE BLOG ALERT TICKER (if any active live blog) */}
-      {liveBlog && (
-        <Link
-          href={`/live/${liveBlog.slug}`}
-          className="flex items-center gap-3 p-3 sm:p-3.5 bg-gradient-to-r from-red-600 via-rose-600 to-amber-600 text-white shadow-sm hover:shadow-md transition-all group overflow-hidden w-full rounded-none"
-        >
-          <span className="flex items-center gap-1.5 px-2.5 py-1 bg-white/20 backdrop-blur-md rounded-full text-[10px] sm:text-xs font-black tracking-wider uppercase shrink-0">
-            <span className="w-2 h-2 rounded-full bg-white animate-ping" />
-            LIVE BLOG
-          </span>
-          <p className="text-xs sm:text-sm font-bold truncate flex-1">
-            {lang === "hi" && liveBlog.titleHi ? liveBlog.titleHi : liveBlog.title}
-          </p>
-          <span className="text-xs font-bold text-white/90 group-hover:translate-x-1 transition-transform flex items-center gap-1 shrink-0">
-            <span>{t("viewLive")}</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </span>
-        </Link>
-      )}
-
-      {/* 2. 3-COLUMN LAYOUT: VISIBLE RIGHT FROM THE TOP (LEFT & RIGHT STICKY, CENTER SCROLLS) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 items-stretch w-full">
+      {/* 2. 3-COLUMN LAYOUT: LEFT & RIGHT STICKY, CENTER SCROLLS (LEFT COMPACT 2-COLS, CENTER EXPANDED 7-COLS) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 items-start w-full">
         {/* ============================================================== */}
-        {/* COLUMN 1: LEFT SIDEBAR - TOPICS / CATEGORY FILTER (3 Cols)   */}
+        {/* COLUMN 1: LEFT SIDEBAR - FIXED ON DESKTOP (Categories)         */}
         {/* ============================================================== */}
-        <aside className="lg:col-span-3 lg:sticky lg:top-0 self-start h-full">
-          <div className="bg-white dark:bg-slate-900 border-b lg:border-b-0 lg:border-r border-slate-200 dark:border-slate-800 p-3 sm:p-4 lg:min-h-[calc(100vh-9rem)] max-h-none lg:max-h-[calc(100vh-9rem)] overflow-y-auto no-scrollbar space-y-4 rounded-none shadow-none">
-            {/* Header */}
-            <div className="flex items-center justify-between pb-3 mb-1 border-b border-slate-100 dark:border-slate-800">
-              <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-red-600 animate-pulse" />
-                <h2 className="text-xs sm:text-sm font-black text-slate-900 dark:text-white tracking-wide uppercase">
-                  विषय चुनें (TOPICS)
+        <aside className="hidden lg:block lg:col-span-2 lg:sticky lg:top-[96px] lg:h-[calc(100vh-96px)] overflow-y-auto no-scrollbar self-start z-10 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800">
+          <div className="p-2 sm:p-2.5 space-y-3">
+            {/* 1. Categories Header */}
+            <div className="flex items-center justify-between pb-2 mb-1 border-b border-slate-100 dark:border-slate-800">
+              <div className="flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse" />
+                <h2 className="text-[11px] sm:text-xs font-black text-slate-900 dark:text-white tracking-wide uppercase">
+                  विषय (CATEGORIES)
                 </h2>
               </div>
             </div>
 
             {/* Topics Filter Navigation */}
-            <div className="space-y-1">
+            <div className="space-y-0.5">
               {/* Option 1: Top News (Default) */}
               <button
                 type="button"
                 onClick={() => setSelectedTopic("all")}
-                className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-extrabold transition-all cursor-pointer ${
+                className={`w-full flex items-center justify-between px-2.5 py-2 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
                   selectedTopic === "all"
                     ? "bg-red-50 dark:bg-red-950/60 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800 shadow-xs"
                     : "text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
                 }`}
               >
-                <div className="flex items-center gap-2.5">
-                  <Flame className={`w-4 h-4 ${selectedTopic === "all" ? "text-red-600 fill-red-600" : "text-slate-400"}`} />
-                  <span>टॉप न्यूज़</span>
+                <div className="flex items-center gap-2 truncate">
+                  <Flame className={`w-3.5 h-3.5 shrink-0 ${selectedTopic === "all" ? "text-red-600 fill-red-600" : "text-slate-400"}`} />
+                  <span className="truncate">टॉप न्यूज़</span>
                 </div>
                 {selectedTopic === "all" && (
-                  <span className="w-1.5 h-1.5 rounded-full bg-red-600" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-red-600 shrink-0" />
                 )}
               </button>
 
@@ -291,14 +261,14 @@ export default function HomePage() {
                     key={cat._id}
                     type="button"
                     onClick={() => setSelectedTopic(cat.slug)}
-                    className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
+                    className={`w-full flex items-center justify-between px-2.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                       isSelected
                         ? "bg-red-50 dark:bg-red-950/60 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800 shadow-xs"
                         : "text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
                     }`}
                   >
-                    <div className="flex items-center gap-2.5 truncate">
-                      <Icon className={`w-4 h-4 shrink-0 ${isSelected ? "text-red-600" : "text-slate-400"}`} />
+                    <div className="flex items-center gap-2 truncate">
+                      <Icon className={`w-3.5 h-3.5 shrink-0 ${isSelected ? "text-red-600" : "text-slate-400"}`} />
                       <span className="truncate">{label}</span>
                     </div>
                     {isSelected && (
@@ -308,31 +278,36 @@ export default function HomePage() {
                 );
               })}
             </div>
-
-            {/* Bottom Utilities (ई-पेपर पढ़ें & खबर भेजें) */}
-            <div className="pt-3 mt-3 border-t border-slate-100 dark:border-slate-800 space-y-2">
-              <Link
-                href="/epaper"
-                className="flex items-center gap-2.5 px-3.5 py-2 rounded-xl text-xs font-bold text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors"
-              >
-                <Newspaper className="w-4 h-4" />
-                <span>ई-पेपर पढ़ें</span>
-              </Link>
-              <Link
-                href="/contact"
-                className="flex items-center gap-2.5 px-3.5 py-2 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
-              >
-                <Send className="w-4 h-4 text-slate-400" />
-                <span>खबर भेजें</span>
-              </Link>
-            </div>
           </div>
         </aside>
 
         {/* ============================================================== */}
-        {/* COLUMN 2: CENTER - NEWS FEED (ONLY THIS COLUMN SCROLLS)       */}
+        {/* COLUMN 2: CENTER - NEWS FEED (EXPANDED TO 7 COLS)              */}
         {/* ============================================================== */}
-        <main className="lg:col-span-6 space-y-4 min-w-0 px-3 sm:px-4 py-3 bg-slate-50 dark:bg-slate-950">
+        <main className="lg:col-span-7 space-y-4 min-w-0 px-3 sm:px-4 py-3 bg-slate-50 dark:bg-slate-950">
+          {/* Mobile Filter & Trending Strip (Swarnim Dastavej Style - Mobile Only) */}
+          <div className="lg:hidden flex items-center justify-between gap-2.5 p-2 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
+            <button
+              type="button"
+              onClick={() => setMobileFilterOpen(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black text-white bg-amber-500 hover:bg-amber-600 active:scale-95 shadow-xs transition-all cursor-pointer shrink-0"
+              title="विषय एवं फ़िल्टर"
+            >
+              <SlidersHorizontal className="w-3.5 h-3.5" />
+              <span>फ़िल्टर</span>
+            </button>
+
+            {/* Mobile Trending Strip */}
+            <div className="flex-1 flex items-center gap-1.5 text-xs overflow-hidden truncate">
+              <span className="text-red-600 font-extrabold shrink-0 flex items-center gap-1">
+                <Flame className="w-3.5 h-3.5 fill-red-600 text-red-600" />
+                <span>ट्रेंडिंग:</span>
+              </span>
+              <span className="text-slate-700 dark:text-slate-300 font-semibold truncate">
+                {trendingArticles[0]?.title || "ताज़ा जमीनी खबरें एवं अपडेट्स"}
+              </span>
+            </div>
+          </div>
           {/* Top Featured Lead Story (integrated into center column) */}
           {selectedTopic === "all" && mainLead && (
             <Link
@@ -508,11 +483,10 @@ export default function HomePage() {
         </main>
 
         {/* ============================================================== */}
-        {/* COLUMN 3: RIGHT SIDEBAR - SPONSORED ADS & TRENDING (3 Cols)   */}
+        {/* COLUMN 3: RIGHT SIDEBAR - FIXED ON DESKTOP (Ads & Trending)    */}
         {/* ============================================================== */}
-        <aside className="lg:col-span-3 lg:sticky lg:top-0 self-start h-full bg-white dark:bg-slate-900 border-t lg:border-t-0 lg:border-l border-slate-200 dark:border-slate-800">
-          {/* Sticky Container so right panel stays pinned from top */}
-          <div className="p-3 sm:p-4 lg:min-h-[calc(100vh-9rem)] max-h-none lg:max-h-[calc(100vh-9rem)] overflow-y-auto no-scrollbar space-y-4 rounded-none">
+        <aside className="lg:col-span-3 lg:sticky lg:top-[96px] lg:h-[calc(100vh-96px)] overflow-y-auto no-scrollbar self-start z-10 bg-white dark:bg-slate-900 border-t lg:border-t-0 lg:border-l border-slate-200 dark:border-slate-800">
+          <div className="p-3 sm:p-4 space-y-4">
             {/* 1. Sponsored Ad Slider Card (Full height / carousel) */}
             <AdSlot slot="sidebar" />
 
@@ -612,65 +586,6 @@ export default function HomePage() {
         </aside>
       </div>
 
-      {/* 4. MULTIMEDIA VIDEO SECTION (4 Columns) */}
-      {videos.length > 0 && (
-        <section className="bg-slate-900 text-white rounded-none p-4 sm:p-6 space-y-6 shadow-none w-full">
-          <div className="flex items-center justify-between border-b border-slate-800 pb-4">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-red-600 flex items-center justify-center font-black">
-                <Play className="w-4 h-4 fill-white ml-0.5" />
-              </div>
-              <h2 className="text-lg sm:text-xl font-black tracking-tight">
-                {t("videos")} • वीडियो बुलेटिन
-              </h2>
-            </div>
-            <Link
-              href="/videos"
-              className="text-xs font-bold text-red-400 hover:text-white flex items-center gap-1"
-            >
-              <span>{t("viewAll")}</span>
-              <ChevronRight className="w-4 h-4" />
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {videos.map((vid) => (
-              <a
-                key={vid._id}
-                href={vid.videoUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="group rounded-2xl overflow-hidden bg-slate-800/80 border border-slate-700/60 hover:border-red-600 transition-all flex flex-col justify-between"
-              >
-                <div className="relative aspect-video bg-black overflow-hidden">
-                  <img
-                    src={vid.thumbnail || "https://images.unsplash.com/photo-1541185933-ef5d8ed016c2?auto=format&fit=crop&w=600&q=80"}
-                    alt=""
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 opacity-90"
-                  />
-                  <div className="absolute inset-0 bg-black/30 group-hover:bg-black/10 flex items-center justify-center transition-colors">
-                    <div className="w-10 h-10 rounded-full bg-red-600 text-white flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                      <Play className="w-4 h-4 fill-white ml-0.5" />
-                    </div>
-                  </div>
-                  <span className="absolute bottom-2 right-2 px-1.5 py-0.5 rounded bg-black/80 text-[10px] font-mono font-bold">
-                    {vid.duration}
-                  </span>
-                </div>
-                <div className="p-3.5 space-y-1">
-                  <h3 className="text-xs font-bold line-clamp-2 group-hover:text-red-400 transition-colors">
-                    {lang === "hi" && vid.titleHi ? vid.titleHi : vid.title}
-                  </h3>
-                  <span className="text-[10px] text-slate-400 block">
-                    {vid.category?.name || "News"}
-                  </span>
-                </div>
-              </a>
-            ))}
-          </div>
-        </section>
-      )}
-
       {/* 5. FLOATING WHATSAPP CHAT BUTTON (Bottom Right - Exactly as in screenshot) */}
       <a
         href="https://wa.me/919999999999?text=Namaste%20Swar%20Media"
@@ -686,6 +601,14 @@ export default function HomePage() {
           <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766 0-3.187-2.59-5.771-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86s.275.072.376-.043c.101-.116.433-.506.549-.68.116-.173.231-.145.39-.087s1.011.477 1.184.564.289.13.332.202c.045.072.045.419-.099.824zm-3.392-10.416c-4.28 0-7.755 3.475-7.755 7.755 0 1.37.357 2.657.98 3.774l-1.042 3.805 3.902-1.024c1.077.587 2.316.924 3.637.924 4.281 0 7.755-3.475 7.755-7.755 0-4.28-3.474-7.755-7.755-7.755z" />
         </svg>
       </a>
+
+      {/* Mobile Filter Drawer (Opens when user taps mobile "फ़िल्टर" button) */}
+      <FilterDrawer
+        isOpen={mobileFilterOpen}
+        onClose={() => setMobileFilterOpen(false)}
+        onSelectCategory={(slug) => setSelectedTopic(slug)}
+        selectedCategory={selectedTopic}
+      />
     </div>
   );
 }

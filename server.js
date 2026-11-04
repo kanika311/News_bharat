@@ -2,6 +2,14 @@ const express = require("express");
 const next = require("next");
 const dotenv = require("dotenv");
 const http = require("http");
+const dns = require("dns");
+
+// Force IPv4 DNS resolution across Node to prevent IPv6 NAT64 connection drops
+try {
+  if (typeof dns.setDefaultResultOrder === "function") {
+    dns.setDefaultResultOrder("ipv4first");
+  }
+} catch (e) {}
 
 // Load environment variables
 dotenv.config();

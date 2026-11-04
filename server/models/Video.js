@@ -37,6 +37,12 @@ const VideoSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    socialLinks: {
+      facebook: { type: String, default: "" },
+      instagram: { type: String, default: "" },
+      youtube: { type: String, default: "" },
+      telegram: { type: String, default: "" },
+    },
   },
   { timestamps: true }
 );

@@ -1,7 +1,18 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Play, Clock, Eye, Loader2 } from "lucide-react";
+import {
+  Play,
+  Clock,
+  Eye,
+  Loader2,
+  ThumbsUp,
+  MessageSquare,
+  Share2,
+  Send,
+  CheckCircle2,
+  Heart,
+} from "lucide-react";
 import { apiFetch } from "@/lib/api";
 import { useLang } from "@/lib/langContext";
 
@@ -11,20 +22,92 @@ export default function VideosPage() {
   const [loading, setLoading] = useState(true);
   const { lang, t } = useLang();
 
+  // Social interactions for active video
+  const [likesMap, setLikesMap] = useState({});
+  const [userLikedMap, setUserLikedMap] = useState({});
+  const [commentsMap, setCommentsMap] = useState({
+    default: [
+      { id: 1, name: "विकास सिंह", text: "शानदार ग्राउंड रिपोर्टिंग!", time: "1 घंटा पहले" },
+      { id: 2, name: "पूजा शर्मा", text: "सत्य और निष्पक्ष विश्लेषण।", time: "30 मिनट पहले" },
+    ],
+  });
+  const [newComment, setNewComment] = useState("");
+  const [commentAuthor, setCommentAuthor] = useState("");
+  const [showComments, setShowComments] = useState(false);
+  const [shareToast, setShareToast] = useState(false);
+
   useEffect(() => {
     apiFetch("/api/videos?limit=24")
       .then((res) => {
         if (res.success && res.videos) {
           setVideos(res.videos);
-          if (res.videos.length > 0) setActiveVideo(res.videos[0]);
+          if (res.videos.length > 0) {
+            setActiveVideo(res.videos[0]);
+            // Init default likes
+            const initialLikes = {};
+            res.videos.forEach((v, idx) => {
+              initialLikes[v._id] = 24 + idx * 7;
+            });
+            setLikesMap(initialLikes);
+          }
         }
       })
       .catch((e) => console.error(e))
       .finally(() => setLoading(false));
   }, []);
 
+  const handleLike = (vidId) => {
+    const isLiked = userLikedMap[vidId];
+    setUserLikedMap({ ...userLikedMap, [vidId]: !isLiked });
+    setLikesMap({
+      ...likesMap,
+      [vidId]: isLiked ? (likesMap[vidId] || 1) - 1 : (likesMap[vidId] || 0) + 1,
+    });
+  };
+
+  const handleAddComment = (vidId) => {
+    if (!newComment.trim()) return;
+    const author = commentAuthor.trim() || (lang === "hi" ? "दर्शक" : "Viewer");
+    const currentComments = commentsMap[vidId] || commentsMap["default"] || [];
+    const updated = [
+      {
+        id: Date.now(),
+        name: author,
+        text: newComment.trim(),
+        time: lang === "hi" ? "अभी" : "Just now",
+      },
+      ...currentComments,
+    ];
+    setCommentsMap({ ...commentsMap, [vidId]: updated });
+    setNewComment("");
+  };
+
+  const handleShare = (vidTitle) => {
+    const url = window.location.href;
+    if (navigator.share) {
+      navigator.share({ title: vidTitle || "Swar Media Video", url });
+    } else {
+      navigator.clipboard.writeText(url);
+      setShareToast(true);
+      setTimeout(() => setShareToast(false), 2500);
+    }
+  };
+
+  const currentVidComments = activeVideo
+    ? commentsMap[activeVideo._id] || commentsMap["default"]
+    : [];
+
   return (
     <div className="max-w-7xl mx-auto px-4 py-6 space-y-8">
+      {/* Toast Notification */}
+      {shareToast && (
+        <div className="fixed bottom-6 right-6 z-50 bg-slate-900 text-white px-4 py-2.5 rounded-2xl shadow-2xl flex items-center gap-2 text-xs font-bold animate-in fade-in slide-in-from-bottom-2">
+          <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+          <span>वीडियो लिंक कॉपी हो गया! आप इसे शेयर कर सकते हैं।</span>
+        </div>
+      )}
+
+      {/* Header Bar */}
       <div className="flex items-center gap-3 border-b-2 border-red-600 pb-3">
         <div className="w-9 h-9 rounded-xl bg-red-600 text-white flex items-center justify-center">
           <Play className="w-5 h-5 fill-white ml-0.5" />
@@ -41,9 +124,10 @@ export default function VideosPage() {
 
       {/* Featured Active Player */}
       {activeVideo && (
-        <div className="bg-slate-950 rounded-3xl overflow-hidden border border-slate-800 shadow-2xl">
+        <div className="bg-slate-950 rounded-3xl overflow-hidden border border-slate-800 shadow-2xl space-y-0">
           <div className="aspect-video w-full bg-black relative flex items-center justify-center">
-            {activeVideo.videoUrl.startsWith("/uploads/") || activeVideo.videoUrl.match(/\.(mp4|webm|mov)$/i) ? (
+            {activeVideo.videoUrl.startsWith("/uploads/") ||
+            activeVideo.videoUrl.match(/\.(mp4|webm|mov)$/i) ? (
               <video
                 key={activeVideo.videoUrl}
                 src={activeVideo.videoUrl}
@@ -68,18 +152,121 @@ export default function VideosPage() {
               />
             )}
           </div>
-          <div className="p-4 sm:p-6 bg-slate-900 border-t border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div>
-              <span className="px-2 py-0.5 rounded bg-red-600 text-white text-[10px] font-bold uppercase tracking-wider">
-                {activeVideo.category?.name || "Now Playing"}
+
+          {/* Active Video Info & Social Interaction Bar */}
+          <div className="p-4 sm:p-6 bg-slate-900 border-t border-slate-800 space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <span className="px-2 py-0.5 rounded bg-red-600 text-white text-[10px] font-bold uppercase tracking-wider">
+                  {activeVideo.category?.name || "Now Playing"}
+                </span>
+                <h2 className="text-base sm:text-xl font-black text-white mt-1.5">
+                  {lang === "hi" && activeVideo.titleHi ? activeVideo.titleHi : activeVideo.title}
+                </h2>
+              </div>
+              <span className="text-xs font-mono text-slate-400 bg-slate-800 px-3 py-1 rounded-xl shrink-0 self-start sm:self-center">
+                Duration: {activeVideo.duration}
               </span>
-              <h2 className="text-base sm:text-lg font-black text-white mt-1.5">
-                {lang === "hi" && activeVideo.titleHi ? activeVideo.titleHi : activeVideo.title}
-              </h2>
             </div>
-            <span className="text-xs font-mono text-slate-400 bg-slate-800 px-3 py-1 rounded-xl shrink-0">
-              Duration: {activeVideo.duration}
-            </span>
+
+            {/* Social Action Buttons: Like, Comment, Share */}
+            <div className="flex items-center justify-between pt-3 border-t border-slate-800 text-xs">
+              <div className="flex items-center gap-2">
+                {/* Like Button */}
+                <button
+                  type="button"
+                  onClick={() => handleLike(activeVideo._id)}
+                  className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl font-bold transition-transform active:scale-95 ${
+                    userLikedMap[activeVideo._id]
+                      ? "bg-red-600 text-white shadow-lg shadow-red-600/30"
+                      : "bg-slate-800 hover:bg-slate-700 text-slate-200"
+                  }`}
+                >
+                  <ThumbsUp
+                    className={`w-4 h-4 ${
+                      userLikedMap[activeVideo._id] ? "fill-white" : ""
+                    }`}
+                  />
+                  <span>{likesMap[activeVideo._id] || 24} पसंद</span>
+                </button>
+
+                {/* Comment Toggle Button */}
+                <button
+                  type="button"
+                  onClick={() => setShowComments(!showComments)}
+                  className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold transition-colors"
+                >
+                  <MessageSquare className="w-4 h-4" />
+                  <span>{currentVidComments.length} टिप्पणियां</span>
+                </button>
+              </div>
+
+              {/* Share Button */}
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => handleShare(activeVideo.title)}
+                  className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold transition-colors shadow-xs"
+                >
+                  <Share2 className="w-4 h-4" />
+                  <span>शेयर करें</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Comments Section */}
+            {showComments && (
+              <div className="pt-4 border-t border-slate-800 space-y-4 animate-in fade-in">
+                <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider">
+                  दर्शक टिप्पणियां ({currentVidComments.length})
+                </h3>
+
+                {/* Comment Input */}
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <input
+                    type="text"
+                    value={commentAuthor}
+                    onChange={(e) => setCommentAuthor(e.target.value)}
+                    placeholder="आपका नाम (वैकल्पिक)..."
+                    className="sm:w-48 px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-400 focus:outline-none focus:border-red-500"
+                  />
+                  <input
+                    type="text"
+                    value={newComment}
+                    onChange={(e) => setNewComment(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") handleAddComment(activeVideo._id);
+                    }}
+                    placeholder="वीडियो पर अपनी राय या टिप्पणी लिखें..."
+                    className="flex-1 px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-400 focus:outline-none focus:border-red-500"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => handleAddComment(activeVideo._id)}
+                    className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 shrink-0"
+                  >
+                    <Send className="w-3.5 h-3.5" />
+                    <span>भेजें</span>
+                  </button>
+                </div>
+
+                {/* Comments List */}
+                <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
+                  {currentVidComments.map((c) => (
+                    <div
+                      key={c.id}
+                      className="p-3 bg-slate-800/80 rounded-xl border border-slate-700/60 space-y-1 text-xs"
+                    >
+                      <div className="flex items-center justify-between text-slate-400 text-[11px]">
+                        <span className="font-bold text-amber-400">{c.name}</span>
+                        <span>{c.time}</span>
+                      </div>
+                      <p className="text-slate-200">{c.text}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -127,9 +314,13 @@ export default function VideosPage() {
                   <h3 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white line-clamp-2 group-hover:text-red-600 transition-colors">
                     {lang === "hi" && vid.titleHi ? vid.titleHi : vid.title}
                   </h3>
-                  <span className="text-[10px] text-slate-400 block">
-                    {vid.category?.name || "News"}
-                  </span>
+                  <div className="flex items-center justify-between text-[10px] text-slate-400 pt-1">
+                    <span>{vid.category?.name || "News"}</span>
+                    <span className="flex items-center gap-1 text-red-500 font-bold">
+                      <ThumbsUp className="w-3 h-3" />
+                      {likesMap[vid._id] || 24}
+                    </span>
+                  </div>
                 </div>
               </div>
             ))}

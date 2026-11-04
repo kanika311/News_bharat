@@ -22,7 +22,6 @@ export async function GET() {
   // Static core routes
   xml += `  <url>\n    <loc>${baseUrl}</loc>\n    <changefreq>always</changefreq>\n    <priority>1.0</priority>\n  </url>\n`;
   xml += `  <url>\n    <loc>${baseUrl}/videos</loc>\n    <changefreq>hourly</changefreq>\n    <priority>0.8</priority>\n  </url>\n`;
-  xml += `  <url>\n    <loc>${baseUrl}/photos</loc>\n    <changefreq>hourly</changefreq>\n    <priority>0.8</priority>\n  </url>\n`;
 
   // Categories
   categories.forEach((cat) => {

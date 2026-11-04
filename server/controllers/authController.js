@@ -16,7 +16,22 @@ exports.login = async (req, res) => {
       return res.status(400).json({ success: false, message: "Email and password are required." });
     }
 
-    const user = await User.findOne({ email: email.toLowerCase() }).select("+password");
+    const normalizedEmail = (email || "").trim().toLowerCase();
+    
+    // Auto-retry once on transient network glitch
+    let user;
+    try {
+      user = await User.findOne({ email: normalizedEmail }).select("+password");
+    } catch (queryErr) {
+      if (queryErr.name === "MongoNetworkError" || queryErr.message?.includes("closed") || queryErr.message?.includes("ECONNRESET")) {
+        console.warn("[MongoDB] Transient network error during login query. Retrying in 300ms...");
+        await new Promise((r) => setTimeout(r, 300));
+        user = await User.findOne({ email: normalizedEmail }).select("+password");
+      } else {
+        throw queryErr;
+      }
+    }
+
     if (!user) {
       return res.status(401).json({ success: false, message: "Invalid email or password." });
     }
@@ -31,7 +46,7 @@ exports.login = async (req, res) => {
     }
 
     user.lastLogin = new Date();
-    await user.save();
+    await user.save().catch(() => {});
 
     const token = signToken(user._id, user.role);
 
@@ -47,7 +62,7 @@ exports.login = async (req, res) => {
     delete userObject.password;
 
     req.user = userObject;
-    await logActivity(req, "LOGIN", "auth", `User logged in: ${user.email}`);
+    await logActivity(req, "LOGIN", "auth", `User logged in: ${user.email}`).catch(() => {});
 
     return res.json({
       success: true,
@@ -57,7 +72,16 @@ exports.login = async (req, res) => {
     });
   } catch (err) {
     console.error("Login error:", err);
-    return res.status(500).json({ success: false, message: err.message });
+    const isNetworkErr =
+      err.name === "MongoNetworkError" ||
+      err.message?.includes("ECONNRESET") ||
+      err.message?.includes("closed");
+    return res.status(500).json({
+      success: false,
+      message: isNetworkErr
+        ? "डेटाबेस कनेक्शन में अस्थायी समस्या आई। कृपया 2 सेकंड बाद पुनः प्रयास करें।"
+        : err.message,
+    });
   }
 };
 
@@ -87,14 +111,15 @@ exports.register = async (req, res) => {
       return res.status(400).json({ success: false, message: "Password must be at least 6 characters long." });
     }
 
-    const existingUser = await User.findOne({ email: email.toLowerCase() });
+    const normalizedEmail = (email || "").trim().toLowerCase();
+    const existingUser = await User.findOne({ email: normalizedEmail });
     if (existingUser) {
       return res.status(400).json({ success: false, message: "An account with this email already exists." });
     }
 
     const user = await User.create({
-      name,
-      email: email.toLowerCase(),
+      name: (name || "").trim(),
+      email: normalizedEmail,
       password,
       role: "reader",
     });
@@ -122,7 +147,16 @@ exports.register = async (req, res) => {
     });
   } catch (err) {
     console.error("Register error:", err);
-    return res.status(500).json({ success: false, message: err.message });
+    const isNetworkErr =
+      err.name === "MongoNetworkError" ||
+      err.message?.includes("ECONNRESET") ||
+      err.message?.includes("closed");
+    return res.status(500).json({
+      success: false,
+      message: isNetworkErr
+        ? "डेटाबेस कनेक्शन में अस्थायी समस्या आई। कृपया 2 सेकंड बाद पुनः प्रयास करें।"
+        : err.message,
+    });
   }
 };
 
@@ -174,6 +208,37 @@ exports.changePassword = async (req, res) => {
     await logActivity(req, "CHANGE_PASSWORD", "auth", "User changed password");
     return res.json({ success: true, message: "Password updated successfully" });
   } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// PUT /api/auth/profile
+exports.updateProfile = async (req, res) => {
+  try {
+    const { name, district, bio, avatar, phone } = req.body;
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    if (name) user.name = name.trim();
+    if (district !== undefined) user.district = district.trim();
+    if (bio !== undefined) user.bio = bio.trim();
+    if (avatar !== undefined) user.avatar = avatar;
+    if (phone !== undefined) user.phone = phone.trim();
+
+    await user.save();
+    const userObject = user.toObject();
+    delete userObject.password;
+
+    await logActivity(req, "UPDATE_PROFILE", "auth", `User updated profile: ${user.email}`);
+    return res.json({
+      success: true,
+      user: userObject,
+      message: "Profile updated successfully",
+    });
+  } catch (err) {
+    console.error("updateProfile error:", err);
     return res.status(500).json({ success: false, message: err.message });
   }
 };

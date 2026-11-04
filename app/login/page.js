@@ -25,7 +25,7 @@ import { useLang } from "@/lib/langContext";
 function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectUrl = searchParams.get("redirect") || "/";
+  const redirectUrl = searchParams.get("redirect") || "/dashboard";
   const initialMode = searchParams.get("mode") === "register" ? "register" : "login";
 
   const { refreshUser } = useAuth();
@@ -60,7 +60,15 @@ function LoginContent() {
         );
         return;
       }
-      if (confirmPassword && password !== confirmPassword) {
+      if (!confirmPassword) {
+        setError(
+          lang === "hi"
+            ? "कृपया पासवर्ड की दोबारा पुष्टि करें।"
+            : "Please confirm your password."
+        );
+        return;
+      }
+      if (password !== confirmPassword) {
         setError(
           lang === "hi"
             ? "दोनों पासवर्ड मेल नहीं खाते।"
@@ -85,6 +93,12 @@ function LoginContent() {
       });
 
       if (res.success) {
+        if (res.token && typeof window !== "undefined") {
+          try {
+            localStorage.setItem("token", res.token);
+          } catch (e) {}
+        }
+
         setSuccess(
           mode === "login"
             ? (lang === "hi" ? "सफलतापूर्वक लॉगिन हो गए! रीडायरेक्ट हो रहा है..." : "Logged in successfully! Redirecting...")
@@ -104,29 +118,6 @@ function LoginContent() {
       }
     } catch (err) {
       setError(err.message || (lang === "hi" ? "एक त्रुटि हुई। कृपया पुनः प्रयास करें।" : "An error occurred. Please try again."));
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleDemoReaderLogin = async () => {
-    setError("");
-    setLoading(true);
-    try {
-      const res = await apiFetch("/api/auth/login", {
-        method: "POST",
-        body: { email: "editor@bharatvarta.in", password: "Password123!" },
-      });
-      if (res.success) {
-        setSuccess(lang === "hi" ? "डेमो रीडर के रूप में साइन इन हुआ!" : "Signed in as Demo Reader!");
-        if (refreshUser) await refreshUser().catch(() => {});
-        setTimeout(() => {
-          router.push(redirectUrl);
-          router.refresh();
-        }, 700);
-      }
-    } catch (err) {
-      setError(err.message || "Demo login failed");
     } finally {
       setLoading(false);
     }
@@ -330,27 +321,6 @@ function LoginContent() {
               )}
             </button>
           </form>
-
-          {/* Quick Demo Login Option */}
-          <div className="pt-2">
-            <div className="relative flex py-2 items-center">
-              <div className="flex-grow border-t border-slate-200 dark:border-slate-800"></div>
-              <span className="flex-shrink mx-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                {lang === "hi" ? "त्वरित परीक्षण" : "Quick Test"}
-              </span>
-              <div className="flex-grow border-t border-slate-200 dark:border-slate-800"></div>
-            </div>
-
-            <button
-              type="button"
-              onClick={handleDemoReaderLogin}
-              disabled={loading}
-              className="w-full py-2.5 px-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-colors border border-slate-200 dark:border-slate-700"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-              <span>{lang === "hi" ? "1-क्लिक डेमो रीडर साइन इन" : "1-Click Demo Reader Sign In"}</span>
-            </button>
-          </div>
 
           {/* Reader Perks */}
           <div className="pt-3 border-t border-slate-100 dark:border-slate-800 text-[11px] text-slate-500 space-y-1.5">

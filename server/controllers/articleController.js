@@ -46,7 +46,13 @@ exports.getArticles = async (req, res) => {
     }
 
     if (tag) query.tags = tag;
-    if (author) query.author = author;
+    if (author) {
+      if (author === "me" && req.user) {
+        query.author = req.user._id;
+      } else {
+        query.author = author;
+      }
+    }
     if (status) query.status = status;
     if (language) query.language = language;
 
@@ -67,6 +73,7 @@ exports.getArticles = async (req, res) => {
 
     const [articles, total] = await Promise.all([
       Article.find(query)
+        .select("-content -contentHi")
         .populate("category", "name nameHi slug color")
         .populate("subCategory", "name nameHi slug")
         .populate("author", "name email avatar")
@@ -145,6 +152,7 @@ exports.createArticle = async (req, res) => {
       language = "hi",
       content,
       excerpt,
+      location,
       category,
       subCategory,
       tags = [],
@@ -166,13 +174,19 @@ exports.createArticle = async (req, res) => {
       });
     }
 
+    // Citizen journalists & readers can submit news for editorial approval
+    let finalStatus = status;
+    if (["reader", "subscriber"].includes(req.user.role)) {
+      finalStatus = "pending";
+    }
+
     // Unique slug generation
     const uniqueSlug = await makeUniqueSlug(Article, slug || title);
     const readingTime = calculateReadingTime(content);
 
     // Published date determination
     let publishedAt = null;
-    if (status === "published") {
+    if (finalStatus === "published") {
       publishedAt = new Date();
     }
 
@@ -183,14 +197,15 @@ exports.createArticle = async (req, res) => {
       language,
       content,
       excerpt: excerpt || title,
+      location: location || "सुल्तानपुर",
       category,
       subCategory: subCategory || null,
       tags,
       author: req.user._id,
       featuredImage: featuredImage || { url: "", caption: "", alt: title },
       galleryImages,
-      status,
-      scheduledAt: status === "scheduled" && scheduledAt ? new Date(scheduledAt) : null,
+      status: finalStatus,
+      scheduledAt: finalStatus === "scheduled" && scheduledAt ? new Date(scheduledAt) : null,
       publishedAt,
       isBreaking: Boolean(isBreaking),
       isFeatured: Boolean(isFeatured),

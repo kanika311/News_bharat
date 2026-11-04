@@ -1,13 +1,14 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { FileText, Loader2 } from "lucide-react";
 import { apiFetch } from "@/lib/api";
 import { useLang } from "@/lib/langContext";
 
 export default function StaticPageViewer() {
   const params = useParams();
+  const router = useRouter();
   const slug = params?.slug;
   const { lang } = useLang();
 
@@ -16,6 +17,10 @@ export default function StaticPageViewer() {
 
   useEffect(() => {
     if (!slug) return;
+    if (slug === "contact") {
+      router.replace("/");
+      return;
+    }
     apiFetch(`/api/pages/slug/${slug}`)
       .then((res) => {
         if (res.success && res.page) setPage(res.page);

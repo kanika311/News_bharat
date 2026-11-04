@@ -35,6 +35,24 @@ const UserSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    district: {
+      type: String,
+      default: "सुल्तानपुर",
+      trim: true,
+    },
+    phone: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+    credits: {
+      type: Number,
+      default: 0,
+    },
+    isVerifiedJournalist: {
+      type: Boolean,
+      default: true,
+    },
     bio: {
       type: String,
       default: "",

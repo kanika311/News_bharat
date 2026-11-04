@@ -7,11 +7,18 @@ import { Lock, Mail, ArrowRight, ShieldCheck, AlertCircle, Loader2 } from "lucid
 
 export default function AdminLoginPage() {
   const router = useRouter();
-  const { login } = useAuth();
+  const { user, login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+
+  // If already authenticated as staff/admin, redirect to admin dashboard
+  React.useEffect(() => {
+    if (user && ["superadmin", "editor", "reporter", "admin"].includes(user.role)) {
+      router.replace("/swar-media-admin");
+    }
+  }, [user, router]);
 
   const handleSubmit = async (e) => {
     e?.preventDefault();

@@ -33,8 +33,8 @@ export default function AdminDashboardPage() {
 
   const fetchStats = async () => {
     try {
-      const res = await apiFetch("/api/dashboard/stats");
-      if (res.success) {
+      const res = await apiFetch("/api/dashboard/stats", { timeout: 3000 });
+      if (res && res.success) {
         setData(res);
       }
     } catch (err) {
@@ -45,7 +45,9 @@ export default function AdminDashboardPage() {
   };
 
   useEffect(() => {
-    fetchStats();
+    const timer = setTimeout(() => setLoading(false), 1200);
+    fetchStats().finally(() => clearTimeout(timer));
+    return () => clearTimeout(timer);
   }, []);
 
   const handleModerateComment = async (commentId, status) => {

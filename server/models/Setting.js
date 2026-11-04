@@ -26,6 +26,10 @@ const SettingSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    adminName: {
+      type: String,
+      default: "Rajesh Sharma (प्रधान संपादक)",
+    },
     contactEmail: {
       type: String,
       default: "contact@swarmedia.in",

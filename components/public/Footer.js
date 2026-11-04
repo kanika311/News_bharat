@@ -16,6 +16,9 @@ import {
   ChevronRight,
   Loader2,
   CheckCircle,
+  User,
+  Radio,
+  Tv,
 } from "lucide-react";
 import { useLang } from "@/lib/langContext";
 import { apiFetch } from "@/lib/api";
@@ -23,11 +26,20 @@ import { apiFetch } from "@/lib/api";
 export default function Footer() {
   const { lang, t } = useLang();
   const [categories, setCategories] = useState([]);
+  const [settings, setSettings] = useState(null);
   const [email, setEmail] = useState("");
   const [subscribing, setSubscribing] = useState(false);
   const [subMessage, setSubMessage] = useState("");
 
   useEffect(() => {
+    // 1. Fetch live site settings from MongoDB
+    apiFetch("/api/settings")
+      .then((res) => {
+        if (res.success && res.settings) setSettings(res.settings);
+      })
+      .catch(() => {});
+
+    // 2. Fetch categories for footer links
     apiFetch("/api/categories?menuOnly=true")
       .then((res) => {
         if (res.success) setCategories(res.categories || []);
@@ -55,9 +67,25 @@ export default function Footer() {
     }
   };
 
+  const adminName = settings?.adminName || "Rajesh Sharma (प्रधान संपादक)";
+  const contactEmail = settings?.contactEmail || "Swarmedia4554@gmail.com";
+  const contactPhone = settings?.contactPhone || "+91 8181935240";
+  const logoUrl = settings?.logo || "/logo.png";
+  const siteName =
+    lang === "hi"
+      ? settings?.siteNameHi || "स्वर मीडिया"
+      : settings?.siteName || "Swar Media";
+  const tagLine =
+    lang === "hi"
+      ? settings?.tagLineHi || "सत्य, सुर और सरोकार"
+      : settings?.tagLine || "Voice of Truth & Integrity";
+  const footerText = settings?.footerText || "Powered By JCRM Technologies";
+  const footerTextHi = settings?.footerTextHi || "Swarmedia4554@gmail.com";
+  const social = settings?.socialLinks || {};
+
   return (
     <footer className="bg-slate-950 text-slate-300 pt-12 pb-8 border-t border-slate-900 mt-0">
-      <div className="w-full px-3 sm:px-4 space-y-12">
+      <div className="w-full px-4 sm:px-6 lg:px-8 space-y-12">
         {/* Newsletter Banner */}
         <div className="p-8 bg-gradient-to-r from-red-900 via-red-800 to-slate-900 rounded-3xl text-white shadow-xl flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="max-w-xl">
@@ -83,7 +111,7 @@ export default function Footer() {
               <button
                 type="submit"
                 disabled={subscribing}
-                className="px-5 py-2.5 text-xs font-bold text-white bg-red-600 hover:bg-red-700 rounded-xl shrink-0 transition-colors shadow-md disabled:opacity-70"
+                className="px-5 py-2.5 text-xs font-bold text-white bg-red-600 hover:bg-red-700 rounded-xl shrink-0 transition-colors shadow-md disabled:opacity-70 cursor-pointer"
               >
                 {subscribing ? <Loader2 className="w-4 h-4 animate-spin" /> : t("subscribe")}
               </button>
@@ -98,74 +126,103 @@ export default function Footer() {
         </div>
 
         {/* Multi-column Navigation */}
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8 text-xs">
-          {/* Col 1: Brand */}
-          <div className="col-span-2 space-y-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 text-xs">
+          {/* Col 1: Brand & Dynamic Social Channels */}
+          <div className="sm:col-span-2 lg:col-span-1 space-y-4">
             <div className="flex items-center gap-3">
               <img
-                src="/logo.png"
-                alt="Swar Media Logo"
-                className="h-14 sm:h-16 w-auto object-contain drop-shadow-lg"
+                src={logoUrl}
+                alt={siteName}
+                className="h-12 sm:h-14 w-auto object-contain drop-shadow-lg"
               />
             </div>
 
-            <p className="text-slate-400 leading-relaxed text-xs max-w-sm">
-              Swar Media is India's premier bilingual news portal delivering real-time national,
-              international, political, sports, and business reporting with highest editorial
-              standards.
+            <p className="text-red-400 font-black text-xs font-hindi tracking-wide">
+              {tagLine}
             </p>
 
-            <div className="flex items-center gap-2 pt-2">
-              <a
-                href="https://youtube.com"
-                target="_blank"
-                rel="noreferrer"
-                className="w-8 h-8 rounded-full bg-slate-900 hover:bg-red-600 text-slate-300 hover:text-white flex items-center justify-center transition-colors"
-              >
-                <Youtube className="w-4 h-4" />
-              </a>
-              <a
-                href="https://x.com"
-                target="_blank"
-                rel="noreferrer"
-                className="w-8 h-8 rounded-full bg-slate-900 hover:bg-red-600 text-slate-300 hover:text-white flex items-center justify-center transition-colors"
-              >
-                <Twitter className="w-4 h-4" />
-              </a>
-              <a
-                href="https://facebook.com"
-                target="_blank"
-                rel="noreferrer"
-                className="w-8 h-8 rounded-full bg-slate-900 hover:bg-red-600 text-slate-300 hover:text-white flex items-center justify-center transition-colors"
-              >
-                <Facebook className="w-4 h-4" />
-              </a>
-              <a
-                href="https://instagram.com"
-                target="_blank"
-                rel="noreferrer"
-                className="w-8 h-8 rounded-full bg-slate-900 hover:bg-red-600 text-slate-300 hover:text-white flex items-center justify-center transition-colors"
-              >
-                <Instagram className="w-4 h-4" />
-              </a>
-              <a
-                href="https://t.me"
-                target="_blank"
-                rel="noreferrer"
-                className="w-8 h-8 rounded-full bg-slate-900 hover:bg-red-600 text-slate-300 hover:text-white flex items-center justify-center transition-colors"
-              >
-                <Send className="w-4 h-4" />
-              </a>
+            <p className="text-slate-400 leading-relaxed text-xs">
+              स्वर मीडिया निष्पक्ष, विश्वसनीय और ज़मीनी पत्रकारिता का प्रमुख हिंदी एवं द्विभाषी न्यूज़ पोर्टल है।
+            </p>
+
+            {/* Social Icons from Site Settings */}
+            <div className="flex flex-wrap items-center gap-2 pt-2">
+              {social.youtube && (
+                <a
+                  href={social.youtube}
+                  target="_blank"
+                  rel="noreferrer"
+                  title="YouTube"
+                  className="w-8 h-8 rounded-full bg-slate-900 hover:bg-red-600 text-slate-300 hover:text-white flex items-center justify-center transition-colors"
+                >
+                  <Youtube className="w-4 h-4" />
+                </a>
+              )}
+              {social.twitter && (
+                <a
+                  href={social.twitter}
+                  target="_blank"
+                  rel="noreferrer"
+                  title="X (Twitter)"
+                  className="w-8 h-8 rounded-full bg-slate-900 hover:bg-red-600 text-slate-300 hover:text-white flex items-center justify-center transition-colors"
+                >
+                  <Twitter className="w-4 h-4" />
+                </a>
+              )}
+              {social.facebook && (
+                <a
+                  href={social.facebook}
+                  target="_blank"
+                  rel="noreferrer"
+                  title="Facebook"
+                  className="w-8 h-8 rounded-full bg-slate-900 hover:bg-red-600 text-slate-300 hover:text-white flex items-center justify-center transition-colors"
+                >
+                  <Facebook className="w-4 h-4" />
+                </a>
+              )}
+              {social.instagram && (
+                <a
+                  href={social.instagram}
+                  target="_blank"
+                  rel="noreferrer"
+                  title="Instagram"
+                  className="w-8 h-8 rounded-full bg-slate-900 hover:bg-red-600 text-slate-300 hover:text-white flex items-center justify-center transition-colors"
+                >
+                  <Instagram className="w-4 h-4" />
+                </a>
+              )}
+              {social.telegram && (
+                <a
+                  href={social.telegram}
+                  target="_blank"
+                  rel="noreferrer"
+                  title="Telegram"
+                  className="w-8 h-8 rounded-full bg-slate-900 hover:bg-red-600 text-slate-300 hover:text-white flex items-center justify-center transition-colors"
+                >
+                  <Send className="w-4 h-4" />
+                </a>
+              )}
+              {social.whatsapp && (
+                <a
+                  href={social.whatsapp}
+                  target="_blank"
+                  rel="noreferrer"
+                  title="WhatsApp"
+                  className="w-8 h-8 rounded-full bg-slate-900 hover:bg-emerald-600 text-slate-300 hover:text-white flex items-center justify-center transition-colors"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                </a>
+              )}
             </div>
           </div>
 
           {/* Col 2: Categories */}
           <div className="space-y-3">
             <h4 className="text-white font-bold uppercase tracking-wider text-xs border-b border-red-600 pb-1 inline-block">
-              News Desks
+              News Desks (प्रमुख श्रेणियां)
             </h4>
             <ul className="space-y-2 text-slate-400">
-              {categories.slice(0, 5).map((c) => (
+              {categories.slice(0, 6).map((c) => (
                 <li key={c._id}>
                   <Link href={`/${c.slug}`} className="hover:text-red-500 transition-colors">
                     {lang === "hi" ? c.nameHi : c.name}
@@ -175,33 +232,42 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Col 3: More Categories */}
+          {/* Col 3: Special Features */}
           <div className="space-y-3">
             <h4 className="text-white font-bold uppercase tracking-wider text-xs border-b border-red-600 pb-1 inline-block">
-              Special Features
+              Special Features (विशेष)
             </h4>
             <ul className="space-y-2 text-slate-400">
+              <li>
+                <Link href="/live" className="hover:text-red-500 transition-colors flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-red-600 animate-ping shrink-0" />
+                  <span>{lang === "hi" ? "लाइव न्यूज़ प्रसारण" : "Live News"}</span>
+                </Link>
+              </li>
+              <li>
+                <Link href="/epaper" className="hover:text-red-500 transition-colors">
+                  {lang === "hi" ? "दैनिक ई-पेपर संस्करण" : "Daily e-Paper"}
+                </Link>
+              </li>
               <li>
                 <Link href="/videos" className="hover:text-red-500 transition-colors">
                   {t("videos")}
                 </Link>
               </li>
               <li>
-                <Link href="/photos" className="hover:text-red-500 transition-colors">
-                  {t("photos")}
+                <Link href="/live-blogs" className="hover:text-red-500 transition-colors">
+                  {lang === "hi" ? "लाइव ब्लॉग्स" : "Live Blogs"}
                 </Link>
               </li>
-              {categories.slice(5).map((c) => (
-                <li key={c._id}>
-                  <Link href={`/${c.slug}`} className="hover:text-red-500 transition-colors">
-                    {lang === "hi" ? c.nameHi : c.name}
-                  </Link>
-                </li>
-              ))}
+              <li>
+                <Link href="/dashboard" className="hover:text-red-500 transition-colors">
+                  {lang === "hi" ? "नागरिक पत्रकार डैशबोर्ड" : "Citizen Journalist Desk"}
+                </Link>
+              </li>
             </ul>
           </div>
 
-          {/* Col 4: Corporate & Compliance */}
+          {/* Col 4: Corporate & Legal (Contact Us removed) */}
           <div className="space-y-3">
             <h4 className="text-white font-bold uppercase tracking-wider text-xs border-b border-red-600 pb-1 inline-block">
               Corporate & Legal
@@ -210,11 +276,6 @@ export default function Footer() {
               <li>
                 <Link href="/pages/about" className="hover:text-red-500 transition-colors">
                   About Us (हमारे बारे में)
-                </Link>
-              </li>
-              <li>
-                <Link href="/pages/contact" className="hover:text-red-500 transition-colors">
-                  Contact Us (संपर्क करें)
                 </Link>
               </li>
               <li>
@@ -234,11 +295,77 @@ export default function Footer() {
               </li>
             </ul>
           </div>
+
+          {/* Col 5: Editorial & Contact Details (Live from Admin Settings) */}
+          <div className="space-y-3 bg-slate-900/60 p-4 rounded-2xl border border-slate-800/80">
+            <h4 className="text-white font-bold uppercase tracking-wider text-xs border-b border-red-600 pb-1 inline-block">
+              संपादकीय एवं संपर्क
+            </h4>
+            <div className="space-y-3 text-slate-300">
+              {/* Admin / Chief Editor Name */}
+              <div className="space-y-0.5">
+                <span className="text-[10px] text-slate-500 uppercase tracking-wider block font-semibold">
+                  प्रधान संपादक / एडमिन
+                </span>
+                <p className="text-xs font-black text-white flex items-center gap-1.5 font-hindi">
+                  <User className="w-3.5 h-3.5 text-red-500 shrink-0" />
+                  <span>{adminName}</span>
+                </p>
+              </div>
+
+              {/* Email */}
+              <div className="space-y-0.5">
+                <span className="text-[10px] text-slate-500 uppercase tracking-wider block font-semibold">
+                  ईमेल (Email)
+                </span>
+                <a
+                  href={`mailto:${contactEmail}`}
+                  className="flex items-center gap-1.5 text-xs text-slate-200 hover:text-red-400 transition-colors break-all font-medium"
+                >
+                  <Mail className="w-3.5 h-3.5 text-red-500 shrink-0" />
+                  <span>{contactEmail}</span>
+                </a>
+              </div>
+
+              {/* Phone */}
+              <div className="space-y-0.5">
+                <span className="text-[10px] text-slate-500 uppercase tracking-wider block font-semibold">
+                  न्यूज़रूम फ़ोन (Phone)
+                </span>
+                <a
+                  href={`tel:${contactPhone.replace(/\s+/g, "")}`}
+                  className="flex items-center gap-1.5 text-xs text-slate-200 hover:text-red-400 font-bold transition-colors"
+                >
+                  <Phone className="w-3.5 h-3.5 text-red-500 shrink-0" />
+                  <span>{contactPhone}</span>
+                </a>
+              </div>
+
+              {/* WhatsApp Community Direct Link */}
+              {social.whatsapp && (
+                <div className="pt-1">
+                  <a
+                    href={social.whatsapp}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-950/80 text-emerald-400 border border-emerald-800/80 hover:bg-emerald-900 transition-colors text-[11px] font-bold"
+                  >
+                    <MessageCircle className="w-3.5 h-3.5" />
+                    <span>WhatsApp चैनल जुड़ें</span>
+                  </a>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
 
-        {/* Bottom Copyright */}
+        {/* Bottom Copyright (Live from Admin Settings) */}
         <div className="pt-8 border-t border-slate-900 text-[11px] text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p>© 2026 Swar Media Network. All Rights Reserved. • सर्वाधिकार सुरक्षित।</p>
+          <div className="flex flex-col sm:flex-row items-center gap-2 text-center sm:text-left">
+            <p className="font-semibold text-slate-400">{footerText}</p>
+            <span className="hidden sm:inline text-slate-700">•</span>
+            <p className="text-slate-500">{footerTextHi}</p>
+          </div>
           <div className="flex items-center gap-4">
             <Link href="/sitemap.xml" className="hover:underline">
               Sitemap

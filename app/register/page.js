@@ -25,7 +25,7 @@ import { useLang } from "@/lib/langContext";
 function RegisterContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectUrl = searchParams.get("redirect") || "/";
+  const redirectUrl = searchParams.get("redirect") || "/dashboard";
 
   const { refreshUser } = useAuth();
   const { lang } = useLang();
@@ -57,7 +57,15 @@ function RegisterContent() {
       );
       return;
     }
-    if (confirmPassword && password !== confirmPassword) {
+    if (!confirmPassword) {
+      setError(
+        lang === "hi"
+          ? "कृपया पासवर्ड की दोबारा पुष्टि करें।"
+          : "Please confirm your password."
+      );
+      return;
+    }
+    if (password !== confirmPassword) {
       setError(
         lang === "hi"
           ? "दोनों पासवर्ड मेल नहीं खाते।"
@@ -75,6 +83,12 @@ function RegisterContent() {
       });
 
       if (res.success) {
+        if (res.token && typeof window !== "undefined") {
+          try {
+            localStorage.setItem("token", res.token);
+          } catch (e) {}
+        }
+
         setSuccess(
           lang === "hi"
             ? "खाता सफलतापूर्वक बन गया! स्वागत है..."

@@ -11,19 +11,16 @@ import {
   Radio,
   Tv,
   Video,
-  Image,
   Flame,
   Users,
-  MessageSquare,
   BadgeDollarSign,
-  Layers,
   FileCode,
-  FolderArchive,
   Mail,
   Settings,
   History,
   ExternalLink,
   ChevronRight,
+  LogOut,
 } from "lucide-react";
 import { useAuth } from "@/lib/authContext";
 import { CMS_PATH } from "@/lib/cms";
@@ -35,14 +32,10 @@ const navItems = [
   { label: "Breaking Ticker", href: `${CMS_PATH}/ticker`, icon: Radio },
   { label: "Live Broadcast Studio", href: `${CMS_PATH}/live-broadcast`, icon: Tv },
   { label: "Videos", href: `${CMS_PATH}/videos`, icon: Video },
-  { label: "Photo Galleries", href: `${CMS_PATH}/galleries`, icon: Image },
   { label: "Live Blogs", href: `${CMS_PATH}/live-blogs`, icon: Flame },
-  { label: "Comments", href: `${CMS_PATH}/comments`, icon: MessageSquare },
-  { label: "Homepage Manager", href: `${CMS_PATH}/homepage`, icon: Layers, roles: ["superadmin", "editor"] },
+  { label: "Users", href: `${CMS_PATH}/users`, icon: Users },
   { label: "Advertisements", href: `${CMS_PATH}/ads`, icon: BadgeDollarSign, roles: ["superadmin", "editor"] },
   { label: "Static Pages", href: `${CMS_PATH}/pages`, icon: FileCode, roles: ["superadmin", "editor"] },
-  { label: "Media Library", href: `${CMS_PATH}/media`, icon: FolderArchive },
-  { label: "Authors & Roles", href: `${CMS_PATH}/users`, icon: Users, roles: ["superadmin"] },
   { label: "Subscribers", href: `${CMS_PATH}/subscribers`, icon: Mail, roles: ["superadmin", "editor"] },
   { label: "Site Settings", href: `${CMS_PATH}/settings`, icon: Settings, roles: ["superadmin", "editor"] },
   { label: "Activity Logs", href: `${CMS_PATH}/activity`, icon: History, roles: ["superadmin", "editor"] },
@@ -50,7 +43,7 @@ const navItems = [
 
 export default function AdminSidebar({ isOpen, setIsOpen }) {
   const pathname = usePathname();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
 
   const userRole = user?.role || "reporter";
 
@@ -137,7 +130,7 @@ export default function AdminSidebar({ isOpen, setIsOpen }) {
         </div>
 
         {/* Footer actions */}
-        <div className="p-3 border-t border-slate-800">
+        <div className="p-3 border-t border-slate-800 space-y-2">
           <Link
             href="/"
             target="_blank"
@@ -146,6 +139,15 @@ export default function AdminSidebar({ isOpen, setIsOpen }) {
             <ExternalLink className="w-3.5 h-3.5 text-red-400" />
             <span>View Public Website</span>
           </Link>
+
+          <button
+            type="button"
+            onClick={logout}
+            className="flex items-center justify-center gap-2 w-full px-3 py-2 text-xs font-bold text-red-400 hover:text-white bg-red-950/40 hover:bg-red-600 rounded-lg border border-red-900/50 transition-all cursor-pointer shadow-xs"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            <span>लॉगआउट (Log Out)</span>
+          </button>
         </div>
       </aside>
     </>
