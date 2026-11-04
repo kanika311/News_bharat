@@ -361,7 +361,13 @@ export default function CitizenJournalistDashboard() {
   const handleLogout = async () => {
     try {
       await apiFetch("/api/auth/logout", { method: "POST" });
+      if (typeof window !== "undefined") {
+        try {
+          localStorage.removeItem("token");
+        } catch (e) {}
+      }
       router.push("/");
+      router.refresh();
     } catch (e) {
       console.error(e);
     }
