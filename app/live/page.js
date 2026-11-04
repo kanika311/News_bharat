@@ -7,12 +7,8 @@ import {
   Tv,
   Radio,
   Eye,
-  Flame,
-  Volume2,
-  VolumeX,
   Share2,
   Heart,
-  ThumbsUp,
   MessageSquare,
   Sparkles,
   MapPin,
@@ -22,15 +18,7 @@ import {
   Check,
   Send,
   Loader2,
-  AlertCircle,
-  Camera,
-  Video,
-  VideoOff,
-  Mic,
-  MicOff,
-  RefreshCw,
-  Square,
-  Zap,
+  ExternalLink,
 } from "lucide-react";
 import { apiFetch } from "@/lib/api";
 import { useLang } from "@/lib/langContext";
@@ -47,68 +35,45 @@ export default function LiveStreamingNewsPage() {
   const [liveBlogs, setLiveBlogs] = useState([]);
   const [recentVideos, setRecentVideos] = useState([]);
 
-  // In-page 1-Click Camera Broadcast state
-  const [isBroadcasting, setIsBroadcasting] = useState(false);
-  const [cameraActive, setCameraActive] = useState(false);
-  const [micMuted, setMicMuted] = useState(false);
-  const [facingMode, setFacingMode] = useState("user");
-  const [broadcastDuration, setBroadcastDuration] = useState(0);
-  const [cameraError, setCameraError] = useState("");
-  const videoSelfPreviewRef = useRef(null);
-  const mediaStreamRef = useRef(null);
-  const mediaRecorderRef = useRef(null);
-  const timerRef = useRef(null);
-
-  // Live interaction state
-  const [reactions, setReactions] = useState({ heart: 342, fire: 589, clap: 215, shock: 94 });
+  // Live interaction state (Real DB data, default 0)
+  const [reactions, setReactions] = useState({ heart: 0, fire: 0, clap: 0, shock: 0 });
   const [activeReactionAnim, setActiveReactionAnim] = useState([]);
   const [copied, setCopied] = useState(false);
 
-  // Live chat messages
-  const [chatMessages, setChatMessages] = useState([
-    { id: 1, user: "सुरेश वर्मा", text: "संसद से बहुत ही स्पष्ट और सटीक ग्राउंड रिपोर्टिंग!", time: "अभी" },
-    { id: 2, user: "रोहित सिंह", text: "राजेश जी, वित्त मंत्री के संबोधन पर विपक्ष की क्या प्रतिक्रिया है?", time: "1 मिनट पहले" },
-    { id: 3, user: "अंजलि गुप्ता", text: "स्वर मीडिया की सीधी कवरेज हमेशा सबसे पहले होती है।", time: "2 मिनट पहले" },
-  ]);
+  // Live chat messages (Real DB data, default empty)
+  const [chatMessages, setChatMessages] = useState([]);
   const [newChatText, setNewChatText] = useState("");
   const [senderName, setSenderName] = useState("");
+  const [sendingChat, setSendingChat] = useState(false);
+  const chatBottomRef = useRef(null);
 
   const fetchLiveStream = async () => {
     try {
       const res = await apiFetch("/api/live-stream");
       if (res.success && res.liveStream) {
-        setStream(res.liveStream);
+        const s = res.liveStream;
+        setStream(s);
+        if (s.reactions) {
+          setReactions(s.reactions);
+        }
+        if (Array.isArray(s.chatMessages)) {
+          setChatMessages(s.chatMessages);
+        }
       }
     } catch (e) {
-      console.error(e);
+      console.error("fetchLiveStream error:", e);
     } finally {
       setLoading(false);
     }
   };
 
-  // Timer effect when broadcasting
-  useEffect(() => {
-    if (isBroadcasting) {
-      timerRef.current = setInterval(() => {
-        setBroadcastDuration((prev) => prev + 1);
-      }, 1000);
-    } else {
-      if (timerRef.current) clearInterval(timerRef.current);
-      setBroadcastDuration(0);
-    }
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
-  }, [isBroadcasting]);
-
   useEffect(() => {
     fetchLiveStream();
 
-    // Poll live stream status: faster when camera stream is active so new chunks load
-    const intervalTime = stream?.isLive && stream?.streamType === "camera" ? 3500 : 8000;
+    // Poll live stream updates every 5 seconds so viewers get latest broadcast video & comments
     const interval = setInterval(() => {
       fetchLiveStream();
-    }, intervalTime);
+    }, 5000);
 
     // Fetch related live blogs & videos
     apiFetch("/api/live-blogs")
@@ -121,182 +86,67 @@ export default function LiveStreamingNewsPage() {
 
     return () => {
       clearInterval(interval);
-      if (mediaStreamRef.current) {
-        mediaStreamRef.current.getTracks().forEach((t) => t.stop());
-      }
     };
-  }, [stream?.isLive, stream?.streamType]);
+  }, []);
 
-  const formatTimer = (seconds) => {
-    const m = Math.floor(seconds / 60);
-    const s = seconds % 60;
-    return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
-  };
-
-  // Start 1-Click Instant Camera Live (Bina publish kare direct live on site)
-  const handleStartQuickLive = async () => {
-    if (!user) {
-      router.push("/swar-media-admin/login?redirect=/live");
-      return;
-    }
-    try {
-      setCameraError("");
-      if (mediaStreamRef.current) {
-        mediaStreamRef.current.getTracks().forEach((t) => t.stop());
-      }
-
-      const constraints = {
-        video: { facingMode: facingMode, width: { ideal: 1280 }, height: { ideal: 720 } },
-        audio: true,
-      };
-
-      const streamObj = await navigator.mediaDevices.getUserMedia(constraints);
-      mediaStreamRef.current = streamObj;
-      if (videoSelfPreviewRef.current) {
-        videoSelfPreviewRef.current.srcObject = streamObj;
-      }
-      setCameraActive(true);
-      setIsBroadcasting(true);
-
-      // Immediately set live state on server so viewers see it instantly
-      await apiFetch("/api/live-stream", {
-        method: "PUT",
-        body: JSON.stringify({
-          streamType: "camera",
-          isLive: true,
-          title: stream?.title || "लाइव ग्राउंड कवरेज",
-          titleHi: stream?.titleHi || "लाइव ग्राउंड कवरेज (सीधा प्रसारण)",
-          reporterName: user?.name || stream?.reporterName || "वरिष्ठ संवाददाता",
-          reporterLocation: stream?.reporterLocation || "ग्राउंड जीरो",
-          breakingHeadline: stream?.breakingHeadline || "बड़ी खबर: स्वर मीडिया रिपोर्टर सीधे ग्राउंड जीरो से लाइव",
-        }),
-      });
-
-      // Stream chunks every 3s
-      let recordedChunks = [];
-      const options = { mimeType: "video/webm;codecs=vp8,opus" };
-      let recorder;
-      try {
-        recorder = new MediaRecorder(streamObj, options);
-      } catch (e) {
-        recorder = new MediaRecorder(streamObj);
-      }
-
-      mediaRecorderRef.current = recorder;
-
-      recorder.ondataavailable = async (e) => {
-        if (e.data && e.data.size > 0) {
-          recordedChunks.push(e.data);
-          const blob = new Blob(recordedChunks, { type: "video/webm" });
-          const formData = new FormData();
-          formData.append("video", blob, `live_${Date.now()}.webm`);
-
-          try {
-            const headers = {};
-            if (typeof window !== "undefined") {
-              const token = localStorage.getItem("token");
-              if (token) headers["Authorization"] = `Bearer ${token}`;
-            }
-            await fetch("/api/live-stream/upload-chunk", {
-              method: "POST",
-              headers,
-              credentials: "include",
-              body: formData,
-            });
-          } catch (uploadErr) {
-            console.error("Chunk upload error:", uploadErr);
-          }
-        }
-      };
-
-      recorder.start(3000);
-      fetchLiveStream();
-    } catch (err) {
-      console.error("Camera access error:", err);
-      setCameraError("कैमरा या माइक्रोफोन की परमिशन नहीं मिली। कृपया ब्राउज़र सेटिंग्स में अनुमति दें।");
-      setIsBroadcasting(false);
-      setCameraActive(false);
-    }
-  };
-
-  // Stop Instant Camera Live
-  const handleStopQuickLive = async () => {
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
-      mediaRecorderRef.current.stop();
-    }
-    if (mediaStreamRef.current) {
-      mediaStreamRef.current.getTracks().forEach((t) => t.stop());
-      mediaStreamRef.current = null;
-    }
-    if (videoSelfPreviewRef.current) {
-      videoSelfPreviewRef.current.srcObject = null;
-    }
-    setCameraActive(false);
-    setIsBroadcasting(false);
-
-    try {
-      await apiFetch("/api/live-stream", {
-        method: "PUT",
-        body: JSON.stringify({ isLive: false }),
-      });
-      fetchLiveStream();
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
-  const toggleMic = () => {
-    if (mediaStreamRef.current) {
-      const audioTracks = mediaStreamRef.current.getAudioTracks();
-      audioTracks.forEach((t) => (t.enabled = !t.enabled));
-      setMicMuted(!micMuted);
-    }
-  };
-
-  const switchCamera = async () => {
-    const newMode = facingMode === "user" ? "environment" : "user";
-    setFacingMode(newMode);
-    if (isBroadcasting) {
-      try {
-        if (mediaStreamRef.current) {
-          mediaStreamRef.current.getTracks().forEach((t) => t.stop());
-        }
-        const streamObj = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: newMode, width: { ideal: 1280 }, height: { ideal: 720 } },
-          audio: true,
-        });
-        mediaStreamRef.current = streamObj;
-        if (videoSelfPreviewRef.current) {
-          videoSelfPreviewRef.current.srcObject = streamObj;
-        }
-      } catch (e) {
-        console.error(e);
-      }
-    }
-  };
-
-  const triggerReaction = (type, emoji) => {
-    setReactions((prev) => ({ ...prev, [type]: prev[type] + 1 }));
+  const triggerReaction = async (type, emoji) => {
+    // Optimistic UI increment
+    setReactions((prev) => ({ ...prev, [type]: (prev[type] || 0) + 1 }));
     const id = Date.now() + Math.random();
     setActiveReactionAnim((prev) => [...prev, { id, emoji, x: Math.random() * 80 + 10 }]);
     setTimeout(() => {
       setActiveReactionAnim((prev) => prev.filter((item) => item.id !== id));
     }, 1800);
+
+    try {
+      const res = await apiFetch("/api/live-stream/reaction", {
+        method: "POST",
+        body: JSON.stringify({ type }),
+      });
+      if (res.success && res.reactions) {
+        setReactions(res.reactions);
+      }
+    } catch (err) {
+      console.error("Reaction error:", err);
+    }
   };
 
-  const handleSendChat = (e) => {
+  const handleSendChat = async (e) => {
     e.preventDefault();
-    if (!newChatText.trim()) return;
+    if (!newChatText.trim() || sendingChat) return;
 
-    const user = senderName.trim() || (lang === "hi" ? "दर्शक" : "Viewer");
-    const msg = {
-      id: Date.now(),
-      user,
-      text: newChatText.trim(),
-      time: lang === "hi" ? "अभी" : "Just now",
-    };
-    setChatMessages((prev) => [msg, ...prev]);
+    const currentText = newChatText.trim();
+    const currentSender = user?.name || senderName.trim() || (lang === "hi" ? "दर्शक" : "Viewer");
+
+    setSendingChat(true);
     setNewChatText("");
+
+    // Optimistic message append
+    const tempMsg = {
+      _id: `temp_${Date.now()}`,
+      user: currentSender,
+      text: currentText,
+      time: new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" }),
+      createdAt: new Date(),
+    };
+    setChatMessages((prev) => [...prev, tempMsg]);
+
+    try {
+      const res = await apiFetch("/api/live-stream/chat", {
+        method: "POST",
+        body: JSON.stringify({ text: currentText, user: currentSender }),
+      });
+      if (res.success && Array.isArray(res.chatMessages)) {
+        setChatMessages(res.chatMessages);
+      }
+    } catch (err) {
+      console.error("Send chat error:", err);
+    } finally {
+      setSendingChat(false);
+      if (chatBottomRef.current) {
+        chatBottomRef.current.scrollIntoView({ behavior: "smooth" });
+      }
+    }
   };
 
   const handleShare = () => {
@@ -362,39 +212,33 @@ export default function LiveStreamingNewsPage() {
           </div>
 
           <div className="flex items-center gap-2 self-end sm:self-auto">
-            {/* Quick 1-Click Camera Go Live Button */}
-            {isBroadcasting ? (
-              <button
-                onClick={handleStopQuickLive}
-                className="flex items-center gap-1.5 px-3.5 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-black shadow-md shadow-rose-600/30 transition-all hover:scale-105 animate-pulse cursor-pointer"
+            {/* If user is an Admin/Reporter, give direct link to live broadcast studio */}
+            {canBroadcast && (
+              <Link
+                href="/swar-media-admin/live-broadcast"
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-700 rounded-xl text-xs font-bold transition-all shadow-xs"
+                title="एडमिन लाइव ब्रॉडकास्ट स्टूडियो"
               >
-                <Square className="w-3.5 h-3.5 fill-white" />
-                <span>लाइव बंद करें ({formatTimer(broadcastDuration)})</span>
-              </button>
-            ) : (
-              <button
-                onClick={handleStartQuickLive}
-                className="flex items-center gap-1.5 px-3.5 py-1.5 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white rounded-xl text-xs font-black shadow-md shadow-red-600/30 transition-all hover:scale-105 cursor-pointer"
-                title="बिना फॉर्म भरे सीधे कैमरा से लाइव जाएं"
-              >
-                <Camera className="w-3.5 h-3.5" />
-                <span>{user ? "कैमरा से तुरंत लाइव जाएं" : "कैमरा लाइव (Go Live)"}</span>
-              </button>
+                <Radio className="w-3.5 h-3.5 text-red-500 animate-pulse" />
+                <span>{lang === "hi" ? "एडमिन स्टूडियो" : "Admin Studio"}</span>
+              </Link>
             )}
 
-            {/* Viewers Counter */}
+            {/* Real Viewers Counter */}
             <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-800 dark:text-slate-200">
               <Eye className="w-4 h-4 text-red-500 animate-pulse" />
               <span>
-                {stream?.viewers ? Number(stream.viewers).toLocaleString("en-IN") : "1,420"}{" "}
-                <span className="text-slate-500 dark:text-slate-400 font-normal">{lang === "hi" ? "लाइव दर्शक" : "Watching"}</span>
+                {Number(stream?.viewers || 0).toLocaleString("en-IN")}{" "}
+                <span className="text-slate-500 dark:text-slate-400 font-normal">
+                  {lang === "hi" ? "लाइव दर्शक" : "Watching"}
+                </span>
               </span>
             </div>
 
             {/* Share */}
             <button
               onClick={handleShare}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white rounded-xl text-xs font-bold transition-all shadow-xs"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer"
             >
               {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Share2 className="w-3.5 h-3.5" />}
               <span>{copied ? (lang === "hi" ? "लिंक कॉपी!" : "Copied!") : (lang === "hi" ? "शेयर" : "Share")}</span>
@@ -402,18 +246,9 @@ export default function LiveStreamingNewsPage() {
           </div>
         </div>
 
-        {cameraError && (
-          <div className="p-3 bg-red-950/80 border border-red-800 rounded-2xl text-xs text-red-300 flex items-center justify-between gap-2">
-            <span>{cameraError}</span>
-            <button onClick={() => setCameraError("")} className="text-red-400 font-bold hover:underline">
-              Dismiss
-            </button>
-          </div>
-        )}
-
         {/* Main Broadcast Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left 2 Cols: Main Video Screen */}
+          {/* Left 2 Cols: Main Video Screen (Viewer Mode) */}
           <div className="lg:col-span-2 space-y-4">
             <div className="relative aspect-video w-full bg-black rounded-3xl overflow-hidden border border-slate-800 shadow-2xl flex items-center justify-center">
               {/* Floating Reaction Animation Emojis */}
@@ -429,59 +264,8 @@ export default function LiveStreamingNewsPage() {
                 ))}
               </div>
 
-              {/* VIDEO STREAM CONTAINER */}
-              {isBroadcasting ? (
-                /* LIVE SELF-BROADCASTING VIEWPORT */
-                <div className="relative w-full h-full bg-black">
-                  <video
-                    ref={videoSelfPreviewRef}
-                    autoPlay
-                    playsInline
-                    muted
-                    className="w-full h-full object-cover"
-                  />
-                  {/* Floating Live Indicator */}
-                  <div className="absolute top-4 left-4 z-20 flex items-center gap-2">
-                    <span className="px-2.5 py-1 bg-red-600 text-white font-black text-xs rounded-lg uppercase tracking-wider flex items-center gap-1.5 shadow-lg animate-pulse">
-                      <span className="w-2 h-2 rounded-full bg-white" />
-                      YOU ARE LIVE ON SITE
-                    </span>
-                    <span className="px-2 py-0.5 bg-black/70 backdrop-blur-md text-red-400 font-mono text-xs font-bold rounded border border-red-500/30">
-                      REC {formatTimer(broadcastDuration)}
-                    </span>
-                  </div>
-
-                  {/* Hardware Controls */}
-                  <div className="absolute bottom-14 right-4 z-30 flex items-center gap-2 bg-black/80 backdrop-blur-md p-2 rounded-2xl border border-white/10 shadow-xl">
-                    <button
-                      type="button"
-                      onClick={toggleMic}
-                      className={`p-2 rounded-xl text-xs font-bold transition-colors ${
-                        micMuted ? "bg-rose-900/80 text-rose-300" : "bg-slate-800 text-white hover:bg-slate-700"
-                      }`}
-                      title={micMuted ? "Unmute Mic" : "Mute Mic"}
-                    >
-                      {micMuted ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={switchCamera}
-                      className="p-2 rounded-xl text-xs font-bold bg-slate-800 text-white hover:bg-slate-700 transition-colors"
-                      title="Flip Camera (Front/Back)"
-                    >
-                      <RefreshCw className="w-4 h-4" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleStopQuickLive}
-                      className="px-3.5 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow cursor-pointer"
-                    >
-                      <Square className="w-3.5 h-3.5 fill-white" />
-                      <span>Stop Live</span>
-                    </button>
-                  </div>
-                </div>
-              ) : isLive ? (
+              {/* VIDEO PLAYER VIEWPORT */}
+              {isLive ? (
                 isCameraStream ? (
                   stream?.cameraVideoUrl ? (
                     <video
@@ -494,7 +278,7 @@ export default function LiveStreamingNewsPage() {
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    /* Journalist Camera Standby / Live Broadcast active */
+                    /* Journalist Camera Standby / Live sync */
                     <div className="w-full h-full bg-radial from-slate-900 to-black flex flex-col items-center justify-center p-6 text-center space-y-4">
                       <div className="relative">
                         <div className="w-20 h-20 rounded-full bg-red-600/20 border-2 border-red-500 flex items-center justify-center animate-ping" />
@@ -510,16 +294,8 @@ export default function LiveStreamingNewsPage() {
                           {stream?.reporterName || "वरिष्ठ संवाददाता"}
                         </h3>
                         <p className="text-xs text-slate-400 max-w-md">
-                          {stream?.reporterLocation || "ग्राउंड जीरो"} से लाइव कैमरा व ऑडियो सिंक हो रहा है।
+                          {stream?.reporterLocation || "ग्राउंड जीरो"} से लाइव कैमरा व ऑडियो स्ट्रीम हो रहा है।
                         </p>
-                        <button
-                          type="button"
-                          onClick={handleStartQuickLive}
-                          className="mt-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-bold inline-flex items-center gap-1.5 shadow-lg transition-transform hover:scale-105 cursor-pointer"
-                        >
-                          <Camera className="w-4 h-4" />
-                          <span>अपना कैमरा जोड़ें और लाइव हों</span>
-                        </button>
                       </div>
                     </div>
                   )
@@ -543,14 +319,7 @@ export default function LiveStreamingNewsPage() {
                   <div className="text-center p-8 space-y-3">
                     <Radio className="w-12 h-12 text-slate-600 mx-auto" />
                     <p className="text-sm font-bold text-slate-400">स्ट्रीम यूआरएल सेट नहीं है</p>
-                    <button
-                      type="button"
-                      onClick={handleStartQuickLive}
-                      className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-bold inline-flex items-center gap-1.5 cursor-pointer"
-                    >
-                      <Camera className="w-4 h-4" />
-                      <span>कैमरा से तुरंत लाइव शुरू करें</span>
-                    </button>
+                    <p className="text-xs text-slate-500">एडमिन स्टूडियो से प्रसारण शुरू होने का इंतज़ार करें।</p>
                   </div>
                 )
               ) : (
@@ -561,14 +330,6 @@ export default function LiveStreamingNewsPage() {
                   <p className="text-xs text-slate-400 max-w-md">
                     संवाददाता का अगला लाइव बुलेटिन जल्द प्रसारित होगा।
                   </p>
-                  <button
-                    type="button"
-                    onClick={handleStartQuickLive}
-                    className="mt-2 px-5 py-2.5 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white rounded-xl text-xs font-black flex items-center gap-2 shadow-lg shadow-red-600/30 transition-all hover:scale-105 cursor-pointer"
-                  >
-                    <Camera className="w-4 h-4" />
-                    <span>कैमरा चालू करें और तुरंत साइट पर लाइव हों</span>
-                  </button>
                 </div>
               )}
 
@@ -610,7 +371,7 @@ export default function LiveStreamingNewsPage() {
               </div>
             </div>
 
-            {/* Broadcast Details & Quick Reactions */}
+            {/* Broadcast Details & Real Reactions */}
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 rounded-3xl shadow-xs space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="space-y-1">
@@ -633,37 +394,40 @@ export default function LiveStreamingNewsPage() {
                   </div>
                 </div>
 
-                {/* Reaction Buttons */}
+                {/* Real Reaction Buttons */}
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => triggerReaction("fire", "🔥")}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-xl text-xs font-bold text-amber-600 dark:text-amber-400 border border-slate-200 dark:border-slate-700 transition-all hover:scale-105"
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-xl text-xs font-bold text-amber-600 dark:text-amber-400 border border-slate-200 dark:border-slate-700 transition-all hover:scale-105 cursor-pointer"
+                    title="आग / फायर"
                   >
                     <span>🔥</span>
-                    <span>{reactions.fire}</span>
+                    <span>{reactions.fire || 0}</span>
                   </button>
 
                   <button
                     onClick={() => triggerReaction("heart", "❤️")}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-xl text-xs font-bold text-rose-600 dark:text-rose-400 border border-slate-200 dark:border-slate-700 transition-all hover:scale-105"
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-xl text-xs font-bold text-rose-600 dark:text-rose-400 border border-slate-200 dark:border-slate-700 transition-all hover:scale-105 cursor-pointer"
+                    title="पसंद / लाइक"
                   >
                     <span>❤️</span>
-                    <span>{reactions.heart}</span>
+                    <span>{reactions.heart || 0}</span>
                   </button>
 
                   <button
                     onClick={() => triggerReaction("clap", "👏")}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-xl text-xs font-bold text-emerald-600 dark:text-emerald-400 border border-slate-200 dark:border-slate-700 transition-all hover:scale-105"
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-xl text-xs font-bold text-emerald-600 dark:text-emerald-400 border border-slate-200 dark:border-slate-700 transition-all hover:scale-105 cursor-pointer"
+                    title="सराहना / ताली"
                   >
                     <span>👏</span>
-                    <span>{reactions.clap}</span>
+                    <span>{reactions.clap || 0}</span>
                   </button>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Right Col: Live Chat & Viewer Q&A */}
+          {/* Right Col: Real Live Chat & Viewer Q&A */}
           <div className="flex flex-col bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden shadow-xs h-[560px]">
             {/* Chat Header */}
             <div className="p-4 bg-slate-50 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-700/60 flex items-center justify-between">
@@ -677,27 +441,54 @@ export default function LiveStreamingNewsPage() {
             </div>
 
             {/* Chat Messages List */}
-            <div className="flex-1 p-4 overflow-y-auto space-y-3 scroll-smooth">
-              {chatMessages.map((msg) => (
-                <div key={msg.id} className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/40 space-y-1">
-                  <div className="flex items-center justify-between text-[11px]">
-                    <span className="font-bold text-amber-600 dark:text-amber-400">{msg.user}</span>
-                    <span className="text-slate-400">{msg.time}</span>
-                  </div>
-                  <p className="text-xs text-slate-700 dark:text-slate-200 leading-relaxed">{msg.text}</p>
+            {chatMessages.length === 0 ? (
+              <div className="flex-1 flex flex-col items-center justify-center p-6 text-center text-slate-400">
+                <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-3">
+                  <MessageSquare className="w-6 h-6 text-slate-400 dark:text-slate-500" />
                 </div>
-              ))}
-            </div>
+                <p className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                  {lang === "hi" ? "अभी तक कोई टिप्पणी नहीं है" : "No live comments yet"}
+                </p>
+                <p className="text-[11px] text-slate-400 mt-1 max-w-[200px]">
+                  {lang === "hi"
+                    ? "नीचे अपनी राय लिखें या रिपोर्टर से सवाल पूछें।"
+                    : "Be the first to share your thoughts or ask a question."}
+                </p>
+              </div>
+            ) : (
+              <div className="flex-1 p-4 overflow-y-auto space-y-3 scroll-smooth">
+                {chatMessages.map((msg, idx) => (
+                  <div
+                    key={msg._id || msg.id || idx}
+                    className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/40 space-y-1"
+                  >
+                    <div className="flex items-center justify-between text-[11px]">
+                      <span className="font-bold text-amber-600 dark:text-amber-400">{msg.user}</span>
+                      <span className="text-slate-400">{msg.time || "अभी"}</span>
+                    </div>
+                    <p className="text-xs text-slate-700 dark:text-slate-200 leading-relaxed">{msg.text}</p>
+                  </div>
+                ))}
+                <div ref={chatBottomRef} />
+              </div>
+            )}
 
-            {/* Chat Input */}
+            {/* Real Chat Input */}
             <form onSubmit={handleSendChat} className="p-3 bg-slate-50 dark:bg-slate-800/90 border-t border-slate-200 dark:border-slate-700/60 space-y-2">
-              <input
-                type="text"
-                placeholder={lang === "hi" ? "आपका नाम (वैकल्पिक)..." : "Your name (optional)..."}
-                value={senderName}
-                onChange={(e) => setSenderName(e.target.value)}
-                className="w-full px-3 py-1.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-red-500"
-              />
+              {user?.name ? (
+                <div className="flex items-center gap-1.5 px-2 py-1 bg-slate-200/60 dark:bg-slate-700/60 rounded-md text-[11px] text-slate-600 dark:text-slate-300">
+                  <User className="w-3 h-3 text-red-500" />
+                  <span>{user.name}</span>
+                </div>
+              ) : (
+                <input
+                  type="text"
+                  placeholder={lang === "hi" ? "आपका नाम (वैकल्पिक)..." : "Your name (optional)..."}
+                  value={senderName}
+                  onChange={(e) => setSenderName(e.target.value)}
+                  className="w-full px-3 py-1.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-red-500"
+                />
+              )}
               <div className="flex items-center gap-2">
                 <input
                   type="text"
@@ -708,7 +499,8 @@ export default function LiveStreamingNewsPage() {
                 />
                 <button
                   type="submit"
-                  className="p-2 bg-red-600 hover:bg-red-700 text-white rounded-xl transition-colors shrink-0 shadow-sm"
+                  disabled={sendingChat || !newChatText.trim()}
+                  className="p-2 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white rounded-xl transition-colors shrink-0 shadow-sm cursor-pointer"
                 >
                   <Send className="w-4 h-4" />
                 </button>

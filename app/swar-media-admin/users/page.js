@@ -70,6 +70,7 @@ export default function UsersManagementPage() {
 
   // Confirm Delete Modal State
   const [confirmModal, setConfirmModal] = useState({ isOpen: false, id: null, name: "" });
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   // Load Users from Backend with enriched posts & comments stats
   const loadUsers = async () => {
@@ -293,12 +294,19 @@ export default function UsersManagementPage() {
 
   // Confirm Delete
   const confirmDelete = async () => {
+    if (!confirmModal.id || deleteLoading) return;
+    setDeleteLoading(true);
     try {
-      await apiFetch(`/api/users/${confirmModal.id}`, { method: "DELETE" });
+      await apiFetch(`/api/users/${confirmModal.id}`, {
+        method: "DELETE",
+        timeout: 25000,
+      });
       setConfirmModal({ isOpen: false, id: null, name: "" });
-      loadUsers();
+      await loadUsers();
     } catch (e) {
-      alert("खाता हटाने में त्रुटि: " + e.message);
+      alert("खाता हटाने में त्रुटि: " + (e.message || "कुछ गलत हुआ"));
+    } finally {
+      setDeleteLoading(false);
     }
   };
 
@@ -1258,6 +1266,7 @@ export default function UsersManagementPage() {
         isOpen={confirmModal.isOpen}
         title="यूज़र खाता हटाएं?"
         message={`क्या आप सुनिश्चित हैं कि आप ${confirmModal.name || "इस यूज़र"} का खाता स्थायी रूप से हटाना चाहते हैं? यह कार्यवाही वापस नहीं ली जा सकती।`}
+        loading={deleteLoading}
         onConfirm={confirmDelete}
         onClose={() => setConfirmModal({ isOpen: false, id: null, name: "" })}
       />

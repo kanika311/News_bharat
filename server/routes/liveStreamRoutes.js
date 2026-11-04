@@ -7,6 +7,10 @@ const { requireAuth, checkRole } = require("../middleware/auth");
 // Public route to get live stream info
 router.get("/", liveStreamController.getLiveStream);
 
+// Public route to post viewer live chat message & reaction
+router.post("/chat", liveStreamController.addChatMessage);
+router.post("/reaction", liveStreamController.addReaction);
+
 // Protected routes to update live stream & upload broadcast
 router.put(
   "/",

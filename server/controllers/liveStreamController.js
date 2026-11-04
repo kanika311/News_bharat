@@ -15,7 +15,9 @@ const getOrCreateLiveStream = async () => {
       streamUrl: "https://www.youtube.com/watch?v=live_stream",
       cameraVideoUrl: "",
       isLive: true,
-      viewers: 1540,
+      viewers: 0,
+      reactions: { heart: 0, fire: 0, clap: 0, shock: 0 },
+      chatMessages: [],
       breakingHeadline: "बड़ी खबर: स्वर मीडिया रिपोर्टर सीधे ग्राउंड जीरो से लाइव",
     });
   }
@@ -26,6 +28,12 @@ const getOrCreateLiveStream = async () => {
 exports.getLiveStream = async (req, res) => {
   try {
     const stream = await getOrCreateLiveStream();
+    if (!stream.reactions) {
+      stream.reactions = { heart: 0, fire: 0, clap: 0, shock: 0 };
+    }
+    if (!stream.chatMessages) {
+      stream.chatMessages = [];
+    }
     res.json({ success: true, liveStream: stream });
   } catch (error) {
     console.error("getLiveStream error:", error);
@@ -103,6 +111,76 @@ exports.uploadCameraBroadcast = async (req, res) => {
     });
   } catch (error) {
     console.error("uploadCameraBroadcast error:", error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// POST /api/live-stream/chat
+// Real viewer live comment
+exports.addChatMessage = async (req, res) => {
+  try {
+    const { text, user } = req.body;
+    if (!text || !text.trim()) {
+      return res.status(400).json({ success: false, message: "टिप्पणी खाली नहीं हो सकती" });
+    }
+
+    const stream = await getOrCreateLiveStream();
+    const sender = (user && user.trim()) || (req.user && req.user.name) || "दर्शक";
+
+    const newComment = {
+      user: sender,
+      text: text.trim(),
+      time: new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" }),
+      createdAt: new Date(),
+    };
+
+    if (!Array.isArray(stream.chatMessages)) {
+      stream.chatMessages = [];
+    }
+
+    stream.chatMessages.push(newComment);
+    if (stream.chatMessages.length > 100) {
+      stream.chatMessages = stream.chatMessages.slice(-100);
+    }
+
+    await stream.save();
+
+    res.json({
+      success: true,
+      message: "टिप्पणी दर्ज की गई",
+      chatMessage: newComment,
+      chatMessages: stream.chatMessages,
+    });
+  } catch (error) {
+    console.error("addChatMessage error:", error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// POST /api/live-stream/reaction
+// Real viewer live reaction
+exports.addReaction = async (req, res) => {
+  try {
+    const { type } = req.body;
+    const validTypes = ["heart", "fire", "clap", "shock"];
+    if (!validTypes.includes(type)) {
+      return res.status(400).json({ success: false, message: "अमान्य रिएक्शन प्रकार" });
+    }
+
+    const stream = await getOrCreateLiveStream();
+    if (!stream.reactions) {
+      stream.reactions = { heart: 0, fire: 0, clap: 0, shock: 0 };
+    }
+
+    stream.reactions[type] = (stream.reactions[type] || 0) + 1;
+    await stream.save();
+
+    res.json({
+      success: true,
+      reactions: stream.reactions,
+    });
+  } catch (error) {
+    console.error("addReaction error:", error);
     res.status(500).json({ success: false, message: error.message });
   }
 };

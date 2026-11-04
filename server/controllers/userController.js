@@ -230,16 +230,32 @@ exports.updateUser = async (req, res) => {
 // DELETE /api/users/:id
 exports.deleteUser = async (req, res) => {
   try {
-    if (req.user && req.user._id.toString() === req.params.id) {
+    if (req.user && req.user._id && req.user._id.toString() === req.params.id) {
       return res.status(400).json({ success: false, message: "You cannot delete your own logged-in account." });
     }
 
-    const user = await User.findByIdAndDelete(req.params.id);
+    let user;
+    try {
+      user = await User.findByIdAndDelete(req.params.id);
+    } catch (queryErr) {
+      if (
+        queryErr.name === "MongoNetworkError" ||
+        queryErr.message?.includes("closed") ||
+        queryErr.message?.includes("ECONNRESET")
+      ) {
+        console.warn("[MongoDB] Transient network error during user delete. Retrying in 300ms...");
+        await new Promise((r) => setTimeout(r, 300));
+        user = await User.findByIdAndDelete(req.params.id);
+      } else {
+        throw queryErr;
+      }
+    }
+
     if (!user) {
       return res.status(404).json({ success: false, message: "User not found" });
     }
 
-    await logActivity(req, "DELETE_USER", "user", `Deleted user account: ${user.name} (${user.email})`);
+    await logActivity(req, "DELETE_USER", "user", `Deleted user account: ${user.name} (${user.email})`).catch(() => {});
     return res.json({ success: true, message: "User account deleted successfully" });
   } catch (err) {
     console.error("deleteUser error:", err);

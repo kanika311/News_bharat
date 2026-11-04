@@ -37,8 +37,22 @@ const LiveStreamSchema = new mongoose.Schema(
     },
     viewers: {
       type: Number,
-      default: 1420,
+      default: 0,
     },
+    reactions: {
+      heart: { type: Number, default: 0 },
+      fire: { type: Number, default: 0 },
+      clap: { type: Number, default: 0 },
+      shock: { type: Number, default: 0 },
+    },
+    chatMessages: [
+      {
+        user: { type: String, default: "दर्शक" },
+        text: { type: String, required: true },
+        time: { type: String },
+        createdAt: { type: Date, default: Date.now },
+      },
+    ],
     breakingHeadline: {
       type: String,
       default: "बड़ी खबर: स्वर मीडिया ग्राउंड रिपोर्टर सीधे ग्राउंड जीरो से लाइव",
@@ -51,5 +65,7 @@ const LiveStreamSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports =
-  mongoose.models.LiveStream || mongoose.model("LiveStream", LiveStreamSchema);
+if (mongoose.models.LiveStream) {
+  delete mongoose.models.LiveStream;
+}
+module.exports = mongoose.model("LiveStream", LiveStreamSchema);

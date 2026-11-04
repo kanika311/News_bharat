@@ -54,7 +54,7 @@ export default function AdminLiveBroadcastStudioPage() {
   const [reporterLocation, setReporterLocation] = useState("");
   const [streamUrl, setStreamUrl] = useState("");
   const [breakingHeadline, setBreakingHeadline] = useState("");
-  const [viewers, setViewers] = useState(1540);
+  const [viewers, setViewers] = useState(0);
   const [isOnAir, setIsOnAir] = useState(true);
 
   // Load stream state from server
@@ -70,7 +70,7 @@ export default function AdminLiveBroadcastStudioPage() {
         setReporterLocation(s.reporterLocation || "");
         setStreamUrl(s.streamUrl || "");
         setBreakingHeadline(s.breakingHeadline || "");
-        setViewers(s.viewers || 1540);
+        setViewers(s.viewers ?? 0);
         setIsOnAir(s.isLive !== false);
         setBroadcastMode(s.streamType || "camera");
       }
