@@ -413,7 +413,14 @@ export default function CitizenJournalistDashboard() {
           </div>
 
           <div className="flex items-center gap-2 self-start sm:self-center shrink-0">
-            <span className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 bg-white/15 backdrop-blur-md text-white text-[11px] sm:text-xs font-bold rounded-full border border-white/25 shadow-xs">
+            <Link
+              href="/"
+              className="flex items-center gap-1.5 px-3 py-1 bg-white/20 hover:bg-white/30 backdrop-blur-md text-white text-xs font-bold rounded-full border border-white/30 transition-all shadow-xs"
+            >
+              <span>मुख्य वेबसाइट</span>
+              <span>&rarr;</span>
+            </Link>
+            <span className="hidden md:flex items-center gap-1.5 px-2.5 sm:px-3 py-1 bg-white/15 backdrop-blur-md text-white text-[11px] sm:text-xs font-bold rounded-full border border-white/25 shadow-xs">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
               <span>लाइव पत्रकार पोर्टल</span>
             </span>

@@ -101,6 +101,8 @@ export default function Header() {
     }
   }, [pathname, authUser]);
 
+  const activeUser = currentUser || authUser;
+
   const toggleDark = () => {
     setDarkMode(!darkMode);
     if (!darkMode) {
@@ -275,21 +277,21 @@ export default function Header() {
           </button>
 
           {/* Reader Login / Single-Click Profile Button to Dashboard */}
-          {currentUser ? (
+          {activeUser ? (
             <Link
               href="/dashboard"
               title={lang === "hi" ? "डैशबोर्ड खोलें" : "Open Dashboard"}
               className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1 bg-gradient-to-r from-red-50 to-amber-50 hover:from-red-100 hover:to-amber-100 dark:from-slate-800 dark:to-slate-800/80 dark:hover:from-red-950/40 border border-red-200/80 dark:border-slate-700 hover:border-red-400 rounded-full text-xs font-bold transition-all shadow-xs group cursor-pointer"
             >
               <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-gradient-to-tr from-red-600 via-red-500 to-amber-500 text-white flex items-center justify-center font-black text-xs shadow-xs overflow-hidden shrink-0">
-                {currentUser.avatar ? (
-                  <img src={currentUser.avatar} alt="" className="w-full h-full object-cover" />
+                {activeUser.avatar ? (
+                  <img src={activeUser.avatar} alt="" className="w-full h-full object-cover" />
                 ) : (
-                  <span>{currentUser.name ? currentUser.name.charAt(0).toUpperCase() : "U"}</span>
+                  <span>{activeUser.name ? activeUser.name.charAt(0).toUpperCase() : "U"}</span>
                 )}
               </div>
               <span className="hidden sm:inline font-bold text-slate-800 dark:text-slate-200 group-hover:text-red-600 dark:group-hover:text-red-400 max-w-[90px] truncate leading-tight">
-                {currentUser.name || (lang === "hi" ? "प्रोफ़ाइल" : "Profile")}
+                {activeUser.name || (lang === "hi" ? "प्रोफ़ाइल" : "Profile")}
               </span>
               <span className="text-[10px] text-red-600 dark:text-red-400 font-extrabold hidden md:inline">
                 डैशबोर्ड &rarr;
@@ -412,12 +414,12 @@ export default function Header() {
             </div>
 
             <div className="pt-4 border-t border-slate-100 dark:border-slate-800 space-y-2">
-              {currentUser ? (
+              {activeUser ? (
                 <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl space-y-2">
                   <div className="flex items-center gap-2">
                     <User className="w-4 h-4 text-red-600" />
                     <span className="text-xs font-bold text-slate-900 dark:text-white">
-                      {currentUser.name}
+                      {activeUser.name}
                     </span>
                   </div>
                   <Link

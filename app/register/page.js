@@ -100,9 +100,12 @@ function RegisterContent() {
         }
 
         setTimeout(() => {
-          router.push(redirectUrl);
-          router.refresh();
-        }, 800);
+          if (typeof window !== "undefined") {
+            window.location.href = redirectUrl;
+          } else {
+            router.push(redirectUrl);
+          }
+        }, 500);
       } else {
         setError(res.message || (lang === "hi" ? "पंजीकरण विफल रहा।" : "Registration failed."));
       }

@@ -16,11 +16,6 @@ function AdminLayoutInner({ children }) {
 
   const isLoginPage = pathname === "/swar-media-admin/login";
 
-  // If on login page, render full screen immediately without loading spinner
-  if (isLoginPage) {
-    return <main className="min-h-screen bg-slate-950">{children}</main>;
-  }
-
   // Safe side-effect redirection inside useEffect (prevents React 18 render crash)
   useEffect(() => {
     if (!loading && !isLoginPage) {
@@ -31,6 +26,11 @@ function AdminLayoutInner({ children }) {
       }
     }
   }, [loading, user, isLoginPage, router]);
+
+  // If on login page, render full screen immediately without loading spinner
+  if (isLoginPage) {
+    return <main className="min-h-screen bg-slate-950">{children}</main>;
+  }
 
   // Loading state with fallback button
   if (loading) {
