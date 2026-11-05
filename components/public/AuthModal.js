@@ -84,20 +84,20 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
         className="w-full max-w-md bg-white dark:bg-slate-900 rounded-2xl sm:rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden my-auto"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
-        <div className="bg-red-600 px-4 sm:px-6 py-3.5 sm:py-5 text-white flex items-center justify-between">
+        {/* Header with Royal Crimson & Gold theme */}
+        <div className="bg-gradient-to-r from-[#8B0000] via-[#B30D12] to-[#80070a] px-4 sm:px-6 py-3.5 sm:py-5 text-white flex items-center justify-between border-b border-amber-500/30">
           <div className="flex items-center gap-2.5 sm:gap-3">
             <img
               src="/logo.png"
-              alt="Swar Media"
-              className="h-10 sm:h-12 w-auto object-contain bg-black/20 p-1 rounded-xl shadow-xs shrink-0"
+              alt="The Swar Media"
+              className="h-10 sm:h-12 w-auto object-contain drop-shadow shrink-0"
             />
             <div>
-              <h3 className="text-base sm:text-lg font-black tracking-tight">
-                {lang === "hi" ? "स्वर मीडिया में स्वागत है" : "Welcome to Swar Media"}
+              <h3 className="text-base sm:text-lg font-black tracking-tight text-white">
+                {lang === "hi" ? "द स्वर मीडिया में स्वागत है" : "Welcome to The Swar Media"}
               </h3>
-              <p className="text-xs text-red-100 font-medium">
-                {lang === "hi" ? "सत्य, निष्पक्षता और त्वरित समाचार" : "Truth, Courage & Fast News"}
+              <p className="text-xs text-amber-200 font-extrabold">
+                {lang === "hi" ? "हर मुद्दे पर, युवा की आवाज" : "Inform • Inspire • Empower"}
               </p>
             </div>
           </div>

@@ -3,25 +3,25 @@ import PublicLayoutWrapper from "@/components/public/PublicLayoutWrapper";
 
 export const metadata = {
   title: {
-    default: "Swar Media | स्वर मीडिया - Hindi & English Latest News",
-    template: "%s | Swar Media",
+    default: "The Swar Media | द स्वर मीडिया - हर मुद्दे पर, युवा की आवाज",
+    template: "%s | The Swar Media",
   },
   description:
-    "Swar Media is India's premier bilingual news portal delivering breaking news, in-depth politics, sports, business, and entertainment stories with truth and courage.",
+    "The Swar Media - हर मुद्दे पर, युवा की आवाज (Inform • Inspire • Empower). निष्पक्ष, विश्वसनीय और ज़मीनी पत्रकारिता का प्रमुख राष्ट्रीय डिजिटल न्यूज़ पोर्टल।",
   keywords: [
-    "Swar Media",
-    "स्वर मीडिया",
+    "The Swar Media",
+    "द स्वर मीडिया",
+    "हर मुद्दे पर युवा की आवाज",
     "Hindi News",
     "ताज़ा खबर",
     "Breaking News",
     "Indian Politics",
     "Cricket",
     "Business News",
-    "Aaj Tak layout",
   ],
-  authors: [{ name: "Swar Media Editorial Board" }],
-  creator: "Swar Media",
-  publisher: "Swar Media Network",
+  authors: [{ name: "The Swar Media Editorial Board" }],
+  creator: "The Swar Media",
+  publisher: "The Swar Media Network",
   metadataBase: new URL(process.env.SITE_URL || "http://localhost:3000"),
   icons: {
     icon: "/logo.png",
@@ -29,16 +29,16 @@ export const metadata = {
     apple: "/logo.png",
   },
   openGraph: {
-    title: "Swar Media | स्वर मीडिया - Truth & Integrity",
-    description: "Leading bilingual news portal covering national and international affairs.",
+    title: "The Swar Media | द स्वर मीडिया - हर मुद्दे पर, युवा की आवाज",
+    description: "Inform • Inspire • Empower - Leading bilingual news portal covering national and international affairs.",
     url: "/",
-    siteName: "Swar Media",
+    siteName: "The Swar Media",
     images: [
       {
         url: "/logo.png",
         width: 1200,
         height: 675,
-        alt: "Swar Media",
+        alt: "The Swar Media",
       },
     ],
     locale: "hi_IN",
@@ -46,10 +46,10 @@ export const metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Swar Media | स्वर मीडिया",
-    description: "Leading bilingual news portal covering national and international affairs.",
+    title: "The Swar Media | द स्वर मीडिया",
+    description: "हर मुद्दे पर, युवा की आवाज (Inform • Inspire • Empower)",
     images: ["/logo.png"],
-    creator: "@swarmedia",
+    creator: "@theswarmedia",
   },
   robots: {
     index: true,

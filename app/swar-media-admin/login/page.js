@@ -43,12 +43,15 @@ export default function AdminLoginPage() {
         <div className="text-center mb-8 flex flex-col items-center">
           <img
             src="/logo.png"
-            alt="Swar Media Logo"
-            className="h-16 w-auto object-contain drop-shadow-xl mb-3"
+            alt="The Swar Media Logo"
+            className="h-20 w-auto object-contain drop-shadow-xl mb-3"
           />
           <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
-            SWAR<span className="text-red-600">MEDIA</span> CMS
+            THE SWAR<span className="text-amber-500"> MEDIA</span> CMS
           </h1>
+          <p className="text-xs text-amber-600 dark:text-amber-400 font-extrabold mt-1">
+            हर मुद्दे पर, युवा की आवाज
+          </p>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
             Editorial Management Portal • सत्य, सुर और सरोकार
           </p>

@@ -73,12 +73,12 @@ export default function Footer() {
   const logoUrl = settings?.logo || "/logo.png";
   const siteName =
     lang === "hi"
-      ? settings?.siteNameHi || "स्वर मीडिया"
-      : settings?.siteName || "Swar Media";
+      ? settings?.siteNameHi || "द स्वर मीडिया"
+      : settings?.siteName || "The Swar Media";
   const tagLine =
     lang === "hi"
-      ? settings?.tagLineHi || "सत्य, सुर और सरोकार"
-      : settings?.tagLine || "Voice of Truth & Integrity";
+      ? settings?.tagLineHi || "हर मुद्दे पर, युवा की आवाज"
+      : settings?.tagLine || "हर मुद्दे पर, युवा की आवाज";
   const footerText = settings?.footerText || "Powered By JCRM Technologies";
   const footerTextHi = settings?.footerTextHi || "Swarmedia4554@gmail.com";
   const social = settings?.socialLinks || {};
@@ -86,11 +86,11 @@ export default function Footer() {
   return (
     <footer className="bg-slate-950 text-slate-300 pt-12 pb-8 border-t border-slate-900 mt-0">
       <div className="w-full px-4 sm:px-6 lg:px-8 space-y-12">
-        {/* Newsletter Banner */}
-        <div className="p-8 bg-gradient-to-r from-red-900 via-red-800 to-slate-900 rounded-3xl text-white shadow-xl flex flex-col md:flex-row items-center justify-between gap-6">
+        {/* Newsletter Banner in Royal Crimson & Gold */}
+        <div className="p-8 bg-gradient-to-r from-[#8B0000] via-[#B30D12] to-slate-950 rounded-3xl text-white shadow-2xl border border-amber-500/30 flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="max-w-xl">
-            <span className="text-[10px] font-bold uppercase tracking-widest bg-red-600/60 px-2 py-0.5 rounded-full inline-block mb-2">
-              Stay Informed • सजग रहें
+            <span className="text-[10px] font-black uppercase tracking-widest bg-amber-500/20 text-amber-300 border border-amber-500/40 px-2.5 py-0.5 rounded-full inline-block mb-2">
+              INFORM • INSPIRE • EMPOWER
             </span>
             <h3 className="text-xl sm:text-2xl font-black tracking-tight">
               {t("newsletterTitle")}
@@ -133,16 +133,16 @@ export default function Footer() {
               <img
                 src={logoUrl}
                 alt={siteName}
-                className="h-12 sm:h-14 w-auto object-contain drop-shadow-lg"
+                className="h-14 sm:h-16 w-auto object-contain drop-shadow-xl"
               />
             </div>
 
-            <p className="text-red-400 font-black text-xs font-hindi tracking-wide">
-              {tagLine}
+            <p className="text-amber-400 font-black text-xs font-hindi tracking-wide flex items-center gap-1.5">
+              <span>{tagLine}</span>
             </p>
 
             <p className="text-slate-400 leading-relaxed text-xs">
-              स्वर मीडिया निष्पक्ष, विश्वसनीय और ज़मीनी पत्रकारिता का प्रमुख हिंदी एवं द्विभाषी न्यूज़ पोर्टल है।
+              द स्वर मीडिया निष्पक्ष, विश्वसनीय और ज़मीनी पत्रकारिता का प्रमुख हिंदी एवं राष्ट्रीय डिजिटल न्यूज़ पोर्टल है।
             </p>
 
             {/* Social Icons from Site Settings */}

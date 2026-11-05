@@ -140,20 +140,20 @@ export default function Header() {
     <header className="w-full bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 transition-colors">
       {/* Clean Single-Row Modern Header (Exact Swarnim Dastavej Layout) */}
       <div className="w-full px-2.5 sm:px-6 py-2 sm:py-2.5 flex items-center justify-between gap-1.5 sm:gap-3">
-        {/* Left: Brand Logo & Dynamic Site Name with Timestamp (Exact Swarnim Dastavej Layout) */}
+        {/* Left: Brand Logo & Dynamic Site Name with Tagline */}
         <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-          <Link href="/" className="flex items-center gap-2 group shrink-0" aria-label="Swar Media Home">
+          <Link href="/" className="flex items-center gap-2 group shrink-0" aria-label="The Swar Media Home">
             <img
               src={siteSettings?.logo || "/logo.png"}
-              alt={siteSettings?.siteName || "Swar Media Logo"}
-              className="h-8 sm:h-11 w-auto object-contain drop-shadow-sm group-hover:scale-105 transition-transform shrink-0"
+              alt={siteSettings?.siteName || "The Swar Media"}
+              className="h-9 sm:h-12 w-auto object-contain drop-shadow-sm group-hover:scale-105 transition-transform shrink-0"
             />
             <div className="flex flex-col">
-              <span className="text-xs sm:text-base font-black text-slate-900 dark:text-white leading-tight font-hindi">
-                {lang === "hi" ? (siteSettings?.siteNameHi || "स्वर मीडिया") : (siteSettings?.siteName || "Swar Media")}
+              <span className="text-xs sm:text-base font-black text-slate-900 dark:text-white leading-tight font-hindi flex items-center gap-1.5">
+                {lang === "hi" ? (siteSettings?.siteNameHi || "द स्वर मीडिया") : (siteSettings?.siteName || "The Swar Media")}
               </span>
-              <span className="hidden sm:inline text-[9px] sm:text-[10px] text-slate-500 dark:text-slate-400 font-medium truncate max-w-[150px] sm:max-w-none">
-                {liveTimestamp || "IST"}
+              <span className="hidden sm:inline-flex items-center gap-1 text-[9px] sm:text-[10px] text-amber-600 dark:text-amber-400 font-extrabold tracking-tight">
+                {siteSettings?.tagLine || "हर मुद्दे पर, युवा की आवाज"}
               </span>
             </div>
           </Link>

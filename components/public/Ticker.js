@@ -22,12 +22,12 @@ export default function Ticker() {
   if (tickers.length === 0 || dismissed) return null;
 
   return (
-    <div className="bg-red-600 text-white border-y border-red-700 text-xs overflow-hidden select-none relative shadow-xs h-9 sm:h-10 flex items-center">
+    <div className="bg-gradient-to-r from-[#8B0000] via-[#B30D12] to-[#80070a] text-white border-y border-amber-500/40 text-xs overflow-hidden select-none relative shadow-xs h-9 sm:h-10 flex items-center">
       <div className="w-full flex items-center h-full">
-        {/* Aaj Tak Style BREAKING NEWS Badge */}
-        <div className="h-full flex items-center gap-1.5 px-3 sm:px-4 bg-red-800 text-white font-black tracking-wider uppercase shrink-0 shadow-md z-10 border-r border-red-700/60">
-          <span className="w-2 h-2 rounded-full bg-white animate-ping shrink-0" />
-          <span className="text-white font-black tracking-wide text-[10px] sm:text-xs whitespace-nowrap">
+        {/* The Swar Media Royal Crimson & Gold BREAKING NEWS Badge */}
+        <div className="h-full flex items-center gap-1.5 px-3 sm:px-4 bg-gradient-to-r from-[#660508] to-[#8B0000] text-amber-300 font-black tracking-wider uppercase shrink-0 shadow-md z-10 border-r border-amber-500/50">
+          <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping shrink-0" />
+          <span className="text-amber-300 font-black tracking-wide text-[10px] sm:text-xs whitespace-nowrap">
             {lang === "hi" ? "बड़ी खबर" : "BREAKING"}
           </span>
         </div>
@@ -41,10 +41,10 @@ export default function Ticker() {
                 <Link
                   key={idx}
                   href={item.link || "#"}
-                  className="inline-flex items-center gap-2 shrink-0 whitespace-nowrap px-4 hover:text-yellow-200 transition-colors"
+                  className="inline-flex items-center gap-2 shrink-0 whitespace-nowrap px-4 hover:text-amber-200 transition-colors"
                 >
-                  <span className="w-1.5 h-1.5 rounded-full bg-yellow-300 inline-block shrink-0" />
-                  <span className={`whitespace-nowrap shrink-0 ${lang === "hi" ? "font-hindi font-semibold" : ""}`}>
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shadow-xs shadow-amber-400/50 inline-block shrink-0" />
+                  <span className={`whitespace-nowrap shrink-0 text-white hover:text-amber-200 ${lang === "hi" ? "font-hindi font-semibold" : ""}`}>
                     {displayContent}
                   </span>
                 </Link>
@@ -53,10 +53,10 @@ export default function Ticker() {
           </div>
         </div>
 
-        {/* Aaj Tak Style Close 'x' button */}
+        {/* Close 'x' button */}
         <button
           onClick={() => setDismissed(true)}
-          className="h-full px-2.5 sm:px-3 flex items-center justify-center text-white/80 hover:text-white hover:bg-red-700 transition-colors shrink-0 z-10 border-l border-red-700/40"
+          className="h-full px-2.5 sm:px-3 flex items-center justify-center text-amber-200/80 hover:text-amber-200 hover:bg-black/20 transition-colors shrink-0 z-10 border-l border-amber-500/30"
           title="Close breaking news"
           aria-label="Close"
         >

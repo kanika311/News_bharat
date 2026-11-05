@@ -4,27 +4,27 @@ const SettingSchema = new mongoose.Schema(
   {
     siteName: {
       type: String,
-      default: "Swar Media",
+      default: "The Swar Media",
     },
     siteNameHi: {
       type: String,
-      default: "स्वर मीडिया",
+      default: "द स्वर मीडिया",
     },
     tagLine: {
       type: String,
-      default: "Voice of Truth & Integrity",
+      default: "हर मुद्दे पर, युवा की आवाज",
     },
     tagLineHi: {
       type: String,
-      default: "सत्य, सुर और सरोकार",
+      default: "हर मुद्दे पर, युवा की आवाज",
     },
     logo: {
       type: String,
-      default: "",
+      default: "/logo.png",
     },
     favicon: {
       type: String,
-      default: "",
+      default: "/logo.png",
     },
     adminName: {
       type: String,

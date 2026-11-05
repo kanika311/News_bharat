@@ -136,24 +136,24 @@ function RegisterContent() {
       </div>
 
       <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
-        {/* Brand Banner */}
-        <div className="bg-gradient-to-r from-red-700 via-red-600 to-red-700 p-6 text-white text-center relative overflow-hidden">
-          <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/10 rounded-full blur-xl pointer-events-none" />
+        {/* Brand Banner with Royal Crimson & Gold theme */}
+        <div className="bg-gradient-to-r from-[#8B0000] via-[#B30D12] to-[#80070a] p-6 text-white text-center relative overflow-hidden border-b border-amber-500/30">
+          <div className="absolute -right-8 -top-8 w-32 h-32 bg-amber-400/10 rounded-full blur-xl pointer-events-none" />
           <div className="relative z-10 flex flex-col items-center">
             <Link href="/" className="inline-block hover:scale-105 transition-transform mb-3">
               <img
                 src="/logo.png"
-                alt="Swar Media"
-                className="h-14 sm:h-16 w-auto object-contain drop-shadow-xl"
+                alt="The Swar Media"
+                className="h-16 sm:h-20 w-auto object-contain drop-shadow-xl"
               />
             </Link>
             <h1 className="text-xl sm:text-2xl font-black tracking-tight">
-              {lang === "hi" ? "नया पाठक खाता बनाएं" : "Join Swar Media Reader Club"}
+              {lang === "hi" ? "द स्वर मीडिया पाठक परिवार से जुड़ें" : "Join The Swar Media Reader Club"}
             </h1>
-            <p className="text-xs text-red-100 font-medium mt-1">
+            <p className="text-xs text-amber-200 font-extrabold mt-1">
               {lang === "hi"
-                ? "सत्य, सुर और सरोकार • देश का सबसे विश्वसनीय न्यूज़ पोर्टल"
-                : "Voice of Truth & Integrity • Premier Bilingual Portal"}
+                ? "हर मुद्दे पर, युवा की आवाज • स्वतंत्र एवं निष्पक्ष मंच"
+                : "Inform • Inspire • Empower • India's Leading Portal"}
             </p>
           </div>
         </div>

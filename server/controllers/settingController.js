@@ -6,10 +6,12 @@ async function getOrCreateSettings() {
   let settings = await Setting.findOne();
   if (!settings) {
     settings = await Setting.create({
-      siteName: "Swar Media",
-      siteNameHi: "स्वर मीडिया",
-      tagLine: "Voice of Truth & Integrity",
-      tagLineHi: "सत्य, सुर और सरोकार",
+      siteName: "The Swar Media",
+      siteNameHi: "द स्वर मीडिया",
+      tagLine: "हर मुद्दे पर, युवा की आवाज",
+      tagLineHi: "हर मुद्दे पर, युवा की आवाज",
+      logo: "/logo.png",
+      favicon: "/logo.png",
     });
   }
   return settings;

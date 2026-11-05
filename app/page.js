@@ -253,7 +253,7 @@ export default function HomePage() {
       <div className="flex flex-col items-center justify-center min-h-[600px] space-y-4">
         <Loader2 className="w-10 h-10 text-red-600 animate-spin" />
         <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">
-          {lang === "hi" ? "खबरें लोड हो रही हैं..." : "Loading Swar Media Headlines..."}
+          {lang === "hi" ? "खबरें लोड हो रही हैं..." : "Loading The Swar Media Headlines..."}
         </p>
       </div>
     );
