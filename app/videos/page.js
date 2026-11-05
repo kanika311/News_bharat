@@ -16,6 +16,7 @@ import {
   Sparkles,
   ChevronRight,
   Filter,
+  Volume2,
 } from "lucide-react";
 import { apiFetch } from "@/lib/api";
 import { useLang } from "@/lib/langContext";
@@ -144,8 +145,8 @@ export default function VideosPage() {
 
     if (embedUrl.includes("youtube.com/embed/")) {
       const sep = embedUrl.includes("?") ? "&" : "?";
-      // Autoplay=1, mute=1 (browsers strictly require muted for immediate autoPlay without click), playsinline=1
-      return `${embedUrl}${sep}autoplay=1&mute=1&playsinline=1&enablejsapi=1`;
+      // Autoplay=1 with sound ON (mute=0), playsinline=1
+      return `${embedUrl}${sep}autoplay=1&mute=0&playsinline=1&enablejsapi=1`;
     }
     return embedUrl;
   };
@@ -379,7 +380,6 @@ export default function VideosPage() {
                       src={activeVideo.videoUrl}
                       controls
                       autoPlay
-                      muted
                       playsInline
                       className="w-full h-full object-contain"
                     />
@@ -405,6 +405,10 @@ export default function VideosPage() {
                         </span>
                         <span className="text-[11px] text-slate-400 font-mono">
                           {activeVideo.duration || "04:15"}
+                        </span>
+                        <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-950/80 text-emerald-400 border border-emerald-800">
+                          <Volume2 className="w-3 h-3" />
+                          <span>साउंड ऑन (Sound ON)</span>
                         </span>
                       </div>
                       <h2 className="text-base sm:text-xl font-black text-white leading-snug">
