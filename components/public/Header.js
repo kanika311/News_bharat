@@ -215,22 +215,23 @@ export default function Header() {
           </Link>
         </nav>
 
-        {/* Right: Search, Language, Dark Mode & Login */}
-        <div className="flex items-center gap-1 sm:gap-2 shrink-0">
-          {/* Search Trigger */}
+        {/* Right: Search (Always visible), Hamburger (Mobile), Icons (Desktop) */}
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          {/* Search Trigger (Always visible on both Mobile and Desktop) */}
           <div className="relative shrink-0">
             <button
               onClick={() => setSearchOpen(!searchOpen)}
-              className="p-1.5 sm:p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors"
+              className="p-1.5 sm:p-2 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors cursor-pointer"
               title="Search News"
+              aria-label="Search"
             >
-              <Search className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
+              <Search className="w-4.5 h-4.5 sm:w-5 sm:h-5 text-slate-800 dark:text-slate-200" />
             </button>
 
             {searchOpen && (
               <form
                 onSubmit={handleSearchSubmit}
-                className="absolute right-0 top-10 sm:top-12 z-50 w-72 sm:w-80 p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl animate-in fade-in zoom-in-95"
+                className="absolute right-0 top-11 sm:top-12 z-50 w-[calc(100vw-32px)] max-w-[320px] sm:w-80 p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl animate-in fade-in zoom-in-95"
               >
                 <div className="relative">
                   <input
@@ -247,8 +248,8 @@ export default function Header() {
             )}
           </div>
 
-          {/* Language Switcher */}
-          <div className="flex items-center bg-slate-100 dark:bg-slate-800 rounded-lg p-0.5 text-[9px] sm:text-[11px] font-bold shrink-0">
+          {/* Desktop Only: Language Switcher (Hidden in Mobile, available inside Hamburger) */}
+          <div className="hidden md:flex items-center bg-slate-100 dark:bg-slate-800 rounded-lg p-0.5 text-[9px] sm:text-[11px] font-bold shrink-0">
             <button
               onClick={() => setLang("hi")}
               className={`px-1.5 sm:px-2 py-0.5 rounded transition-colors ${
@@ -267,21 +268,21 @@ export default function Header() {
             </button>
           </div>
 
-          {/* Dark mode */}
+          {/* Desktop Only: Dark mode toggle (Hidden in Mobile, available inside Hamburger) */}
           <button
             onClick={toggleDark}
-            className="p-1 sm:p-1.5 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors shrink-0"
+            className="hidden md:flex p-1 sm:p-1.5 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors shrink-0"
             title="Toggle Dark Mode"
           >
             {darkMode ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4" />}
           </button>
 
-          {/* Reader Login / Single-Click Profile Button to Dashboard */}
+          {/* Desktop Only: Reader Login / Profile Button to Dashboard (Hidden in Mobile, available inside Hamburger) */}
           {activeUser ? (
             <Link
               href="/dashboard"
               title={lang === "hi" ? "डैशबोर्ड खोलें" : "Open Dashboard"}
-              className="flex items-center gap-1 sm:gap-2 px-1.5 sm:px-3 py-1 bg-gradient-to-r from-red-50 to-amber-50 hover:from-red-100 hover:to-amber-100 dark:from-slate-800 dark:to-slate-800/80 dark:hover:from-red-950/40 border border-red-200/80 dark:border-slate-700 hover:border-red-400 rounded-full text-xs font-bold transition-all shadow-xs group cursor-pointer shrink-0"
+              className="hidden md:flex items-center gap-1 sm:gap-2 px-1.5 sm:px-3 py-1 bg-gradient-to-r from-red-50 to-amber-50 hover:from-red-100 hover:to-amber-100 dark:from-slate-800 dark:to-slate-800/80 dark:hover:from-red-950/40 border border-red-200/80 dark:border-slate-700 hover:border-red-400 rounded-full text-xs font-bold transition-all shadow-xs group cursor-pointer shrink-0"
             >
               <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-gradient-to-tr from-red-600 via-red-500 to-amber-500 text-white flex items-center justify-center font-black text-xs shadow-xs overflow-hidden shrink-0">
                 {activeUser.avatar ? (
@@ -300,14 +301,14 @@ export default function Header() {
           ) : (
             <Link
               href="/login"
-              className="flex items-center gap-1 px-2.5 sm:px-4 py-1 sm:py-1.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white rounded-full text-[11px] sm:text-xs font-bold shadow-xs transition-transform hover:scale-105 active:scale-95 shrink-0"
+              className="hidden md:flex items-center gap-1 px-2.5 sm:px-4 py-1 sm:py-1.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white rounded-full text-[11px] sm:text-xs font-bold shadow-xs transition-transform hover:scale-105 active:scale-95 shrink-0"
             >
               <User className="w-3.5 h-3.5" />
               <span>{lang === "hi" ? "लॉगिन" : "Login"}</span>
             </Link>
           )}
 
-          {/* Mobile Hamburger Menu Button (Matches Swarnim Dastavej Layout) */}
+          {/* Mobile Hamburger Menu Button (Shows only Search + Hamburger on Mobile) */}
           <button
             type="button"
             onClick={() => setMobileMenuOpen(true)}
@@ -348,6 +349,85 @@ export default function Header() {
               {/* Timestamp on mobile drawer */}
               <div className="py-2 text-[11px] text-slate-500 font-mono border-b border-slate-100 dark:border-slate-800">
                 {liveTimestamp}
+              </div>
+
+              {/* User Account / Profile Card in Hamburger */}
+              <div className="pt-3 pb-2">
+                {activeUser ? (
+                  <div className="p-3 bg-gradient-to-r from-red-50 to-amber-50 dark:from-slate-800 dark:to-slate-800/90 rounded-2xl border border-red-200/70 dark:border-slate-700 space-y-2">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-red-600 via-red-500 to-amber-500 text-white flex items-center justify-center font-black text-sm shadow-xs overflow-hidden shrink-0">
+                        {activeUser.avatar ? (
+                          <img src={activeUser.avatar} alt="" className="w-full h-full object-cover" />
+                        ) : (
+                          <span>{activeUser.name ? activeUser.name.charAt(0).toUpperCase() : "U"}</span>
+                        )}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="text-xs font-black text-slate-900 dark:text-white truncate">
+                          {activeUser.name}
+                        </div>
+                        <div className="text-[10px] text-red-600 dark:text-red-400 font-bold">
+                          {activeUser.role === "admin" || activeUser.role === "superadmin" ? "संपादक" : "नागरिक पत्रकार"}
+                        </div>
+                      </div>
+                      <Link
+                        href="/dashboard"
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="px-2.5 py-1 bg-red-600 hover:bg-red-700 text-white text-[10px] font-extrabold rounded-lg shadow-xs shrink-0"
+                      >
+                        डैशबोर्ड &rarr;
+                      </Link>
+                    </div>
+                  </div>
+                ) : (
+                  <Link
+                    href="/login"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center justify-center gap-2 w-full py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 text-white rounded-xl text-xs font-black shadow-sm shadow-amber-500/20 active:scale-98 transition-all"
+                  >
+                    <User className="w-4 h-4" />
+                    <span>{lang === "hi" ? "लॉगिन / साइन-अप करें" : "Login / Sign Up"}</span>
+                  </Link>
+                )}
+              </div>
+
+              {/* Quick Settings: Language & Dark Mode Toggles (Moved to Hamburger) */}
+              <div className="grid grid-cols-2 gap-2 pb-3 border-b border-slate-100 dark:border-slate-800">
+                {/* Language Switcher */}
+                <div className="flex items-center justify-between px-2.5 py-2 bg-slate-50 dark:bg-slate-800/80 rounded-xl border border-slate-200 dark:border-slate-700">
+                  <span className="text-[10px] font-bold text-slate-600 dark:text-slate-400">भाषा:</span>
+                  <div className="flex items-center bg-white dark:bg-slate-900 rounded-lg p-0.5 text-[10px] font-black border border-slate-200 dark:border-slate-700">
+                    <button
+                      type="button"
+                      onClick={() => setLang("hi")}
+                      className={`px-1.5 py-0.5 rounded transition-colors ${
+                        lang === "hi" ? "bg-red-600 text-white" : "text-slate-600 dark:text-slate-400"
+                      }`}
+                    >
+                      HI
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setLang("en")}
+                      className={`px-1.5 py-0.5 rounded transition-colors ${
+                        lang === "en" ? "bg-red-600 text-white" : "text-slate-600 dark:text-slate-400"
+                      }`}
+                    >
+                      EN
+                    </button>
+                  </div>
+                </div>
+
+                {/* Dark Mode Switcher */}
+                <button
+                  type="button"
+                  onClick={toggleDark}
+                  className="flex items-center justify-between px-2.5 py-2 bg-slate-50 dark:bg-slate-800/80 rounded-xl border border-slate-200 dark:border-slate-700 text-[10px] font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                >
+                  <span>{darkMode ? "लाइट मोड" : "डार्क मोड"}</span>
+                  {darkMode ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-600 dark:text-slate-300" />}
+                </button>
               </div>
 
               <div className="py-4 space-y-1">
@@ -413,41 +493,16 @@ export default function Header() {
               </div>
             </div>
 
-            <div className="pt-4 border-t border-slate-100 dark:border-slate-800 space-y-2">
-              {activeUser ? (
-                <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl space-y-2">
-                  <div className="flex items-center gap-2">
-                    <User className="w-4 h-4 text-red-600" />
-                    <span className="text-xs font-bold text-slate-900 dark:text-white">
-                      {activeUser.name}
-                    </span>
-                  </div>
-                  <Link
-                    href="/dashboard"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-2 px-3 py-2 text-xs font-bold bg-amber-500 hover:bg-amber-600 text-white rounded-lg transition-colors"
-                  >
-                    <LayoutDashboard className="w-3.5 h-3.5" />
-                    <span>{lang === "hi" ? "नागरिक पत्रकार डैशबोर्ड" : "Citizen Journalist Dashboard"}</span>
-                  </Link>
-                  <button
-                    onClick={handleLogout}
-                    className="w-full py-2 bg-red-600 text-white font-bold text-xs rounded-lg"
-                  >
-                    {lang === "hi" ? "साइन आउट" : "Sign Out"}
-                  </button>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  <Link
-                    href="/login"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="w-full py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-2 shadow-md"
-                  >
-                    <User className="w-4 h-4" />
-                    <span>{lang === "hi" ? "लॉगिन" : "Login"}</span>
-                  </Link>
-                </div>
+            <div className="pt-3 border-t border-slate-100 dark:border-slate-800 space-y-2">
+              {activeUser && (
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="w-full py-2.5 bg-red-50 hover:bg-red-100 dark:bg-red-950/40 dark:hover:bg-red-900/50 text-red-600 dark:text-red-400 font-extrabold text-xs rounded-xl flex items-center justify-center gap-2 border border-red-200 dark:border-red-900/50 transition-colors cursor-pointer"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span>{lang === "hi" ? "साइन आउट (लॉगआउट)" : "Sign Out"}</span>
+                </button>
               )}
             </div>
           </div>
