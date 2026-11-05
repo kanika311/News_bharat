@@ -94,4 +94,17 @@ app.use("/api", (req, res) => {
   });
 });
 
+// Global API error handler (Guarantees JSON error response instead of Express HTML 500 pages)
+app.use((err, req, res, next) => {
+  console.error("[API Global Error]", err);
+  if (res.headersSent) {
+    return next(err);
+  }
+  const status = err.status || err.statusCode || 500;
+  return res.status(status).json({
+    success: false,
+    message: err.message || "An unexpected internal server error occurred.",
+  });
+});
+
 module.exports = app;

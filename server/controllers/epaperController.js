@@ -139,11 +139,40 @@ exports.createEPaper = async (req, res) => {
     let pdfUrl = req.body.pdfUrl || "";
     let fileSize = req.body.fileSize || "";
 
-    // Handle uploaded PDF file via Multer
+    // Handle uploaded PDF file via Multer (MemoryBuffer with disk & DB persistence)
     if (req.file) {
-      pdfUrl = `/uploads/${req.file.filename}`;
-      if (req.file.size) {
-        fileSize = `${(req.file.size / (1024 * 1024)).toFixed(2)} MB`;
+      const origExt = path.extname(req.file.originalname || "").toLowerCase() || ".pdf";
+      const filename = `pdf-${Date.now()}-${Math.round(Math.random() * 1e9)}${origExt}`;
+      const uploadDir = path.join(process.cwd(), "public", "uploads");
+
+      let savedUrl = "";
+      try {
+        if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+        fs.writeFileSync(path.join(uploadDir, filename), req.file.buffer);
+        savedUrl = `/uploads/${filename}`;
+      } catch (e) {
+        console.warn("[EPaper] Disk write bypassed (read-only):", e.message);
+      }
+
+      if (!savedUrl) {
+        const Media = require("../models/Media");
+        const doc = await Media.create({
+          filename,
+          originalName: req.file.originalname || filename,
+          mimetype: "application/pdf",
+          size: req.file.size || req.file.buffer.length,
+          type: "pdf",
+          data: req.file.buffer,
+          user: req.user?._id,
+        });
+        savedUrl = `/api/media/file/${doc._id}/${filename}`;
+        doc.url = savedUrl;
+        await doc.save();
+      }
+
+      pdfUrl = savedUrl;
+      if (req.file.size || req.file.buffer?.length) {
+        fileSize = `${((req.file.size || req.file.buffer.length) / (1024 * 1024)).toFixed(2)} MB`;
       }
     }
 
@@ -204,16 +233,38 @@ exports.updateEPaper = async (req, res) => {
 
     // Handle new uploaded PDF file
     if (req.file) {
-      // Delete old local file if present
-      if (epaper.pdfUrl && epaper.pdfUrl.startsWith("/uploads/")) {
-        const oldPath = path.join(process.cwd(), "public", epaper.pdfUrl);
-        if (fs.existsSync(oldPath)) {
-          try { fs.unlinkSync(oldPath); } catch (e) {}
-        }
+      const origExt = path.extname(req.file.originalname || "").toLowerCase() || ".pdf";
+      const filename = `pdf-${Date.now()}-${Math.round(Math.random() * 1e9)}${origExt}`;
+      const uploadDir = path.join(process.cwd(), "public", "uploads");
+
+      let savedUrl = "";
+      try {
+        if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+        fs.writeFileSync(path.join(uploadDir, filename), req.file.buffer);
+        savedUrl = `/uploads/${filename}`;
+      } catch (e) {
+        console.warn("[EPaper] Disk write bypassed (read-only):", e.message);
       }
-      epaper.pdfUrl = `/uploads/${req.file.filename}`;
-      if (req.file.size) {
-        epaper.fileSize = `${(req.file.size / (1024 * 1024)).toFixed(2)} MB`;
+
+      if (!savedUrl) {
+        const Media = require("../models/Media");
+        const doc = await Media.create({
+          filename,
+          originalName: req.file.originalname || filename,
+          mimetype: "application/pdf",
+          size: req.file.size || req.file.buffer.length,
+          type: "pdf",
+          data: req.file.buffer,
+          user: req.user?._id,
+        });
+        savedUrl = `/api/media/file/${doc._id}/${filename}`;
+        doc.url = savedUrl;
+        await doc.save();
+      }
+
+      epaper.pdfUrl = savedUrl;
+      if (req.file.size || req.file.buffer?.length) {
+        epaper.fileSize = `${((req.file.size || req.file.buffer.length) / (1024 * 1024)).toFixed(2)} MB`;
       }
     } else if (req.body.pdfUrl) {
       epaper.pdfUrl = req.body.pdfUrl.trim();
