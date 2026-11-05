@@ -218,49 +218,8 @@ export default function ArticleDetailPage() {
       </nav>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
-        {/* Left Sticky Sidebar (4 cols) - Full Height Fixed along reading flow */}
-        <aside className="order-last lg:order-first lg:col-span-4 lg:sticky lg:top-[105px] lg:h-[calc(100vh-120px)] lg:overflow-y-auto no-scrollbar space-y-6 self-start">
-          <AdSlot slot="sidebar" />
-
-          {/* Related Articles Card */}
-          {relatedArticles.length > 0 && (
-            <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xs p-5 space-y-4">
-              <h3 className="text-sm font-black text-slate-900 dark:text-white border-b border-slate-100 dark:border-slate-800 pb-2 flex items-center gap-2">
-                <span className="w-2.5 h-2.5 bg-red-600 rounded-full" />
-                <span>{t("relatedArticles")}</span>
-              </h3>
-
-              <div className="divide-y divide-slate-100 dark:divide-slate-800">
-                {relatedArticles.map((rel) => (
-                  <Link
-                    key={rel._id}
-                    href={`/${rel.category?.slug || "news"}/${rel.slug}`}
-                    className="py-3 flex items-start gap-3 group"
-                  >
-                    {rel.featuredImage?.url && (
-                      <img
-                        src={rel.featuredImage.url}
-                        alt=""
-                        className="w-16 h-16 rounded-xl object-cover shrink-0 border border-slate-100"
-                      />
-                    )}
-                    <div className="space-y-1">
-                      <h4 className="text-xs font-bold text-slate-900 dark:text-white group-hover:text-red-600 transition-colors line-clamp-2">
-                        {rel.title}
-                      </h4>
-                      <span className="text-[10px] text-slate-400 block">
-                        {new Date(rel.publishedAt || rel.createdAt).toLocaleDateString()}
-                      </span>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          )}
-        </aside>
-
-        {/* Main Article Body (8 cols) */}
-        <div className="order-first lg:order-last lg:col-span-8 space-y-6 min-w-0">
+        {/* Main Article Body (Left Side on Desktop - 8 cols) */}
+        <div className="lg:col-span-8 space-y-6 min-w-0">
           {/* Headline & Subhead */}
           <div className="space-y-3">
             <span className="inline-block px-3 py-1 rounded-full text-xs font-black uppercase text-white bg-red-600">
@@ -517,6 +476,47 @@ export default function ArticleDetailPage() {
             </div>
           </section>
         </div>
+
+        {/* Right Sticky Sidebar (Sponsored Ad & Related Articles - 4 cols) */}
+        <aside className="lg:col-span-4 lg:sticky lg:top-[105px] lg:h-[calc(100vh-120px)] lg:overflow-y-auto no-scrollbar space-y-6 self-start">
+          <AdSlot slot="sidebar" />
+
+          {/* Related Articles Card */}
+          {relatedArticles.length > 0 && (
+            <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xs p-5 space-y-4">
+              <h3 className="text-sm font-black text-slate-900 dark:text-white border-b border-slate-100 dark:border-slate-800 pb-2 flex items-center gap-2">
+                <span className="w-2.5 h-2.5 bg-red-600 rounded-full" />
+                <span>{t("relatedArticles")}</span>
+              </h3>
+
+              <div className="divide-y divide-slate-100 dark:divide-slate-800">
+                {relatedArticles.map((rel) => (
+                  <Link
+                    key={rel._id}
+                    href={`/${rel.category?.slug || "news"}/${rel.slug}`}
+                    className="py-3 flex items-start gap-3 group"
+                  >
+                    {rel.featuredImage?.url && (
+                      <img
+                        src={rel.featuredImage.url}
+                        alt=""
+                        className="w-16 h-16 rounded-xl object-cover shrink-0 border border-slate-100"
+                      />
+                    )}
+                    <div className="space-y-1">
+                      <h4 className="text-xs font-bold text-slate-900 dark:text-white group-hover:text-red-600 transition-colors line-clamp-2">
+                        {rel.title}
+                      </h4>
+                      <span className="text-[10px] text-slate-400 block">
+                        {new Date(rel.publishedAt || rel.createdAt).toLocaleDateString()}
+                      </span>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+        </aside>
       </div>
     </article>
   );
