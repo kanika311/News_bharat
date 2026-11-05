@@ -6,6 +6,8 @@ import {
   Flame,
   Clock,
   Eye,
+  Heart,
+  MessageSquare,
   TrendingUp,
   Play,
   Image as ImageIcon,
@@ -85,6 +87,23 @@ export default function HomePage() {
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
   const [bookmarkedIds, setBookmarkedIds] = useState(new Set());
   const [copiedId, setCopiedId] = useState(null);
+  const [likedArticles, setLikedArticles] = useState(new Set());
+  const [likesMap, setLikesMap] = useState({});
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const likedSet = new Set();
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && key.startsWith("liked_article_")) {
+            likedSet.add(key.replace("liked_article_", ""));
+          }
+        }
+        setLikedArticles(likedSet);
+      } catch (e) {}
+    }
+  }, []);
 
   useEffect(() => {
     // Safety timer: Never block visitor for more than 1.2s on loading screen
@@ -191,6 +210,41 @@ export default function HomePage() {
       navigator.clipboard.writeText(url);
       setCopiedId(art._id);
       setTimeout(() => setCopiedId(null), 2000);
+    }
+  };
+
+  const handleLikeArticle = async (e, art) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const artId = art._id;
+    const isLiked = likedArticles.has(artId);
+
+    const currentLikes = likesMap[artId] ?? art.likesCount ?? 0;
+    const newCount = isLiked ? Math.max(0, currentLikes - 1) : currentLikes + 1;
+
+    setLikesMap((prev) => ({ ...prev, [artId]: newCount }));
+    setLikedArticles((prev) => {
+      const next = new Set(prev);
+      if (isLiked) {
+        next.delete(artId);
+        try { localStorage.removeItem(`liked_article_${artId}`); } catch (err) {}
+      } else {
+        next.add(artId);
+        try { localStorage.setItem(`liked_article_${artId}`, "true"); } catch (err) {}
+      }
+      return next;
+    });
+
+    try {
+      const res = await apiFetch(`/api/articles/${artId}/like`, {
+        method: "POST",
+        body: JSON.stringify({ action: isLiked ? "unlike" : "like" }),
+      });
+      if (res.success && typeof res.likesCount === "number") {
+        setLikesMap((prev) => ({ ...prev, [artId]: res.likesCount }));
+      }
+    } catch (err) {
+      console.error("Like action failed:", err);
     }
   };
 
@@ -379,6 +433,8 @@ export default function HomePage() {
                 const catLabel = lang === "hi" && art.category?.nameHi ? art.category.nameHi : art.category?.name || "समाचार";
                 const isSaved = bookmarkedIds.has(art._id);
                 const isCopied = copiedId === art._id;
+                const isArtLiked = likedArticles.has(art._id);
+                const artLikesCount = likesMap[art._id] ?? art.likesCount ?? 0;
 
                 return (
                   <article
@@ -431,20 +487,39 @@ export default function HomePage() {
                         </p>
                       </div>
 
-                      {/* Footer Actions */}
+                      {/* Footer Actions: Reading time, Like, Comment, Bookmark, Share, Read more */}
                       <div className="flex items-center justify-between text-xs text-slate-500 pt-2 border-t border-slate-100 dark:border-slate-800/80">
-                        <div className="flex items-center gap-3">
-                          <span className="flex items-center gap-1 text-[11px]">
+                        <div className="flex items-center gap-2.5 sm:gap-3.5">
+                          <span className="flex items-center gap-1 text-[11px] text-slate-500 dark:text-slate-400">
                             <Clock className="w-3.5 h-3.5 text-slate-400" />
-                            <span>{art.readingTime || 3} मिनट</span>
+                            <span>{art.readingTime || 2} मिनट</span>
                           </span>
-                          <span className="flex items-center gap-1 text-[11px]">
-                            <Eye className="w-3.5 h-3.5 text-slate-400" />
-                            <span>{art.viewCount || 0}</span>
-                          </span>
+
+                          {/* Reader Like Button */}
+                          <button
+                            type="button"
+                            onClick={(e) => handleLikeArticle(e, art)}
+                            className={`flex items-center gap-1 text-[11px] font-bold transition-all py-0.5 px-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/30 cursor-pointer ${
+                              isArtLiked ? "text-red-600 bg-red-50/80 dark:bg-red-950/40" : "text-slate-600 dark:text-slate-400 hover:text-red-600"
+                            }`}
+                            title={isArtLiked ? "पसंद किया (Liked)" : "पसंद करें (Like)"}
+                          >
+                            <Heart className={`w-3.5 h-3.5 ${isArtLiked ? "fill-red-600 text-red-600" : ""}`} />
+                            <span>{artLikesCount}</span>
+                          </button>
+
+                          {/* Reader Comment Button */}
+                          <Link
+                            href={`/${catSlug}/${art.slug}#comments`}
+                            className="flex items-center gap-1 text-[11px] text-slate-600 dark:text-slate-400 hover:text-red-600 transition-colors py-0.5 px-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"
+                            title="टिप्पणी करें या पढ़ें"
+                          >
+                            <MessageSquare className="w-3.5 h-3.5 text-slate-400" />
+                            <span>टिप्पणी</span>
+                          </Link>
                         </div>
 
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2.5 sm:gap-3">
                           <button
                             type="button"
                             onClick={() => toggleBookmark(art._id)}
@@ -520,7 +595,7 @@ export default function HomePage() {
                           {art.title}
                         </h4>
                         <span className="text-[10px] text-slate-400 block">
-                          {(art.viewCount || 0).toLocaleString()} व्यूज
+                          {art.category?.name || "न्यूज़"} • {art.readingTime || 2} मिनट
                         </span>
                       </div>
                     </Link>

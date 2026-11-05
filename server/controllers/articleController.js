@@ -461,24 +461,26 @@ exports.getRelatedArticles = async (req, res) => {
   }
 };
 
-// POST /api/articles/:id/like (Public reader like)
+// POST /api/articles/:id/like (Public reader like / toggle)
 exports.likeArticle = async (req, res) => {
   try {
     const { id } = req.params;
-    const article = await Article.findByIdAndUpdate(
-      id,
-      { $inc: { likesCount: 1 } },
-      { new: true }
-    );
+    const { action } = req.body || {};
+    const incVal = action === "unlike" ? -1 : 1;
 
-    if (!article) {
+    const existing = await Article.findById(id);
+    if (!existing) {
       return res.status(404).json({ success: false, message: "Article not found" });
     }
 
+    const newLikes = Math.max(0, (existing.likesCount || 0) + incVal);
+    existing.likesCount = newLikes;
+    await existing.save();
+
     return res.json({
       success: true,
-      likesCount: article.likesCount || 1,
-      message: "Article liked successfully",
+      likesCount: newLikes,
+      message: action === "unlike" ? "Article unliked" : "Article liked successfully",
     });
   } catch (err) {
     return res.status(500).json({ success: false, message: err.message });
