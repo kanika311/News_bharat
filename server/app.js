@@ -23,6 +23,7 @@ const subscriberRoutes = require("./routes/subscriberRoutes");
 const settingRoutes = require("./routes/settingRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
 const activityRoutes = require("./routes/activityRoutes");
+const epaperRoutes = require("./routes/epaperRoutes");
 
 const app = express();
 app.set("trust proxy", 1);
@@ -75,6 +76,7 @@ app.use("/api/subscribers", subscriberRoutes);
 app.use("/api/settings", settingRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/activity", activityRoutes);
+app.use("/api/epaper", epaperRoutes);
 
 // Health check endpoint
 app.get("/api/health", (req, res) => {

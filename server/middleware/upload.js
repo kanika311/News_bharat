@@ -15,22 +15,28 @@ const storage = multer.diskStorage({
   filename: function (req, file, cb) {
     const ext = path.extname(file.originalname).toLowerCase();
     const isVideo = file.mimetype.startsWith("video/") || /mp4|webm|mov|mkv|avi|m4v/.test(ext);
-    const prefix = isVideo ? "vid" : "img";
+    const isPdf = file.mimetype === "application/pdf" || ext === ".pdf";
+    const prefix = isVideo ? "vid" : isPdf ? "pdf" : "img";
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
     cb(null, `${prefix}-${uniqueSuffix}${ext}`);
   },
 });
 
-// File filter (images and videos)
+// File filter (images, videos, and PDF documents)
 const fileFilter = (req, file, cb) => {
-  const allowed = /jpeg|jpg|png|webp|gif|svg|mp4|webm|mov|mkv|avi|m4v/;
+  const allowed = /jpeg|jpg|png|webp|gif|svg|mp4|webm|mov|mkv|avi|m4v|pdf/;
   const ext = path.extname(file.originalname).toLowerCase().replace(".", "");
   const mime = file.mimetype.toLowerCase();
 
-  if (allowed.test(ext) || mime.startsWith("image/") || mime.startsWith("video/")) {
+  if (
+    allowed.test(ext) ||
+    mime.startsWith("image/") ||
+    mime.startsWith("video/") ||
+    mime === "application/pdf"
+  ) {
     cb(null, true);
   } else {
-    cb(new Error("Only images (JPG, PNG, WEBP, GIF, SVG) and videos (MP4, WEBM, MOV, MKV) are allowed!"), false);
+    cb(new Error("Only images, videos, and PDF documents are allowed!"), false);
   }
 };
 

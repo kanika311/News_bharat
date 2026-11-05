@@ -12,109 +12,137 @@ import {
   Maximize2,
   Minimize2,
   MapPin,
-  Volume2,
-  VolumeX,
   Search,
+  ExternalLink,
+  Archive,
+  History,
+  FileText,
+  AlertCircle,
+  Eye,
+  Check,
+  RefreshCw,
+  Clock,
+  Sparkles,
 } from "lucide-react";
-import { useLang } from "@/lib/langContext";
+import { apiFetch } from "@/lib/api";
 
 export default function EPaperPage() {
-  const { lang } = useLang();
-  const [selectedEdition, setSelectedEdition] = useState("lucknow");
-  const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState(() => {
     const today = new Date();
     return today.toISOString().split("T")[0];
   });
-  const [soundEnabled, setSoundEnabled] = useState(true);
+  const [selectedEdition, setSelectedEdition] = useState("all");
+  const [paper, setPaper] = useState(null);
+  const [latestPaper, setLatestPaper] = useState(null);
+  const [requestedDateFound, setRequestedDateFound] = useState(true);
+  const [archiveDates, setArchiveDates] = useState([]);
+  const [editionsList, setEditionsList] = useState([]);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const paperContainerRef = useRef(null);
+  const [copied, setCopied] = useState(false);
+  const [showArchiveDrawer, setShowArchiveDrawer] = useState(false);
+  const readerContainerRef = useRef(null);
 
-  const totalPages = 4;
-
-  const editions = [
-    { id: "lucknow", name: "लखनऊ मुख्य संस्करण" },
-    { id: "delhi", name: "दिल्ली मुख्य संस्करण" },
-    { id: "mumbai", name: "मुंबई संस्करण" },
-    { id: "patna", name: "पटना एवं बिहार संस्करण" },
-  ];
-
-  // Authentic Paper Flip Sound using Web Audio API Synthesizer
-  const playPageTurnSound = () => {
-    if (!soundEnabled) return;
+  // Fetch e-paper data
+  const fetchEPaper = async (dateParam, editionParam) => {
+    setLoading(true);
     try {
-      const AudioCtx = window.AudioContext || window.webkitAudioContext;
-      if (!AudioCtx) return;
-      const ctx = new AudioCtx();
-      if (ctx.state === "suspended") {
-        ctx.resume();
+      const qDate = dateParam || "";
+      const qEdition = editionParam && editionParam !== "all" ? editionParam : "";
+      const res = await apiFetch(`/api/epaper?date=${encodeURIComponent(qDate)}&edition=${encodeURIComponent(qEdition)}`);
+
+      if (res && res.success) {
+        setPaper(res.epaper || null);
+        setLatestPaper(res.latestEpaper || null);
+        setRequestedDateFound(res.requestedDateFound !== false);
+        setArchiveDates(res.archiveDates || []);
+        if (res.editions && res.editions.length) {
+          setEditionsList(res.editions);
+        }
+
+        // If no date was given initially and we got a paper, sync selectedDate
+        if (!dateParam && res.epaper) {
+          const epDate = res.epaper.dateStr || (res.epaper.date ? new Date(res.epaper.date).toISOString().split("T")[0] : "");
+          if (epDate) setSelectedDate(epDate);
+        }
       }
-
-      // 1. White noise buffer to simulate paper surface friction
-      const bufferSize = Math.floor(ctx.sampleRate * 0.22);
-      const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-      const data = buffer.getChannelData(0);
-      for (let i = 0; i < bufferSize; i++) {
-        data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (ctx.sampleRate * 0.07));
-      }
-
-      const noise = ctx.createBufferSource();
-      noise.buffer = buffer;
-
-      // 2. Bandpass filter to give that specific crisp paper rustle frequency
-      const filter = ctx.createBiquadFilter();
-      filter.type = "bandpass";
-      filter.frequency.setValueAtTime(1200, ctx.currentTime);
-      filter.frequency.exponentialRampToValueAtTime(320, ctx.currentTime + 0.18);
-      filter.Q.value = 2.2;
-
-      // 3. Gain envelope (attack & decay)
-      const gain = ctx.createGain();
-      gain.gain.setValueAtTime(0.4, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.22);
-
-      noise.connect(filter);
-      filter.connect(gain);
-      gain.connect(ctx.destination);
-
-      noise.start();
-      noise.stop(ctx.currentTime + 0.22);
     } catch (e) {
-      console.warn("Audio synthesis:", e);
+      console.error("Failed to load e-paper:", e);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const goToPage = (pageNum) => {
-    if (pageNum < 1 || pageNum > totalPages || pageNum === currentPage) return;
-    playPageTurnSound();
-    setCurrentPage(pageNum);
-  };
-
-  const handlePrevPage = () => {
-    if (currentPage > 1) {
-      goToPage(currentPage - 1);
-    }
-  };
-
-  const handleNextPage = () => {
-    if (currentPage < totalPages) {
-      goToPage(currentPage + 1);
-    }
-  };
-
-  // Keyboard navigation (Left / Right arrow keys)
   useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.key === "ArrowLeft") handlePrevPage();
-      if (e.key === "ArrowRight") handleNextPage();
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [currentPage]);
+    // Check if URL has ?date=
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const urlDate = params.get("date");
+      const urlEdition = params.get("edition");
+      if (urlDate) setSelectedDate(urlDate);
+      if (urlEdition) setSelectedEdition(urlEdition);
+      fetchEPaper(urlDate || selectedDate, urlEdition || selectedEdition);
+    } else {
+      fetchEPaper(selectedDate, selectedEdition);
+    }
+  }, []);
+
+  const handleDateChange = (newDate) => {
+    setSelectedDate(newDate);
+    fetchEPaper(newDate, selectedEdition);
+    // Update URL without full refresh
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location);
+      url.searchParams.set("date", newDate);
+      window.history.replaceState({}, "", url);
+    }
+  };
+
+  const handleEditionChange = (newEdition) => {
+    setSelectedEdition(newEdition);
+    fetchEPaper(selectedDate, newEdition);
+  };
+
+  const handleDownload = async () => {
+    if (!paper) return;
+    try {
+      // Track download metric
+      await apiFetch(`/api/epaper/${paper._id}/download`, { method: "POST" });
+    } catch (e) {}
+
+    // Trigger download
+    const link = document.createElement("a");
+    link.href = paper.pdfUrl;
+    link.download = `${paper.title || "Swar-Media-EPaper"}.pdf`;
+    link.target = "_blank";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleShare = async () => {
+    const url = typeof window !== "undefined" ? window.location.href : "";
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: paper?.title || "दैनिक स्वर मीडिया ई-पेपर",
+          text: `स्वर मीडिया दैनिक समाचार पत्र (${selectedDate}) का ई-संस्करण पढ़ें:`,
+          url,
+        });
+        return;
+      } catch (e) {}
+    }
+    // Fallback: copy to clipboard
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
+    }
+  };
 
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
-      paperContainerRef.current?.requestFullscreen().catch(() => {});
+      readerContainerRef.current?.requestFullscreen().catch(() => {});
       setIsFullscreen(true);
     } else {
       document.exitFullscreen().catch(() => {});
@@ -122,454 +150,466 @@ export default function EPaperPage() {
     }
   };
 
+  // Jump to latest active paper
+  const handleJumpToLatest = () => {
+    if (latestPaper) {
+      const latestDateStr = latestPaper.dateStr || (latestPaper.date ? new Date(latestPaper.date).toISOString().split("T")[0] : "");
+      if (latestDateStr) {
+        handleDateChange(latestDateStr);
+      }
+    } else {
+      const today = new Date().toISOString().split("T")[0];
+      handleDateChange(today);
+    }
+  };
+
+  const formattedDate = selectedDate
+    ? new Date(selectedDate).toLocaleDateString("hi-IN", {
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      })
+    : "";
+
   return (
-    <div className="w-full bg-[#f8fafc] dark:bg-slate-950 min-h-screen py-4 sm:py-6">
-      <div className="max-w-6xl mx-auto px-3 sm:px-4 space-y-4">
+    <div className="w-full bg-[#f8fafc] dark:bg-slate-950 min-h-screen py-3 sm:py-6 text-slate-900 dark:text-slate-100 font-sans">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 space-y-4">
         {/* ============================================================== */}
-        {/* TOP CONTROLS BAR (Matches Swarnim Dastavej Layout Exactly)      */}
+        {/* TOP CONTROL BAR: Date Filter, Edition, Quick Jump & Actions     */}
         {/* ============================================================== */}
-        <div className="bg-white dark:bg-slate-900 rounded-2xl p-3 sm:p-4 border border-slate-200 dark:border-slate-800 shadow-xs flex flex-wrap items-center justify-between gap-3">
-          {/* Left: Date & Edition Selectors */}
-          <div className="flex flex-wrap items-center gap-2.5">
-            {/* Date Picker */}
-            <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-800/80 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-300">
-              <Calendar className="w-3.5 h-3.5 text-amber-600" />
-              <span>दिनांक:</span>
-              <input
-                type="date"
-                value={selectedDate}
-                onChange={(e) => setSelectedDate(e.target.value)}
-                className="bg-transparent text-xs font-bold text-slate-900 dark:text-white focus:outline-none cursor-pointer"
-              />
+        <div className="bg-white dark:bg-slate-900 rounded-3xl p-3 sm:p-5 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            {/* Left: Branding & Current Edition Info */}
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-red-600 to-amber-600 text-white flex items-center justify-center shadow-md shadow-red-600/20 shrink-0">
+                <Newspaper className="w-5 h-5" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h1 className="text-base sm:text-lg font-black tracking-tight text-slate-950 dark:text-white">
+                    स्वर मीडिया दैनिक ई-अखबार
+                  </h1>
+                  <span className="hidden sm:inline-flex items-center gap-1 text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-red-100 text-red-700 dark:bg-red-950/60 dark:text-red-400">
+                    <Sparkles className="w-3 h-3" />
+                    डिजिटल संस्करण
+                  </span>
+                </div>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  {formattedDate || "दैनिक समाचार पत्र"} • निष्पक्ष, निर्भीक और जनहितैषी आवाज़
+                </p>
+              </div>
             </div>
 
-            {/* Edition Dropdown */}
-            <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-800/80 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-300">
-              <MapPin className="w-3.5 h-3.5 text-red-600 shrink-0" />
-              <select
-                value={selectedEdition}
-                onChange={(e) => setSelectedEdition(e.target.value)}
-                className="bg-transparent text-xs font-bold text-slate-900 dark:text-white focus:outline-none cursor-pointer"
+            {/* Right: Action Buttons (Archives Drawer, Share, Download, Fullscreen) */}
+            <div className="flex flex-wrap items-center gap-2">
+              {/* Archives Drawer Button */}
+              <button
+                type="button"
+                onClick={() => setShowArchiveDrawer(!showArchiveDrawer)}
+                className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
+                  showArchiveDrawer
+                    ? "bg-red-50 text-red-600 border-red-200 dark:bg-red-950/40 dark:border-red-800"
+                    : "bg-slate-50 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-100"
+                }`}
               >
-                {editions.map((ed) => (
-                  <option key={ed.id} value={ed.id} className="dark:bg-slate-900 text-slate-900 dark:text-white">
-                    {ed.name}
-                  </option>
-                ))}
-              </select>
+                <History className="w-3.5 h-3.5 text-red-600" />
+                <span>पुराने अंक ({archiveDates.length})</span>
+              </button>
+
+              {/* Share Button */}
+              <button
+                type="button"
+                onClick={handleShare}
+                className="flex items-center gap-1.5 px-3 py-2 bg-slate-50 dark:bg-slate-800/80 hover:bg-slate-100 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold transition-colors cursor-pointer"
+                title="अखबार साझा करें"
+              >
+                {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Share2 className="w-3.5 h-3.5" />}
+                <span>{copied ? "लिंक कॉपी हो गया!" : "साझा करें"}</span>
+              </button>
+
+              {/* Download PDF Button */}
+              {paper && paper.pdfUrl && (
+                <button
+                  type="button"
+                  onClick={handleDownload}
+                  className="flex items-center gap-1.5 px-3.5 py-2 bg-amber-500 hover:bg-amber-600 active:scale-95 text-white rounded-xl text-xs font-bold shadow-sm shadow-amber-500/20 transition-all cursor-pointer"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  <span>PDF डाउनलोड</span>
+                </button>
+              )}
+
+              {/* Fullscreen Button */}
+              <button
+                type="button"
+                onClick={toggleFullscreen}
+                className="hidden md:flex items-center gap-1.5 px-3 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold shadow-xs transition-colors cursor-pointer"
+              >
+                <Maximize2 className="w-3.5 h-3.5" />
+                <span>फुल स्क्रीन</span>
+              </button>
             </div>
           </div>
 
-          {/* Right: Sound, Page Navigation & PDF */}
-          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-            {/* Sound Toggle Button (Green icon like reference) */}
-            <button
-              onClick={() => {
-                setSoundEnabled(!soundEnabled);
-                if (!soundEnabled) playPageTurnSound();
-              }}
-              title={soundEnabled ? "Mute Page Flip Sound" : "Enable Page Flip Sound"}
-              className={`p-2 rounded-xl border transition-colors flex items-center justify-center ${
-                soundEnabled
-                  ? "bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-950/40 dark:border-emerald-800"
-                  : "bg-slate-100 text-slate-400 border-slate-200 dark:bg-slate-800 dark:border-slate-700"
-              }`}
-            >
-              {soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
-            </button>
+          {/* Bottom Filter Controls: Date Picker & Edition Selector */}
+          <div className="pt-2 border-t border-slate-100 dark:border-slate-800/80 flex flex-wrap items-center justify-between gap-3">
+            <div className="flex flex-wrap items-center gap-2.5">
+              {/* Date Filter Input */}
+              <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-800/90 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-300 shadow-2xs">
+                <Calendar className="w-4 h-4 text-red-600 shrink-0" />
+                <span className="text-slate-500 dark:text-slate-400 font-medium">दिनांक चुनें:</span>
+                <input
+                  type="date"
+                  value={selectedDate}
+                  onChange={(e) => handleDateChange(e.target.value)}
+                  className="bg-transparent text-xs font-extrabold text-slate-900 dark:text-white focus:outline-none cursor-pointer"
+                />
+              </div>
 
-            {/* Page Navigation (< पिछला | 1 / 4 | अगला >) */}
-            <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold">
+              {/* Jump to Today Button */}
               <button
-                onClick={handlePrevPage}
-                disabled={currentPage <= 1}
-                className="px-2.5 py-1 text-slate-600 dark:text-slate-300 hover:text-slate-900 disabled:opacity-40 disabled:hover:text-slate-600 transition-colors"
+                type="button"
+                onClick={handleJumpToLatest}
+                className="flex items-center gap-1 px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-bold shadow-xs transition-colors cursor-pointer"
               >
-                ‹ पिछला
+                <RefreshCw className="w-3.5 h-3.5" />
+                <span>आज का ताज़ा अंक</span>
               </button>
 
-              <span className="px-2 py-1 text-slate-800 dark:text-slate-200 font-extrabold font-mono">
-                {currentPage} / {totalPages}
-              </span>
-
-              <button
-                onClick={handleNextPage}
-                disabled={currentPage >= totalPages}
-                className="px-3 py-1 bg-red-600 hover:bg-red-700 disabled:opacity-40 text-white font-extrabold rounded-lg shadow-xs transition-colors"
-              >
-                अगला ›
-              </button>
+              {/* Edition Filter Dropdown */}
+              <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-800/90 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-300 shadow-2xs">
+                <MapPin className="w-3.5 h-3.5 text-red-600 shrink-0" />
+                <span className="text-slate-500 dark:text-slate-400 font-medium">संस्करण:</span>
+                <select
+                  value={selectedEdition}
+                  onChange={(e) => handleEditionChange(e.target.value)}
+                  className="bg-transparent text-xs font-extrabold text-slate-900 dark:text-white focus:outline-none cursor-pointer"
+                >
+                  <option value="all" className="dark:bg-slate-900">सभी संस्करण</option>
+                  {editionsList.map((ed) => (
+                    <option key={ed} value={ed} className="dark:bg-slate-900">
+                      {ed}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
 
-            {/* Full Screen Button */}
-            <button
-              onClick={toggleFullscreen}
-              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold shadow-xs transition-colors"
-            >
-              <Maximize2 className="w-3.5 h-3.5" />
-              <span>फुल पेज खोलें</span>
-            </button>
-
-            {/* Download PDF Button */}
-            <button
-              onClick={() => alert(`Downloading Swar Media e-Paper Page ${currentPage} (${selectedDate})...`)}
-              className="flex items-center gap-1.5 px-3.5 py-1.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-bold shadow-xs transition-colors"
-            >
-              <Download className="w-3.5 h-3.5" />
-              <span>PDF</span>
-            </button>
+            {/* Quick date pills for the 4 most recent editions */}
+            <div className="hidden lg:flex items-center gap-1.5 text-xs">
+              <span className="text-slate-400 text-[11px] font-semibold flex items-center gap-1">
+                <Clock className="w-3 h-3" /> हाल के अंक:
+              </span>
+              {archiveDates.slice(0, 4).map((item) => {
+                const isCurrent = item.dateStr === selectedDate;
+                return (
+                  <button
+                    key={item._id}
+                    type="button"
+                    onClick={() => handleDateChange(item.dateStr)}
+                    className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
+                      isCurrent
+                        ? "bg-red-600 text-white shadow-xs"
+                        : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200"
+                    }`}
+                  >
+                    {item.dateStr}
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
 
         {/* ============================================================== */}
-        {/* NEWSPAPER CANVAS WITH FLOATING PREV / NEXT BUTTONS             */}
+        {/* ARCHIVE DRAWER / HISTORY EXPLORER (Shown when toggled)         */}
+        {/* ============================================================== */}
+        {showArchiveDrawer && (
+          <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200 dark:border-slate-800 shadow-lg space-y-4 animate-in fade-in slide-in-from-top-2">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+              <div className="flex items-center gap-2">
+                <Archive className="w-5 h-5 text-red-600" />
+                <h3 className="text-sm font-black text-slate-900 dark:text-white">
+                  पुराने समाचार पत्र पुरालेख (Newspaper Archive Directory)
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowArchiveDrawer(false)}
+                className="text-xs font-bold text-slate-400 hover:text-slate-600 px-2 py-1 rounded-lg"
+              >
+                बंद करें ✕
+              </button>
+            </div>
+
+            {archiveDates.length === 0 ? (
+              <p className="text-xs text-slate-400 py-4 text-center">
+                फिलहाल कोई पिछला संस्करण उपलब्ध नहीं है।
+              </p>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 max-h-[360px] overflow-y-auto pr-1">
+                {archiveDates.map((item) => {
+                  const isCurrent = item.dateStr === selectedDate;
+                  const itemDateFormatted = item.date
+                    ? new Date(item.date).toLocaleDateString("hi-IN", {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                      })
+                    : item.dateStr;
+
+                  return (
+                    <div
+                      key={item._id}
+                      onClick={() => {
+                        handleDateChange(item.dateStr);
+                        setShowArchiveDrawer(false);
+                      }}
+                      className={`p-3 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between space-y-2 ${
+                        isCurrent
+                          ? "bg-red-50 dark:bg-red-950/40 border-red-300 dark:border-red-800 shadow-sm"
+                          : "bg-slate-50/70 dark:bg-slate-800/40 border-slate-200 dark:border-slate-800 hover:border-red-400 hover:bg-white dark:hover:bg-slate-800"
+                      }`}
+                    >
+                      <div className="space-y-1">
+                        <div className="flex items-center justify-between text-[11px] font-bold">
+                          <span className="flex items-center gap-1 text-slate-900 dark:text-white font-extrabold">
+                            <Calendar className="w-3.5 h-3.5 text-red-600" />
+                            {itemDateFormatted}
+                          </span>
+                          {isCurrent && (
+                            <span className="text-[9px] font-black uppercase px-1.5 py-0.5 rounded bg-red-600 text-white">
+                              सक्रिय
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="text-xs font-bold text-slate-800 dark:text-slate-200 line-clamp-1">
+                          {item.title}
+                        </div>
+
+                        <div className="flex items-center gap-1 text-[10px] text-red-600 font-semibold">
+                          <MapPin className="w-3 h-3" />
+                          <span>{item.edition}</span>
+                        </div>
+                      </div>
+
+                      <div className="pt-2 border-t border-slate-200/60 dark:border-slate-700/60 flex items-center justify-between text-[10px] text-slate-500">
+                        <span>{item.pageCount || 4} पृष्ठ</span>
+                        {item.fileSize && <span>{item.fileSize}</span>}
+                        <span className="text-red-600 font-bold hover:underline">अंक पढ़ें →</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ============================================================== */}
+        {/* MAIN VIEWER CANVAS                                             */}
         {/* ============================================================== */}
         <div
-          ref={paperContainerRef}
-          className="relative bg-[#e2e8f0]/80 dark:bg-slate-900/90 rounded-3xl p-4 sm:p-8 flex items-center justify-center min-h-[750px] shadow-inner overflow-hidden border border-slate-200 dark:border-slate-800 select-none"
+          ref={readerContainerRef}
+          className="relative bg-white dark:bg-slate-900 rounded-3xl p-3 sm:p-6 border border-slate-200 dark:border-slate-800 shadow-md min-h-[600px] flex flex-col"
         >
-          {/* FLOATING LEFT CIRCULAR BUTTON (<) */}
-          <button
-            onClick={handlePrevPage}
-            disabled={currentPage <= 1}
-            aria-label="Previous Page"
-            className={`absolute left-2 sm:left-6 top-1/2 -translate-y-1/2 w-11 h-11 sm:w-14 sm:h-14 rounded-full bg-white dark:bg-slate-800 text-slate-800 dark:text-white shadow-2xl flex items-center justify-center border border-slate-200 dark:border-slate-700 transition-all z-20 ${
-              currentPage <= 1
-                ? "opacity-30 cursor-not-allowed"
-                : "hover:scale-110 active:scale-95 hover:bg-red-50 hover:text-red-600 dark:hover:bg-slate-700 cursor-pointer"
-            }`}
-          >
-            <ChevronLeft className="w-6 h-6 sm:w-8 sm:h-8" />
-          </button>
+          {loading ? (
+            <div className="flex-1 flex flex-col items-center justify-center py-24 space-y-4">
+              <div className="w-12 h-12 rounded-full border-4 border-red-600 border-t-transparent animate-spin" />
+              <div className="text-center space-y-1">
+                <p className="text-sm font-bold text-slate-900 dark:text-white">
+                  समाचार पत्र लोड हो रहा है...
+                </p>
+                <p className="text-xs text-slate-400">
+                  दिनांक {selectedDate} का संस्करण प्राप्त किया जा रहा है
+                </p>
+              </div>
+            </div>
+          ) : paper && paper.pdfUrl ? (
+            /* ============================================================ */
+            /* SUCCESS STATE: EMBEDDED PDF VIEWER                          */
+            /* ============================================================ */
+            <div className="flex-1 flex flex-col space-y-3">
+              {/* Paper Meta Banner */}
+              <div className="bg-slate-50 dark:bg-slate-800/80 rounded-2xl p-3 sm:p-4 border border-slate-200 dark:border-slate-700/80 flex flex-wrap items-center justify-between gap-3">
+                <div className="space-y-0.5">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs sm:text-sm font-black text-slate-950 dark:text-white">
+                      {paper.title}
+                    </span>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-400">
+                      ✓ सत्यापित PDF
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500 dark:text-slate-400">
+                    <span className="flex items-center gap-1 text-red-600 font-semibold">
+                      <MapPin className="w-3.5 h-3.5" />
+                      {paper.edition}
+                    </span>
+                    <span>• {paper.pageCount || 4} पृष्ठ</span>
+                    {paper.fileSize && <span>• {paper.fileSize}</span>}
+                    {paper.views > 0 && <span>• 👁️ {paper.views} पाठकों ने देखा</span>}
+                  </div>
+                </div>
 
-          {/* FLOATING RIGHT CIRCULAR BUTTON (>) */}
-          <button
-            onClick={handleNextPage}
-            disabled={currentPage >= totalPages}
-            aria-label="Next Page"
-            className={`absolute right-2 sm:right-6 top-1/2 -translate-y-1/2 w-11 h-11 sm:w-14 sm:h-14 rounded-full bg-white dark:bg-slate-800 text-slate-800 dark:text-white shadow-2xl flex items-center justify-center border border-slate-200 dark:border-slate-700 transition-all z-20 ${
-              currentPage >= totalPages
-                ? "opacity-30 cursor-not-allowed"
-                : "hover:scale-110 active:scale-95 hover:bg-red-50 hover:text-red-600 dark:hover:bg-slate-700 cursor-pointer"
-            }`}
-          >
-            <ChevronRight className="w-6 h-6 sm:w-8 sm:h-8" />
-          </button>
-
-          {/* REALISTIC NEWSPAPER PAGE (Crisp physical print style) */}
-          <div className="relative w-full max-w-3xl bg-[#fefefe] text-slate-950 rounded-lg shadow-2xl border border-slate-300/80 overflow-hidden font-hindi">
-            {/* Top Right "फुल स्क्रीन पढ़ें" overlay badge */}
-            <button
-              onClick={toggleFullscreen}
-              className="absolute top-3 right-3 z-10 flex items-center gap-1 px-2.5 py-1 bg-black/75 hover:bg-black text-white text-[10px] font-bold rounded-full backdrop-blur-md transition-all shadow"
-            >
-              <Search className="w-3 h-3" />
-              <span>फुल स्क्रीन पढ़ें</span>
-            </button>
-
-            {/* NEWSPAPER MASTHEAD (HEADER OF PAPER) */}
-            <div className="border-b-4 border-slate-950 p-4 sm:p-5 bg-[#faf9f6]">
-              {/* Top Sub-masthead */}
-              <div className="flex items-center justify-between text-[10px] sm:text-[11px] font-extrabold uppercase border-b border-slate-900 pb-1 text-slate-800">
-                <span>वर्ष 26 • अंक 104 • डाक पंजीयन सं. 452</span>
-                <span className="font-bold text-red-700">
-                  {selectedEdition === "lucknow"
-                    ? "लखनऊ मुख्य संस्करण"
-                    : selectedEdition === "delhi"
-                    ? "दिल्ली मुख्य संस्करण"
-                    : selectedEdition === "mumbai"
-                    ? "मुंबई संस्करण"
-                    : "पटना संस्करण"}
-                </span>
-                <span>{selectedDate} • मूल्य ₹ 5.00 • पृष्ठ {currentPage}</span>
+                {/* Right Direct Links */}
+                <div className="flex items-center gap-2">
+                  <a
+                    href={paper.pdfUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-800 dark:text-white rounded-xl text-xs font-bold transition-colors"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" />
+                    <span>नये टैब में खोलें</span>
+                  </a>
+                  <button
+                    type="button"
+                    onClick={handleDownload}
+                    className="flex items-center gap-1.5 px-3.5 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-bold shadow-xs transition-colors cursor-pointer"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    <span>डाउनलोड</span>
+                  </button>
+                </div>
               </div>
 
-              {/* Newspaper Main Title */}
-              <div className="text-center py-2 sm:py-3 space-y-1">
-                <h1 className="text-4xl sm:text-6xl font-black tracking-tight text-slate-950 font-serif">
-                  स्वर मीडिया
-                </h1>
-                <p className="text-[10px] sm:text-xs font-black tracking-widest text-slate-700 uppercase">
-                  हिन्दी दैनिक समाचार पत्र • निष्पक्षता, सत्य और जन सरोकार की बुलंद आवाज़
+              {/* The Interactive Native PDF Viewer */}
+              <div className="w-full flex-1 rounded-2xl overflow-hidden border border-slate-300 dark:border-slate-700 shadow-inner bg-slate-100 dark:bg-slate-950 min-h-[750px] sm:min-h-[850px]">
+                <iframe
+                  src={`${paper.pdfUrl}#toolbar=1&navpanes=1&scrollbar=1&view=FitH`}
+                  className="w-full h-full min-h-[750px] sm:min-h-[850px] border-0"
+                  title={paper.title}
+                />
+              </div>
+
+              {/* Viewer Footer Tips */}
+              <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500 pt-1">
+                <span>
+                  💡 सुझाव: पेज ज़ूम, प्रिंट या सर्च करने के लिए ऊपर दिए गए टूल्स का उपयोग करें या "नये टैब में खोलें" पर क्लिक करें।
+                </span>
+                <span className="font-bold text-red-600">
+                  स्वर मीडिया • निष्पक्ष पत्रकारिता
+                </span>
+              </div>
+            </div>
+          ) : (
+            /* ============================================================ */
+            /* EMPTY STATE: NO PAPER FOUND FOR SELECTED DATE                */
+            /* ============================================================ */
+            <div className="flex-1 flex flex-col items-center justify-center py-16 px-4 text-center space-y-5">
+              <div className="w-20 h-20 rounded-3xl bg-amber-50 dark:bg-amber-950/40 text-amber-600 flex items-center justify-center shadow-inner">
+                <AlertCircle className="w-10 h-10" />
+              </div>
+
+              <div className="space-y-1.5 max-w-md">
+                <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white">
+                  चयनित दिनांक ({selectedDate}) का समाचार पत्र उपलब्ध नहीं है
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                  इस दिनांक के लिए कोई ई-संस्करण अपलोड नहीं किया गया है। आप नवीनतम अंक पढ़ सकते हैं या नीचे दिए गए पुरालेख में से किसी अन्य तारीख का चुनाव कर सकते हैं।
                 </p>
               </div>
 
-              {/* Bottom Tagline / Ticker inside Newspaper */}
-              <div className="flex items-center justify-between border-t border-slate-900 pt-1 text-[9px] sm:text-[10px] font-bold text-slate-700">
-                <span>संपादक: राजेश शर्मा</span>
-                <span>इंटरनेट संस्करण: www.swarmedia.in</span>
-                <span>मौसम: दिल्ली 24°C • लखनऊ 25°C • मुंबई 30°C</span>
+              <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={handleJumpToLatest}
+                  className="flex items-center gap-2 px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-bold shadow-md shadow-red-600/30 transition-transform active:scale-95 cursor-pointer"
+                >
+                  <RefreshCw className="w-4 h-4" />
+                  <span>नवीनतम ई-पेपर खोलें</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setShowArchiveDrawer(true)}
+                  className="flex items-center gap-2 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-bold transition-colors cursor-pointer"
+                >
+                  <History className="w-4 h-4 text-red-600" />
+                  <span>उपलब्ध पुराने अंक देखें</span>
+                </button>
               </div>
+
+              {/* Recent Active Editions Carousel/Grid */}
+              {archiveDates.length > 0 && (
+                <div className="w-full max-w-3xl pt-8 space-y-3 text-left">
+                  <h4 className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                    <Clock className="w-3.5 h-3.5 text-red-600" />
+                    <span>हाल के उपलब्ध समाचार पत्र:</span>
+                  </h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    {archiveDates.slice(0, 3).map((item) => (
+                      <div
+                        key={item._id}
+                        onClick={() => handleDateChange(item.dateStr)}
+                        className="p-3 bg-slate-50 dark:bg-slate-800/80 rounded-2xl border border-slate-200 dark:border-slate-700 hover:border-red-500 cursor-pointer transition-all space-y-1.5"
+                      >
+                        <div className="flex items-center justify-between text-xs font-bold text-slate-900 dark:text-white">
+                          <span>{item.dateStr}</span>
+                          <span className="text-[10px] text-red-600">{item.edition}</span>
+                        </div>
+                        <p className="text-[11px] text-slate-600 dark:text-slate-300 truncate">
+                          {item.title}
+                        </p>
+                        <div className="text-[10px] text-red-600 font-bold">
+                          क्लिक करके पढ़ें →
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
+          )}
+        </div>
 
-            {/* DYNAMIC PAGE CONTENT BASED ON currentPage */}
-            {currentPage === 1 && (
-              /* ======================================================== */
-              /* PAGE 1: FRONT PAGE (मुख्य पृष्ठ / राष्ट्रीय)            */
-              /* ======================================================== */
-              <div className="p-4 sm:p-6 space-y-5 bg-[#faf9f6]">
-                {/* Top Banner Story */}
-                <div className="border-b-2 border-slate-900 pb-4">
-                  <div className="flex items-center justify-between text-xs text-red-700 font-black mb-1">
-                    <span>केंद्रीय गृह मंत्रालय • विशेष रिपोर्ट</span>
-                    <span className="text-[10px] bg-red-100 text-red-800 px-2 py-0.5 rounded">प्रमुख खबर</span>
-                  </div>
-                  <h2 className="text-2xl sm:text-3xl font-black leading-tight text-slate-950">
-                    पार्टी का 350 सीट जीतने का लक्ष्य: नए संगठनात्मक फैसलों का हुआ एलान
-                  </h2>
-                  <p className="text-xs sm:text-sm text-slate-700 font-bold mt-1 leading-snug">
-                    अमित शाह ने कार्यकर्ताओं को संबोधित करते हुए कहा कि आगामी विधानसभा चुनावों में बूथ स्तर पर मजबूत पकड़ ही ऐतिहासिक जीत का आधार बनेगी।
-                  </p>
-                </div>
-
-                {/* 2-Column Front Stories */}
-                <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
-                  {/* Left Column: Lead story with image */}
-                  <div className="md:col-span-8 space-y-3 md:border-r border-slate-300 md:pr-5">
-                    <div className="relative aspect-video rounded-lg overflow-hidden border border-slate-300">
-                      <img
-                        src="https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=800&q=80"
-                        alt="News Lead"
-                        className="w-full h-full object-cover"
-                      />
-                      <span className="absolute bottom-1 right-1 bg-black/80 text-white text-[9px] px-1.5 py-0.5 rounded">
-                        संसद भवन परिसर (फाइल फोटो)
-                      </span>
-                    </div>
-
-                    <h3 className="text-lg sm:text-xl font-black text-slate-950 leading-snug">
-                      संसद के आगामी विशेष सत्र में ऐतिहासिक आर्थिक सुधारों और डिजिटल भारत पर नए विधेयक पेश होने के संकेत
-                    </h3>
-
-                    <p className="text-xs text-slate-800 leading-relaxed text-justify columns-1 sm:columns-2 gap-4">
-                      नई दिल्ली: संसद के विशेष सत्र में देश की अर्थव्यवस्था और डिजिटल संरचना को बढ़ावा देने वाले ऐतिहासिक विधेयकों पर गहन चर्चा होगी। वित्त मंत्रालय और योजना आयोग के वरिष्ठ अधिकारियों ने मसौदा तैयार कर लिया है। सभी दलों के साथ सर्वदलीय बैठक आहूत की गई है।
-                    </p>
-                  </div>
-
-                  {/* Right Column: Mercury to Gold Discovery & City Bulletins */}
-                  <div className="md:col-span-4 space-y-4">
-                    <div className="bg-amber-50 p-3 rounded-lg border border-amber-200 space-y-1.5">
-                      <span className="text-[10px] font-black uppercase text-amber-800 bg-amber-200/60 px-1.5 py-0.5 rounded">
-                        वैज्ञानिक शोध
-                      </span>
-                      <h4 className="text-sm font-black text-slate-950 leading-snug">
-                        पारे (Mercury) से सोना! राजस्थान के वैज्ञानिक का दावा
-                      </h4>
-                      <p className="text-[11px] text-slate-700 leading-normal">
-                        प्राचीन 'रसशास्त्र' और आचार्य नागार्जुन के ग्रंथों से मिला तरीका। शोधकर्ताओं ने लैब में प्राथमिक परीक्षण सफल रहने की बात कही।
-                      </p>
-                    </div>
-
-                    <div className="border-t border-slate-300 pt-3 space-y-1">
-                      <h4 className="text-xs font-black text-red-700">
-                        जम्मू-कश्मीर: पूर्व पत्रकार निधि राजदान संग रचाई शादी
-                      </h4>
-                      <p className="text-[11px] text-slate-600 leading-normal">
-                        उमर अब्दुल्ला के नए सफर पर सोशल मीडिया पर बधाईयों का तांता लगा।
-                      </p>
-                    </div>
-
-                    <div className="border-t border-slate-300 pt-3 space-y-1">
-                      <h4 className="text-xs font-black text-slate-900">
-                        शेयर बाजार: सेंसेक्स 85,000 के पार
-                      </h4>
-                      <p className="text-[11px] text-slate-600 leading-normal">
-                        आईटी और बैंकिंग शेयरों में जबरदस्त उछाल से निवेशकों की संपत्ति में 4 लाख करोड़ का इजाफा।
-                      </p>
-                    </div>
-                  </div>
-                </div>
+        {/* ============================================================== */}
+        {/* BOTTOM ARCHIVE BROWSER BAR                                     */}
+        {/* ============================================================== */}
+        {archiveDates.length > 0 && (
+          <div className="bg-white dark:bg-slate-900 rounded-3xl p-4 sm:p-5 border border-slate-200 dark:border-slate-800 shadow-2xs space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <History className="w-4 h-4 text-red-600" />
+                <h3 className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider">
+                  पिछला पुरालेख एवं पुराने अंक (Past Editions Archive)
+                </h3>
               </div>
-            )}
-
-            {currentPage === 2 && (
-              /* ======================================================== */
-              /* PAGE 2: STATE & CITY (राज्य-शहर बुलेटिन)                 */
-              /* ======================================================== */
-              <div className="p-4 sm:p-6 space-y-5 bg-[#faf9f6]">
-                <div className="border-b-2 border-red-700 pb-2 flex items-center justify-between">
-                  <h2 className="text-xl sm:text-2xl font-black text-red-700">
-                    राज्य-शहर • उत्तर प्रदेश हलचल
-                  </h2>
-                  <span className="text-xs font-bold text-slate-600">पेज 2 • ग्राउंड रिपोर्ट्स</span>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                  <div className="space-y-2 border border-slate-200 p-4 rounded-xl bg-white">
-                    <span className="text-[10px] font-black text-white bg-red-600 px-2 py-0.5 rounded">
-                      सुल्तानपुर
-                    </span>
-                    <h3 className="text-base font-black text-slate-950">
-                      जल जीवन मिशन के कर्मचारियों पर जानलेवा हमला, 13 नामजद समेत 23 पर FIR दर्ज
-                    </h3>
-                    <p className="text-xs text-slate-700 leading-relaxed">
-                      उत्तर प्रदेश के सुल्तानपुर जिले में जल जीवन मिशन के तहत काम कर रहे कर्मचारियों पर दबंगों द्वारा हमला करने का मामला सामने आया है। पुलिस ने त्वरित कार्रवाई करते हुए मुख्य आरोपियों को हिरासत में लिया।
-                    </p>
-                  </div>
-
-                  <div className="space-y-2 border border-slate-200 p-4 rounded-xl bg-white">
-                    <span className="text-[10px] font-black text-white bg-slate-800 px-2 py-0.5 rounded">
-                      लखनऊ
-                    </span>
-                    <h3 className="text-base font-black text-slate-950">
-                      23वीं मंजिल से गिरकर पति-बेटे की मौत के बाद अफसर पत्नी ने की आत्महत्या की कोशिश
-                    </h3>
-                    <p className="text-xs text-slate-700 leading-relaxed">
-                      राजधानी लखनऊ के पॉश इलाके में स्थित बहुमंजिला इमारत की 23वीं मंजिल से गिरकर पिता-पुत्र की मौत हो गई। घटना के कुछ ही समय बाद सदमे में आई पत्नी ने जान देने का प्रयास किया, जिनका अस्पताल में इलाज जारी है।
-                    </p>
-                  </div>
-                </div>
-
-                <div className="border-t-2 border-slate-900 pt-4 space-y-3">
-                  <h3 className="text-lg font-black text-slate-950">
-                    अयोध्या में दीपोत्सव की तैयारियां तेज, 28 लाख दीयों से बनेगा नया विश्व रिकॉर्ड
-                  </h3>
-                  <p className="text-xs text-slate-700 columns-2 leading-relaxed text-justify">
-                    रामनगरी अयोध्या में इस बार का दीपोत्सव भव्य और ऐतिहासिक होने जा रहा है। राम की पैड़ी पर 28 लाख दीये जलाकर नया गिनीज वर्ल्ड रिकॉर्ड बनाने की तैयारी है। 30 हजार से अधिक वालंटियर्स तैनात रहेंगे और सुरक्षा के कड़े इंतजाम किए गए हैं।
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {currentPage === 3 && (
-              /* ======================================================== */
-              /* PAGE 3: EDITORIAL & OPINION (संपादकीय एवं विचार)        */
-              /* ======================================================== */
-              <div className="p-4 sm:p-6 space-y-5 bg-[#faf9f6]">
-                <div className="border-b-2 border-slate-900 pb-2 flex items-center justify-between">
-                  <h2 className="text-xl sm:text-2xl font-black text-slate-900">
-                    संपादकीय • विचार और विमर्श
-                  </h2>
-                  <span className="text-xs font-bold text-slate-600">पेज 3 • संपादकीय मंच</span>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
-                  <div className="md:col-span-8 space-y-3 md:border-r border-slate-300 md:pr-5">
-                    <h3 className="text-xl font-black text-slate-950">
-                      भारत का अंतरिक्ष विजन: आत्मनिर्भरता से वैश्विक नेतृत्व तक
-                    </h3>
-                    <p className="text-xs text-slate-500 font-bold">आलेख: डॉ. के. राधाकृष्णन (वरिष्ठ अंतरिक्ष विशेषज्ञ)</p>
-                    <p className="text-xs text-slate-800 leading-relaxed columns-2 gap-4 text-justify pt-1">
-                      हाल के वर्षों में भारतीय अंतरिक्ष अनुसंधान संगठन (इसरो) ने वैश्विक स्तर पर जो प्रतिष्ठा अर्जित की है, वह अप्रत्याशित है। चंद्रयान और आदित्य-एल1 मिशनों की सफलता ने यह साबित कर दिया है कि भारत किफायती लेकिन विश्वस्तरीय तकनीक का केंद्र है। आगामी गगनयान मिशन मानव अंतरिक्ष उड़ान के क्षेत्र में देश को एक नई ऊंचाई पर स्थापित करेगा।
-                    </p>
-                  </div>
-
-                  <div className="md:col-span-4 space-y-4">
-                    <div className="bg-slate-100 p-3 rounded-lg border border-slate-300 space-y-2">
-                      <h4 className="text-xs font-black text-red-700 uppercase">आज का विचार</h4>
-                      <p className="text-xs font-bold italic text-slate-800">
-                        "सत्य को किसी सहारे की आवश्यकता नहीं होती, वह अपने तेज से स्वयं प्रकाशित होता है।"
-                      </p>
-                      <span className="text-[10px] text-slate-500 block text-right">— स्वामी विवेकानंद</span>
-                    </div>
-
-                    <div className="border-t border-slate-300 pt-3">
-                      <h4 className="text-xs font-black text-slate-900 mb-1">पाठक मंच</h4>
-                      <p className="text-[11px] text-slate-700 leading-relaxed">
-                        शहरों में बढ़ते प्रदूषण पर ठोस कार्ययोजना जरूरी है। केवल पराली जलाने पर दोष मढ़ने के बजाय निर्माण धूल और वाहनों से होने वाले धुएं पर सख्त कार्रवाई होनी चाहिए।
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {currentPage === 4 && (
-              /* ======================================================== */
-              /* PAGE 4: SPORTS & BUSINESS (खेल एवं व्यापार)             */
-              /* ======================================================== */
-              <div className="p-4 sm:p-6 space-y-5 bg-[#faf9f6]">
-                <div className="border-b-2 border-emerald-700 pb-2 flex items-center justify-between">
-                  <h2 className="text-xl sm:text-2xl font-black text-emerald-800">
-                    खेल एवं कारोबार • बिजनेस व स्पोर्ट्स डेस्क
-                  </h2>
-                  <span className="text-xs font-bold text-slate-600">पेज 4 • अंतिम पृष्ठ</span>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                  <div className="space-y-2 border border-slate-200 p-4 rounded-xl bg-white">
-                    <span className="text-[10px] font-black text-white bg-blue-600 px-2 py-0.5 rounded">
-                      क्रिकेट
-                    </span>
-                    <h3 className="text-base font-black text-slate-950">
-                      Champions Trophy: रोहित शर्मा की कप्तानी में 15 सदस्यीय टीम का एलान
-                    </h3>
-                    <p className="text-xs text-slate-700 leading-relaxed">
-                      बीसीसीआई चयन समिति ने आगामी आईसीसी चैंपियंस ट्रॉफी के लिए भारतीय दल की घोषणा कर दी है। युवा ऑलराउंडरों को मौका दिया गया है, जबकि जसप्रीत बुमराह गेंदबाजी आक्रमण की अगुवाई करेंगे।
-                    </p>
-                  </div>
-
-                  <div className="space-y-2 border border-slate-200 p-4 rounded-xl bg-white">
-                    <span className="text-[10px] font-black text-white bg-emerald-700 px-2 py-0.5 rounded">
-                      बाजार विश्लेषण
-                    </span>
-                    <h3 className="text-base font-black text-slate-950">
-                      सोने और चांदी के भाव में रिकॉर्ड गिरावट, खरीदारों में उत्साह
-                    </h3>
-                    <p className="text-xs text-slate-700 leading-relaxed">
-                      वैश्विक बाजार में डॉलर की मजबूती के चलते बुलियन बाजार में सोने की कीमतों में 800 रुपये प्रति 10 ग्राम की नरमी देखी गई। चांदी 90,000 रुपये प्रति किलो के स्तर पर कारोबार कर रही है।
-                    </p>
-                  </div>
-                </div>
-
-                <div className="border-t-2 border-slate-900 pt-3 flex items-center justify-between text-xs font-bold text-slate-700">
-                  <span>मुद्रा विनिमय: USD/INR: ₹83.95</span>
-                  <span>क्रूड ऑयल: $74.20/बैरल</span>
-                  <span>निफ्टी: 25,850 (+145)</span>
-                </div>
-              </div>
-            )}
-
-            {/* Bottom Right "फुल स्क्रीन पढ़ें" overlay badge */}
-            <div className="p-3 bg-[#f1efe9] border-t border-slate-300 flex items-center justify-between">
-              <span className="text-[10px] text-slate-500 font-bold">
-                स्वर मीडिया ई-अखबार • सर्वाधिकार सुरक्षित © 2026
+              <span className="text-[11px] text-slate-400">
+                तारीख पर क्लिक करके पुराना अखबार पढ़ें
               </span>
-              <button
-                onClick={toggleFullscreen}
-                className="flex items-center gap-1 px-3 py-1 bg-black/80 hover:bg-black text-white text-[10px] font-bold rounded-full shadow transition-all"
-              >
-                <Search className="w-3 h-3" />
-                <span>फुल स्क्रीन पढ़ें</span>
-              </button>
+            </div>
+
+            <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-thin">
+              {archiveDates.map((item) => {
+                const isCurrent = item.dateStr === selectedDate;
+                return (
+                  <button
+                    key={item._id}
+                    type="button"
+                    onClick={() => handleDateChange(item.dateStr)}
+                    className={`shrink-0 flex items-center gap-2 px-3.5 py-2 rounded-2xl border text-xs font-bold transition-all cursor-pointer ${
+                      isCurrent
+                        ? "bg-red-600 text-white border-red-600 shadow-md shadow-red-600/30 scale-102"
+                        : "bg-slate-50 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700"
+                    }`}
+                  >
+                    <Calendar className={`w-3.5 h-3.5 ${isCurrent ? "text-white" : "text-red-600"}`} />
+                    <span>{item.dateStr}</span>
+                    <span className={`text-[10px] px-1.5 py-0.5 rounded ${
+                      isCurrent ? "bg-red-700 text-white" : "bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300"
+                    }`}>
+                      {item.edition.split(" ")[0]}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
           </div>
-        </div>
-
-        {/* BOTTOM PAGINATION BAR */}
-        <div className="flex items-center justify-center gap-3 pt-2">
-          <button
-            onClick={handlePrevPage}
-            disabled={currentPage <= 1}
-            className="flex items-center gap-1 px-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 disabled:opacity-40 text-slate-800 dark:text-slate-200 font-bold text-xs rounded-xl shadow-xs hover:bg-slate-50 transition-colors"
-          >
-            <ChevronLeft className="w-4 h-4" /> पिछला पेज
-          </button>
-
-          <div className="flex items-center gap-2">
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-              <button
-                key={p}
-                onClick={() => goToPage(p)}
-                className={`w-9 h-9 rounded-xl font-bold text-xs transition-all ${
-                  currentPage === p
-                    ? "bg-red-600 text-white shadow-md shadow-red-600/30 scale-105"
-                    : "bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 hover:bg-slate-50"
-                }`}
-              >
-                {p}
-              </button>
-            ))}
-          </div>
-
-          <button
-            onClick={handleNextPage}
-            disabled={currentPage >= totalPages}
-            className="flex items-center gap-1 px-4 py-2 bg-red-600 hover:bg-red-700 disabled:opacity-40 text-white font-bold text-xs rounded-xl shadow-md shadow-red-600/20 transition-colors"
-          >
-            अगला पेज <ChevronRight className="w-4 h-4" />
-          </button>
-        </div>
+        )}
       </div>
     </div>
   );
