@@ -1,7 +1,7 @@
 "use client";
 
-import LiveBlogDetailPage from "@/app/live/[slug]/page";
+import LiveBlogsDirectoryPage from "../page";
 
 export default function LiveBlogSlugAliasPage() {
-  return <LiveBlogDetailPage />;
+  return <LiveBlogsDirectoryPage />;
 }
