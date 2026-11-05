@@ -23,6 +23,12 @@ import {
   RefreshCw,
   Clock,
   Sparkles,
+  Volume2,
+  VolumeX,
+  ZoomIn,
+  ZoomOut,
+  Layers,
+  Loader2,
 } from "lucide-react";
 import { apiFetch } from "@/lib/api";
 
@@ -41,15 +47,112 @@ export default function EPaperPage() {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [showArchiveDrawer, setShowArchiveDrawer] = useState(false);
+
+  // PDF.js Page-by-Page Viewer States
+  const [pdfLibReady, setPdfLibReady] = useState(false);
+  const [pdfDoc, setPdfDoc] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [pageRendering, setPageRendering] = useState(false);
+  const [soundEnabled, setSoundEnabled] = useState(true);
+  const [zoomScale, setZoomScale] = useState(1.0);
+  const [turnAnimation, setTurnAnimation] = useState("");
+
+  const canvasRef = useRef(null);
+  const renderTaskRef = useRef(null);
   const readerContainerRef = useRef(null);
 
-  // Fetch e-paper data
+  // 1. Dynamically Load Local PDF.js Engine (/pdf.min.js)
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    if (window.pdfjsLib) {
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.js";
+      setPdfLibReady(true);
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.src = "/pdf.min.js";
+    script.async = true;
+    script.onload = () => {
+      if (window.pdfjsLib) {
+        window.pdfjsLib.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.js";
+        setPdfLibReady(true);
+      }
+    };
+    script.onerror = () => {
+      console.warn("Local PDF.js load error, falling back to CDN");
+      const cdnScript = document.createElement("script");
+      cdnScript.src = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
+      cdnScript.async = true;
+      cdnScript.onload = () => {
+        if (window.pdfjsLib) {
+          window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+            "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+          setPdfLibReady(true);
+        }
+      };
+      document.body.appendChild(cdnScript);
+    };
+
+    document.body.appendChild(script);
+  }, []);
+
+  // 2. Authentic Paper Flip Sound using Web Audio API Synthesizer
+  const playPageTurnSound = () => {
+    if (!soundEnabled) return;
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      if (ctx.state === "suspended") {
+        ctx.resume();
+      }
+
+      // 1. White noise buffer to simulate physical newspaper surface friction
+      const bufferSize = Math.floor(ctx.sampleRate * 0.22);
+      const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) {
+        data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (ctx.sampleRate * 0.07));
+      }
+
+      const noise = ctx.createBufferSource();
+      noise.buffer = buffer;
+
+      // 2. Bandpass filter to give that specific crisp paper rustle frequency
+      const filter = ctx.createBiquadFilter();
+      filter.type = "bandpass";
+      filter.frequency.setValueAtTime(1200, ctx.currentTime);
+      filter.frequency.exponentialRampToValueAtTime(320, ctx.currentTime + 0.18);
+      filter.Q.value = 2.2;
+
+      // 3. Gain envelope (attack & decay)
+      const gain = ctx.createGain();
+      gain.gain.setValueAtTime(0.45, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.22);
+
+      noise.connect(filter);
+      filter.connect(gain);
+      gain.connect(ctx.destination);
+
+      noise.start();
+      noise.stop(ctx.currentTime + 0.22);
+    } catch (e) {
+      console.warn("Audio synthesis:", e);
+    }
+  };
+
+  // 3. Fetch E-Paper Data from Backend
   const fetchEPaper = async (dateParam, editionParam) => {
     setLoading(true);
     try {
       const qDate = dateParam || "";
       const qEdition = editionParam && editionParam !== "all" ? editionParam : "";
-      const res = await apiFetch(`/api/epaper?date=${encodeURIComponent(qDate)}&edition=${encodeURIComponent(qEdition)}`);
+      const res = await apiFetch(
+        `/api/epaper?date=${encodeURIComponent(qDate)}&edition=${encodeURIComponent(qEdition)}`
+      );
 
       if (res && res.success) {
         setPaper(res.epaper || null);
@@ -60,9 +163,10 @@ export default function EPaperPage() {
           setEditionsList(res.editions);
         }
 
-        // If no date was given initially and we got a paper, sync selectedDate
         if (!dateParam && res.epaper) {
-          const epDate = res.epaper.dateStr || (res.epaper.date ? new Date(res.epaper.date).toISOString().split("T")[0] : "");
+          const epDate =
+            res.epaper.dateStr ||
+            (res.epaper.date ? new Date(res.epaper.date).toISOString().split("T")[0] : "");
           if (epDate) setSelectedDate(epDate);
         }
       }
@@ -74,7 +178,6 @@ export default function EPaperPage() {
   };
 
   useEffect(() => {
-    // Check if URL has ?date=
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
       const urlDate = params.get("date");
@@ -87,10 +190,139 @@ export default function EPaperPage() {
     }
   }, []);
 
+  // 4. Load PDF Document via PDF.js when paper.pdfUrl is available
+  useEffect(() => {
+    if (!pdfLibReady || !paper?.pdfUrl || typeof window === "undefined" || !window.pdfjsLib) return;
+
+    let isCancelled = false;
+
+    const loadDoc = async () => {
+      try {
+        setPageRendering(true);
+        const loadingTask = window.pdfjsLib.getDocument({
+          url: paper.pdfUrl,
+          cMapUrl: "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/cmaps/",
+          cMapPacked: true,
+        });
+
+        const doc = await loadingTask.promise;
+        if (isCancelled) return;
+
+        setPdfDoc(doc);
+        setTotalPages(doc.numPages || paper.pageCount || 1);
+        setCurrentPage(1);
+      } catch (err) {
+        console.error("Failed to load PDF doc:", err);
+      } finally {
+        setPageRendering(false);
+      }
+    };
+
+    loadDoc();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [pdfLibReady, paper?.pdfUrl]);
+
+  // 5. Render Current Page onto Canvas (High-DPI, Crisp Print Quality)
+  useEffect(() => {
+    if (!pdfDoc || !canvasRef.current || typeof window === "undefined") return;
+
+    let isCancelled = false;
+
+    const renderCurrentPage = async () => {
+      setPageRendering(true);
+      try {
+        const page = await pdfDoc.getPage(currentPage);
+        if (isCancelled || !canvasRef.current) return;
+
+        const canvas = canvasRef.current;
+        const context = canvas.getContext("2d");
+
+        // Calculate responsive scale based on container width
+        const containerWidth = readerContainerRef.current
+          ? Math.min(readerContainerRef.current.clientWidth - 40, 960)
+          : 850;
+
+        const unscaledViewport = page.getViewport({ scale: 1 });
+        const scale = (containerWidth / unscaledViewport.width) * zoomScale;
+
+        // Support Retina / High-DPI screens
+        const pixelRatio = window.devicePixelRatio || 1;
+        const viewport = page.getViewport({ scale: scale * pixelRatio });
+
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+        canvas.style.width = `${viewport.width / pixelRatio}px`;
+        canvas.style.height = `${viewport.height / pixelRatio}px`;
+
+        const renderContext = {
+          canvasContext: context,
+          viewport,
+        };
+
+        if (renderTaskRef.current) {
+          renderTaskRef.current.cancel();
+        }
+
+        renderTaskRef.current = page.render(renderContext);
+        await renderTaskRef.current.promise;
+      } catch (err) {
+        if (err.name !== "RenderingCancelledException") {
+          console.error("PDF page render error:", err);
+        }
+      } finally {
+        setPageRendering(false);
+      }
+    };
+
+    renderCurrentPage();
+
+    return () => {
+      isCancelled = true;
+      if (renderTaskRef.current) {
+        try {
+          renderTaskRef.current.cancel();
+        } catch (e) {}
+      }
+    };
+  }, [pdfDoc, currentPage, zoomScale]);
+
+  // 6. Page Turn Controller (with Sound and Flip Transition)
+  const goToPage = (newPage) => {
+    if (newPage < 1 || newPage > totalPages || newPage === currentPage) return;
+    playPageTurnSound();
+    setTurnAnimation(newPage > currentPage ? "slide-next" : "slide-prev");
+    setCurrentPage(newPage);
+    setTimeout(() => setTurnAnimation(""), 400);
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      goToPage(currentPage - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      goToPage(currentPage + 1);
+    }
+  };
+
+  // Keyboard navigation (Left / Right arrow keys)
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "ArrowLeft") handlePrevPage();
+      if (e.key === "ArrowRight") handleNextPage();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [currentPage, totalPages, soundEnabled]);
+
   const handleDateChange = (newDate) => {
     setSelectedDate(newDate);
     fetchEPaper(newDate, selectedEdition);
-    // Update URL without full refresh
     if (typeof window !== "undefined") {
       const url = new URL(window.location);
       url.searchParams.set("date", newDate);
@@ -106,11 +338,9 @@ export default function EPaperPage() {
   const handleDownload = async () => {
     if (!paper) return;
     try {
-      // Track download metric
       await apiFetch(`/api/epaper/${paper._id}/download`, { method: "POST" });
     } catch (e) {}
 
-    // Trigger download
     const link = document.createElement("a");
     link.href = paper.pdfUrl;
     link.download = `${paper.title || "Swar-Media-EPaper"}.pdf`;
@@ -132,7 +362,6 @@ export default function EPaperPage() {
         return;
       } catch (e) {}
     }
-    // Fallback: copy to clipboard
     if (navigator.clipboard) {
       navigator.clipboard.writeText(url);
       setCopied(true);
@@ -150,10 +379,11 @@ export default function EPaperPage() {
     }
   };
 
-  // Jump to latest active paper
   const handleJumpToLatest = () => {
     if (latestPaper) {
-      const latestDateStr = latestPaper.dateStr || (latestPaper.date ? new Date(latestPaper.date).toISOString().split("T")[0] : "");
+      const latestDateStr =
+        latestPaper.dateStr ||
+        (latestPaper.date ? new Date(latestPaper.date).toISOString().split("T")[0] : "");
       if (latestDateStr) {
         handleDateChange(latestDateStr);
       }
@@ -176,7 +406,7 @@ export default function EPaperPage() {
     <div className="w-full bg-[#f8fafc] dark:bg-slate-950 min-h-screen py-3 sm:py-6 text-slate-900 dark:text-slate-100 font-sans">
       <div className="max-w-7xl mx-auto px-3 sm:px-6 space-y-4">
         {/* ============================================================== */}
-        {/* TOP CONTROL BAR: Date Filter, Edition, Quick Jump & Actions     */}
+        {/* TOP CONTROL BAR: Date Filter, Edition, Page Navigation & Sound */}
         {/* ============================================================== */}
         <div className="bg-white dark:bg-slate-900 rounded-3xl p-3 sm:p-5 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
           <div className="flex flex-wrap items-center justify-between gap-3">
@@ -192,7 +422,7 @@ export default function EPaperPage() {
                   </h1>
                   <span className="hidden sm:inline-flex items-center gap-1 text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-red-100 text-red-700 dark:bg-red-950/60 dark:text-red-400">
                     <Sparkles className="w-3 h-3" />
-                    डिजिटल संस्करण
+                    पेज टर्न रीडर
                   </span>
                 </div>
                 <p className="text-xs text-slate-500 dark:text-slate-400">
@@ -201,31 +431,86 @@ export default function EPaperPage() {
               </div>
             </div>
 
-            {/* Right: Action Buttons (Archives Drawer, Share, Download, Fullscreen) */}
+            {/* Right: Sound, Page Navigation & PDF Controls */}
             <div className="flex flex-wrap items-center gap-2">
-              {/* Archives Drawer Button */}
+              {/* Sound Toggle Button (Green when active) */}
               <button
                 type="button"
-                onClick={() => setShowArchiveDrawer(!showArchiveDrawer)}
-                className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
-                  showArchiveDrawer
-                    ? "bg-red-50 text-red-600 border-red-200 dark:bg-red-950/40 dark:border-red-800"
-                    : "bg-slate-50 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-100"
+                onClick={() => {
+                  setSoundEnabled(!soundEnabled);
+                  if (!soundEnabled) playPageTurnSound();
+                }}
+                title={soundEnabled ? "पन्ने पलटने की आवाज़ चालू है (Mute Sound)" : "आवाज़ चालू करें (Enable Sound)"}
+                className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
+                  soundEnabled
+                    ? "bg-emerald-50 text-emerald-700 border-emerald-300 dark:bg-emerald-950/40 dark:border-emerald-800"
+                    : "bg-slate-100 text-slate-400 border-slate-200 dark:bg-slate-800 dark:border-slate-700"
                 }`}
               >
-                <History className="w-3.5 h-3.5 text-red-600" />
-                <span>पुराने अंक ({archiveDates.length})</span>
+                {soundEnabled ? (
+                  <Volume2 className="w-4 h-4 text-emerald-600 animate-pulse" />
+                ) : (
+                  <VolumeX className="w-4 h-4" />
+                )}
+                <span className="hidden sm:inline">{soundEnabled ? "साउंड चालू" : "साउंड म्यूट"}</span>
               </button>
 
-              {/* Share Button */}
+              {/* Page Navigation (< पिछला | 1 / 4 | अगला >) */}
+              <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold">
+                <button
+                  type="button"
+                  onClick={handlePrevPage}
+                  disabled={currentPage <= 1}
+                  className="px-2.5 py-1 text-slate-700 dark:text-slate-300 hover:text-slate-900 disabled:opacity-30 disabled:hover:text-slate-500 transition-colors cursor-pointer"
+                >
+                  ‹ पिछला
+                </button>
+
+                <span className="px-2.5 py-1 text-slate-900 dark:text-white font-black font-mono bg-white dark:bg-slate-900 rounded-lg shadow-2xs">
+                  {currentPage} / {totalPages}
+                </span>
+
+                <button
+                  type="button"
+                  onClick={handleNextPage}
+                  disabled={currentPage >= totalPages}
+                  className="px-3 py-1 bg-red-600 hover:bg-red-700 disabled:opacity-30 text-white font-extrabold rounded-lg shadow-xs transition-colors cursor-pointer"
+                >
+                  अगला ›
+                </button>
+              </div>
+
+              {/* Zoom Controls */}
+              <div className="hidden md:flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700 text-xs">
+                <button
+                  type="button"
+                  onClick={() => setZoomScale((z) => Math.max(0.7, z - 0.15))}
+                  className="p-1 text-slate-600 dark:text-slate-300 hover:text-slate-900 cursor-pointer"
+                  title="ज़ूम कम करें"
+                >
+                  <ZoomOut className="w-3.5 h-3.5" />
+                </button>
+                <span className="text-[10px] font-mono font-bold px-1 text-slate-600 dark:text-slate-300">
+                  {Math.round(zoomScale * 100)}%
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setZoomScale((z) => Math.min(1.6, z + 0.15))}
+                  className="p-1 text-slate-600 dark:text-slate-300 hover:text-slate-900 cursor-pointer"
+                  title="ज़ूम बढ़ाएं"
+                >
+                  <ZoomIn className="w-3.5 h-3.5" />
+                </button>
+              </div>
+
+              {/* Fullscreen Button */}
               <button
                 type="button"
-                onClick={handleShare}
-                className="flex items-center gap-1.5 px-3 py-2 bg-slate-50 dark:bg-slate-800/80 hover:bg-slate-100 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold transition-colors cursor-pointer"
-                title="अखबार साझा करें"
+                onClick={toggleFullscreen}
+                className="hidden lg:flex items-center gap-1.5 px-3 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold shadow-xs transition-colors cursor-pointer"
               >
-                {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Share2 className="w-3.5 h-3.5" />}
-                <span>{copied ? "लिंक कॉपी हो गया!" : "साझा करें"}</span>
+                <Maximize2 className="w-3.5 h-3.5" />
+                <span>फुल स्क्रीन</span>
               </button>
 
               {/* Download PDF Button */}
@@ -239,16 +524,6 @@ export default function EPaperPage() {
                   <span>PDF डाउनलोड</span>
                 </button>
               )}
-
-              {/* Fullscreen Button */}
-              <button
-                type="button"
-                onClick={toggleFullscreen}
-                className="hidden md:flex items-center gap-1.5 px-3 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold shadow-xs transition-colors cursor-pointer"
-              >
-                <Maximize2 className="w-3.5 h-3.5" />
-                <span>फुल स्क्रीन</span>
-              </button>
             </div>
           </div>
 
@@ -256,9 +531,9 @@ export default function EPaperPage() {
           <div className="pt-2 border-t border-slate-100 dark:border-slate-800/80 flex flex-wrap items-center justify-between gap-3">
             <div className="flex flex-wrap items-center gap-2.5">
               {/* Date Filter Input */}
-              <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-800/90 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-300 shadow-2xs">
+              <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-800/90 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-300 shadow-2xs">
                 <Calendar className="w-4 h-4 text-red-600 shrink-0" />
-                <span className="text-slate-500 dark:text-slate-400 font-medium">दिनांक चुनें:</span>
+                <span className="text-slate-500 dark:text-slate-400 font-medium">दिनांक:</span>
                 <input
                   type="date"
                   value={selectedDate}
@@ -271,14 +546,14 @@ export default function EPaperPage() {
               <button
                 type="button"
                 onClick={handleJumpToLatest}
-                className="flex items-center gap-1 px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-bold shadow-xs transition-colors cursor-pointer"
+                className="flex items-center gap-1 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-bold shadow-xs transition-colors cursor-pointer"
               >
                 <RefreshCw className="w-3.5 h-3.5" />
-                <span>आज का ताज़ा अंक</span>
+                <span>आज का अंक</span>
               </button>
 
               {/* Edition Filter Dropdown */}
-              <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-800/90 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-300 shadow-2xs">
+              <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-800/90 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-300 shadow-2xs">
                 <MapPin className="w-3.5 h-3.5 text-red-600 shrink-0" />
                 <span className="text-slate-500 dark:text-slate-400 font-medium">संस्करण:</span>
                 <select
@@ -286,7 +561,9 @@ export default function EPaperPage() {
                   onChange={(e) => handleEditionChange(e.target.value)}
                   className="bg-transparent text-xs font-extrabold text-slate-900 dark:text-white focus:outline-none cursor-pointer"
                 >
-                  <option value="all" className="dark:bg-slate-900">सभी संस्करण</option>
+                  <option value="all" className="dark:bg-slate-900">
+                    सभी संस्करण
+                  </option>
                   {editionsList.map((ed) => (
                     <option key={ed} value={ed} className="dark:bg-slate-900">
                       {ed}
@@ -294,9 +571,23 @@ export default function EPaperPage() {
                   ))}
                 </select>
               </div>
+
+              {/* Archives Drawer Button */}
+              <button
+                type="button"
+                onClick={() => setShowArchiveDrawer(!showArchiveDrawer)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
+                  showArchiveDrawer
+                    ? "bg-red-50 text-red-600 border-red-200 dark:bg-red-950/40 dark:border-red-800"
+                    : "bg-slate-50 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-100"
+                }`}
+              >
+                <History className="w-3.5 h-3.5 text-red-600" />
+                <span>पुराने अंक ({archiveDates.length})</span>
+              </button>
             </div>
 
-            {/* Quick date pills for the 4 most recent editions */}
+            {/* Quick date pills for recent editions */}
             <div className="hidden lg:flex items-center gap-1.5 text-xs">
               <span className="text-slate-400 text-[11px] font-semibold flex items-center gap-1">
                 <Clock className="w-3 h-3" /> हाल के अंक:
@@ -409,96 +700,116 @@ export default function EPaperPage() {
         )}
 
         {/* ============================================================== */}
-        {/* MAIN VIEWER CANVAS                                             */}
+        {/* NEWSPAPER CANVAS WITH FLOATING PREV / NEXT ARROWS & SOUND      */}
         {/* ============================================================== */}
         <div
           ref={readerContainerRef}
-          className="relative bg-white dark:bg-slate-900 rounded-3xl p-3 sm:p-6 border border-slate-200 dark:border-slate-800 shadow-md min-h-[600px] flex flex-col"
+          className="relative bg-[#e2e8f0]/80 dark:bg-slate-900/90 rounded-3xl p-3 sm:p-8 flex items-center justify-center min-h-[750px] shadow-inner overflow-hidden border border-slate-200 dark:border-slate-800 select-none"
         >
-          {loading ? (
-            <div className="flex-1 flex flex-col items-center justify-center py-24 space-y-4">
+          {/* FLOATING LEFT CIRCULAR BUTTON (<) */}
+          <button
+            type="button"
+            onClick={handlePrevPage}
+            disabled={currentPage <= 1}
+            aria-label="Previous Page"
+            className={`absolute left-2 sm:left-5 top-1/2 -translate-y-1/2 w-11 h-11 sm:w-14 sm:h-14 rounded-full bg-white dark:bg-slate-800 text-slate-800 dark:text-white shadow-2xl flex items-center justify-center border border-slate-200 dark:border-slate-700 transition-all z-20 ${
+              currentPage <= 1
+                ? "opacity-25 cursor-not-allowed"
+                : "hover:scale-110 active:scale-95 hover:bg-red-50 hover:text-red-600 dark:hover:bg-slate-700 cursor-pointer"
+            }`}
+            title="पिछला पृष्ठ (Turn Left)"
+          >
+            <ChevronLeft className="w-6 h-6 sm:w-8 sm:h-8" />
+          </button>
+
+          {/* FLOATING RIGHT CIRCULAR BUTTON (>) */}
+          <button
+            type="button"
+            onClick={handleNextPage}
+            disabled={currentPage >= totalPages}
+            aria-label="Next Page"
+            className={`absolute right-2 sm:right-5 top-1/2 -translate-y-1/2 w-11 h-11 sm:w-14 sm:h-14 rounded-full bg-white dark:bg-slate-800 text-slate-800 dark:text-white shadow-2xl flex items-center justify-center border border-slate-200 dark:border-slate-700 transition-all z-20 ${
+              currentPage >= totalPages
+                ? "opacity-25 cursor-not-allowed"
+                : "hover:scale-110 active:scale-95 hover:bg-red-50 hover:text-red-600 dark:hover:bg-slate-700 cursor-pointer"
+            }`}
+            title="अगला पृष्ठ (Turn Right)"
+          >
+            <ChevronRight className="w-6 h-6 sm:w-8 sm:h-8" />
+          </button>
+
+          {loading || (!pdfLibReady && paper) ? (
+            <div className="flex flex-col items-center justify-center py-24 space-y-4">
               <div className="w-12 h-12 rounded-full border-4 border-red-600 border-t-transparent animate-spin" />
               <div className="text-center space-y-1">
                 <p className="text-sm font-bold text-slate-900 dark:text-white">
                   समाचार पत्र लोड हो रहा है...
                 </p>
-                <p className="text-xs text-slate-400">
-                  दिनांक {selectedDate} का संस्करण प्राप्त किया जा रहा है
-                </p>
+                <p className="text-xs text-slate-400">PDF पेज-बाई-पेज इंजन तैयार हो रहा है</p>
               </div>
             </div>
           ) : paper && paper.pdfUrl ? (
-            /* ============================================================ */
-            /* SUCCESS STATE: EMBEDDED PDF VIEWER                          */
-            /* ============================================================ */
-            <div className="flex-1 flex flex-col space-y-3">
-              {/* Paper Meta Banner */}
-              <div className="bg-slate-50 dark:bg-slate-800/80 rounded-2xl p-3 sm:p-4 border border-slate-200 dark:border-slate-700/80 flex flex-wrap items-center justify-between gap-3">
-                <div className="space-y-0.5">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs sm:text-sm font-black text-slate-950 dark:text-white">
-                      {paper.title}
-                    </span>
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-400">
-                      ✓ सत्यापित PDF
-                    </span>
-                  </div>
-                  <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500 dark:text-slate-400">
-                    <span className="flex items-center gap-1 text-red-600 font-semibold">
-                      <MapPin className="w-3.5 h-3.5" />
-                      {paper.edition}
-                    </span>
-                    <span>• {paper.pageCount || 4} पृष्ठ</span>
-                    {paper.fileSize && <span>• {paper.fileSize}</span>}
-                    {paper.views > 0 && <span>• 👁️ {paper.views} पाठकों ने देखा</span>}
-                  </div>
-                </div>
-
-                {/* Right Direct Links */}
+            /* REALISTIC NEWSPAPER PAGE CANVAS (Single Page View with Turn Animation) */
+            <div className="relative flex flex-col items-center justify-center max-w-full">
+              {/* Top Page Masthead Indicator */}
+              <div className="w-full max-w-4xl bg-white dark:bg-slate-900 rounded-t-2xl px-4 py-2 border-t border-x border-slate-300 dark:border-slate-700 flex items-center justify-between text-xs font-bold text-slate-700 dark:text-slate-300 shadow-sm">
+                <span className="flex items-center gap-1.5 text-red-600 font-extrabold">
+                  <MapPin className="w-3.5 h-3.5" />
+                  {paper.edition}
+                </span>
+                <span className="font-extrabold text-slate-900 dark:text-white">
+                  {paper.title} • पृष्ठ {currentPage} / {totalPages}
+                </span>
                 <div className="flex items-center gap-2">
+                  <span className="text-[10px] text-emerald-600 font-bold bg-emerald-50 dark:bg-emerald-950/50 px-2 py-0.5 rounded">
+                    ✓ सत्यापित संस्करण
+                  </span>
                   <a
                     href={paper.pdfUrl}
                     target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-800 dark:text-white rounded-xl text-xs font-bold transition-colors"
+                    rel="noreferrer"
+                    className="text-[11px] text-blue-600 hover:underline flex items-center gap-0.5"
                   >
-                    <ExternalLink className="w-3.5 h-3.5" />
-                    <span>नये टैब में खोलें</span>
+                    <span>नये टैब में</span>
+                    <ExternalLink className="w-3 h-3" />
                   </a>
-                  <button
-                    type="button"
-                    onClick={handleDownload}
-                    className="flex items-center gap-1.5 px-3.5 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-bold shadow-xs transition-colors cursor-pointer"
-                  >
-                    <Download className="w-3.5 h-3.5" />
-                    <span>डाउनलोड</span>
-                  </button>
                 </div>
               </div>
 
-              {/* The Interactive Native PDF Viewer */}
-              <div className="w-full flex-1 rounded-2xl overflow-hidden border border-slate-300 dark:border-slate-700 shadow-inner bg-slate-100 dark:bg-slate-950 min-h-[750px] sm:min-h-[850px]">
-                <iframe
-                  src={`${paper.pdfUrl}#toolbar=1&navpanes=1&scrollbar=1&view=FitH`}
-                  className="w-full h-full min-h-[750px] sm:min-h-[850px] border-0"
-                  title={paper.title}
-                />
+              {/* The Single High-DPI Page Canvas */}
+              <div
+                className={`relative bg-white shadow-2xl rounded-b-2xl border border-slate-300 dark:border-slate-700 overflow-hidden flex items-center justify-center min-h-[600px] transition-all duration-300 ${
+                  turnAnimation === "slide-next"
+                    ? "animate-in slide-in-from-right-4 fade-in-50"
+                    : turnAnimation === "slide-prev"
+                    ? "animate-in slide-in-from-left-4 fade-in-50"
+                    : ""
+                }`}
+              >
+                {/* Page Rendering Spinner Overlay */}
+                {pageRendering && (
+                  <div className="absolute inset-0 z-10 bg-white/60 dark:bg-black/40 backdrop-blur-2xs flex items-center justify-center">
+                    <Loader2 className="w-8 h-8 text-red-600 animate-spin" />
+                  </div>
+                )}
+
+                <canvas ref={canvasRef} className="block max-w-full h-auto" />
               </div>
 
-              {/* Viewer Footer Tips */}
-              <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500 pt-1">
+              {/* Keyboard Tip & Sound Notification */}
+              <div className="flex items-center justify-between w-full max-w-4xl text-[11px] text-slate-500 pt-2 px-1">
                 <span>
-                  💡 सुझाव: पेज ज़ूम, प्रिंट या सर्च करने के लिए ऊपर दिए गए टूल्स का उपयोग करें या "नये टैब में खोलें" पर क्लिक करें।
+                  ⌨️ कीबोर्ड एरो <b>← पिछला</b> | <b>अगला →</b> दबाकर भी पन्ने पलट सकते हैं
                 </span>
-                <span className="font-bold text-red-600">
-                  स्वर मीडिया • निष्पक्ष पत्रकारिता
-                </span>
+                {soundEnabled && (
+                  <span className="flex items-center gap-1 text-emerald-600 font-bold">
+                    <Volume2 className="w-3 h-3" /> पन्ना पलटने की साउंड ऑन है
+                  </span>
+                )}
               </div>
             </div>
           ) : (
-            /* ============================================================ */
-            /* EMPTY STATE: NO PAPER FOUND FOR SELECTED DATE                */
-            /* ============================================================ */
+            /* EMPTY STATE: NO PAPER FOUND FOR SELECTED DATE */
             <div className="flex-1 flex flex-col items-center justify-center py-16 px-4 text-center space-y-5">
               <div className="w-20 h-20 rounded-3xl bg-amber-50 dark:bg-amber-950/40 text-amber-600 flex items-center justify-center shadow-inner">
                 <AlertCircle className="w-10 h-10" />
@@ -509,7 +820,8 @@ export default function EPaperPage() {
                   चयनित दिनांक ({selectedDate}) का समाचार पत्र उपलब्ध नहीं है
                 </h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                  इस दिनांक के लिए कोई ई-संस्करण अपलोड नहीं किया गया है। आप नवीनतम अंक पढ़ सकते हैं या नीचे दिए गए पुरालेख में से किसी अन्य तारीख का चुनाव कर सकते हैं।
+                  इस दिनांक के लिए कोई ई-संस्करण अपलोड नहीं किया गया है। आप आज का ताज़ा अंक पढ़ सकते
+                  हैं या नीचे दिए गए पुरालेख में से किसी अन्य तारीख का चुनाव कर सकते हैं।
                 </p>
               </div>
 
@@ -532,39 +844,52 @@ export default function EPaperPage() {
                   <span>उपलब्ध पुराने अंक देखें</span>
                 </button>
               </div>
-
-              {/* Recent Active Editions Carousel/Grid */}
-              {archiveDates.length > 0 && (
-                <div className="w-full max-w-3xl pt-8 space-y-3 text-left">
-                  <h4 className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-                    <Clock className="w-3.5 h-3.5 text-red-600" />
-                    <span>हाल के उपलब्ध समाचार पत्र:</span>
-                  </h4>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    {archiveDates.slice(0, 3).map((item) => (
-                      <div
-                        key={item._id}
-                        onClick={() => handleDateChange(item.dateStr)}
-                        className="p-3 bg-slate-50 dark:bg-slate-800/80 rounded-2xl border border-slate-200 dark:border-slate-700 hover:border-red-500 cursor-pointer transition-all space-y-1.5"
-                      >
-                        <div className="flex items-center justify-between text-xs font-bold text-slate-900 dark:text-white">
-                          <span>{item.dateStr}</span>
-                          <span className="text-[10px] text-red-600">{item.edition}</span>
-                        </div>
-                        <p className="text-[11px] text-slate-600 dark:text-slate-300 truncate">
-                          {item.title}
-                        </p>
-                        <div className="text-[10px] text-red-600 font-bold">
-                          क्लिक करके पढ़ें →
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
             </div>
           )}
         </div>
+
+        {/* ============================================================== */}
+        {/* BOTTOM PAGINATION BAR: Numbered Page Jump Buttons              */}
+        {/* ============================================================== */}
+        {paper && totalPages > 1 && (
+          <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 pt-1">
+            <button
+              type="button"
+              onClick={handlePrevPage}
+              disabled={currentPage <= 1}
+              className="flex items-center gap-1 px-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 disabled:opacity-40 text-slate-800 dark:text-slate-200 font-bold text-xs rounded-xl shadow-xs hover:bg-slate-50 cursor-pointer transition-colors"
+            >
+              <ChevronLeft className="w-4 h-4" /> पिछला पृष्ठ
+            </button>
+
+            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1">
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+                <button
+                  key={p}
+                  type="button"
+                  onClick={() => goToPage(p)}
+                  className={`w-9 h-9 rounded-xl font-extrabold text-xs transition-all cursor-pointer ${
+                    currentPage === p
+                      ? "bg-red-600 text-white shadow-md shadow-red-600/30 scale-105"
+                      : "bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800"
+                  }`}
+                  title={`पृष्ठ ${p} पर जाएं`}
+                >
+                  {p}
+                </button>
+              ))}
+            </div>
+
+            <button
+              type="button"
+              onClick={handleNextPage}
+              disabled={currentPage >= totalPages}
+              className="flex items-center gap-1 px-4 py-2 bg-red-600 hover:bg-red-700 disabled:opacity-40 text-white font-bold text-xs rounded-xl shadow-md shadow-red-600/20 cursor-pointer transition-colors"
+            >
+              अगला पृष्ठ <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+        )}
 
         {/* ============================================================== */}
         {/* BOTTOM ARCHIVE BROWSER BAR                                     */}
@@ -578,9 +903,7 @@ export default function EPaperPage() {
                   पिछला पुरालेख एवं पुराने अंक (Past Editions Archive)
                 </h3>
               </div>
-              <span className="text-[11px] text-slate-400">
-                तारीख पर क्लिक करके पुराना अखबार पढ़ें
-              </span>
+              <span className="text-[11px] text-slate-400">तारीख पर क्लिक करके पुराना अखबार पढ़ें</span>
             </div>
 
             <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-thin">
@@ -597,11 +920,17 @@ export default function EPaperPage() {
                         : "bg-slate-50 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700"
                     }`}
                   >
-                    <Calendar className={`w-3.5 h-3.5 ${isCurrent ? "text-white" : "text-red-600"}`} />
+                    <Calendar
+                      className={`w-3.5 h-3.5 ${isCurrent ? "text-white" : "text-red-600"}`}
+                    />
                     <span>{item.dateStr}</span>
-                    <span className={`text-[10px] px-1.5 py-0.5 rounded ${
-                      isCurrent ? "bg-red-700 text-white" : "bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300"
-                    }`}>
+                    <span
+                      className={`text-[10px] px-1.5 py-0.5 rounded ${
+                        isCurrent
+                          ? "bg-red-700 text-white"
+                          : "bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300"
+                      }`}
+                    >
                       {item.edition.split(" ")[0]}
                     </span>
                   </button>
