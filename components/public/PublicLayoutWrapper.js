@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import Header from "./Header";
 import Ticker from "./Ticker";
 import Footer from "./Footer";
+import WhatsAppFloat from "./WhatsAppFloat";
 import { LangProvider } from "@/lib/langContext";
 import { AuthProvider } from "@/lib/authContext";
 
@@ -27,6 +28,7 @@ export default function PublicLayoutWrapper({ children }) {
           </div>
           <main className="flex-1">{children}</main>
           <Footer />
+          <WhatsAppFloat />
         </div>
       </LangProvider>
     </AuthProvider>

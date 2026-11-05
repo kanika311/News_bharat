@@ -38,6 +38,31 @@ const SettingSchema = new mongoose.Schema(
       type: String,
       default: "+91 11 2345 6789",
     },
+    whatsappNumber: {
+      type: String,
+      default: "+91 98765 43210",
+    },
+    isWhatsAppEnabled: {
+      type: Boolean,
+      default: true,
+    },
+    whatsappDefaultMessage: {
+      type: String,
+      default: "नमस्ते स्वर मीडिया! मुझे समाचार / सुझाव / सहयोग के संबंध में संपर्क करना है।",
+    },
+    whatsappUseRandomMessages: {
+      type: Boolean,
+      default: true,
+    },
+    whatsappRandomMessages: {
+      type: [String],
+      default: [
+        "नमस्ते स्वर मीडिया! मुझे ताज़ा समाचार या ग्राउंड रिपोर्ट साझा करनी है।",
+        "नमस्ते! स्वर मीडिया में विज्ञापन एवं सहयोग के संबंध में जानकारी चाहिए।",
+        "नमस्ते स्वर मीडिया टीम! मुझे एक सुझाव / प्रतिक्रिया साझा करनी है।",
+        "नमस्ते! मैं स्वर मीडिया डिजिटल पोर्टल से संपर्क कर रहा हूँ।",
+      ],
+    },
     socialLinks: {
       facebook: { type: String, default: "https://facebook.com/swarmedia" },
       twitter: { type: String, default: "https://x.com/swarmedia" },
