@@ -272,9 +272,9 @@ export default function HomePage() {
         <aside className="hidden lg:block lg:col-span-2 lg:sticky lg:top-[96px] lg:h-[calc(100vh-96px)] overflow-y-auto no-scrollbar self-start z-10 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800">
           <div className="p-2 sm:p-2.5 space-y-3">
             {/* 1. Categories Header */}
-            <div className="flex items-center justify-between pb-2 mb-1 border-b border-slate-100 dark:border-slate-800">
+            <div className="flex items-center justify-between pb-2 mb-1 border-b border-amber-200/60 dark:border-amber-900/40">
               <div className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse" />
+                <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
                 <h2 className="text-[11px] sm:text-xs font-black text-slate-900 dark:text-white tracking-wide uppercase">
                   विषय (CATEGORIES)
                 </h2>
@@ -289,16 +289,16 @@ export default function HomePage() {
                 onClick={() => setSelectedTopic("all")}
                 className={`w-full flex items-center justify-between px-2.5 py-2 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
                   selectedTopic === "all"
-                    ? "bg-red-50 dark:bg-red-950/60 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800 shadow-xs"
-                    : "text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
+                    ? "bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-950/40 dark:to-slate-900 text-amber-900 dark:text-amber-300 border border-amber-300 dark:border-amber-700 shadow-xs"
+                    : "text-slate-700 dark:text-slate-300 hover:bg-amber-50/60 dark:hover:bg-slate-800"
                 }`}
               >
                 <div className="flex items-center gap-2 truncate">
-                  <Flame className={`w-3.5 h-3.5 shrink-0 ${selectedTopic === "all" ? "text-red-600 fill-red-600" : "text-slate-400"}`} />
+                  <Flame className={`w-3.5 h-3.5 shrink-0 ${selectedTopic === "all" ? "text-amber-500 fill-amber-500" : "text-slate-400"}`} />
                   <span className="truncate">टॉप न्यूज़</span>
                 </div>
                 {selectedTopic === "all" && (
-                  <span className="w-1.5 h-1.5 rounded-full bg-red-600 shrink-0" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />
                 )}
               </button>
 
@@ -315,16 +315,16 @@ export default function HomePage() {
                     onClick={() => setSelectedTopic(cat.slug)}
                     className={`w-full flex items-center justify-between px-2.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                       isSelected
-                        ? "bg-red-50 dark:bg-red-950/60 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800 shadow-xs"
-                        : "text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
+                        ? "bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-950/40 dark:to-slate-900 text-amber-900 dark:text-amber-300 border border-amber-300 dark:border-amber-700 shadow-xs font-black"
+                        : "text-slate-700 dark:text-slate-300 hover:bg-amber-50/60 dark:hover:bg-slate-800"
                     }`}
                   >
                     <div className="flex items-center gap-2 truncate">
-                      <Icon className={`w-3.5 h-3.5 shrink-0 ${isSelected ? "text-red-600" : "text-slate-400"}`} />
+                      <Icon className={`w-3.5 h-3.5 shrink-0 ${isSelected ? "text-amber-600 dark:text-amber-400" : "text-slate-400"}`} />
                       <span className="truncate">{label}</span>
                     </div>
                     {isSelected && (
-                      <span className="w-1.5 h-1.5 rounded-full bg-red-600 shrink-0" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />
                     )}
                   </button>
                 );
@@ -338,11 +338,11 @@ export default function HomePage() {
         {/* ============================================================== */}
         <main className="lg:col-span-7 space-y-4 min-w-0 px-3 sm:px-4 py-3 bg-slate-50 dark:bg-slate-950">
           {/* Mobile Filter & Trending Strip (Swarnim Dastavej Style - Mobile Only) */}
-          <div className="lg:hidden flex items-center justify-between gap-2.5 p-2 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
+          <div className="lg:hidden flex items-center justify-between gap-2.5 p-2 bg-white dark:bg-slate-900 rounded-2xl border border-amber-200/60 dark:border-slate-800 shadow-xs">
             <button
               type="button"
               onClick={() => setMobileFilterOpen(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black text-white bg-red-600 hover:bg-red-700 active:scale-95 shadow-sm shadow-red-600/30 transition-all cursor-pointer shrink-0"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black text-slate-950 bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 hover:from-amber-600 hover:to-yellow-500 active:scale-95 shadow-sm ring-1 ring-amber-400/80 transition-all cursor-pointer shrink-0"
               title="विषय एवं फ़िल्टर"
             >
               <SlidersHorizontal className="w-3.5 h-3.5" />
@@ -364,7 +364,7 @@ export default function HomePage() {
           {selectedTopic === "all" && mainLead && (
             <Link
               href={`/${mainLead.category?.slug || "news"}/${mainLead.slug}`}
-              className="group block relative rounded-3xl overflow-hidden bg-slate-900 shadow-sm hover:shadow-xl transition-all border border-slate-200 dark:border-slate-800"
+              className="group block relative rounded-3xl overflow-hidden bg-slate-900 shadow-sm hover:shadow-xl transition-all border border-amber-300/40 dark:border-slate-800 hover:border-amber-400"
             >
               <div className="relative aspect-[16/9] w-full overflow-hidden">
                 <img
@@ -376,16 +376,16 @@ export default function HomePage() {
                   className="w-full h-full object-cover object-top sm:object-center group-hover:scale-105 transition-transform duration-500"
                 />
                 <div className="absolute inset-x-0 bottom-0 h-3/5 bg-gradient-to-t from-black/95 via-black/50 to-transparent pointer-events-none" />
-                <span className="absolute top-3.5 left-3.5 px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wider text-white bg-red-600 shadow-md">
+                <span className="absolute top-3.5 left-3.5 px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wider text-slate-950 bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 shadow-md ring-1 ring-amber-400">
                   {lang === "hi" && mainLead.category?.nameHi ? mainLead.category.nameHi : mainLead.category?.name}
                 </span>
                 {mainLead.location && (
-                  <span className="absolute top-3.5 right-3.5 px-2.5 py-1 rounded-lg text-[10px] font-bold text-white bg-black/75 backdrop-blur-md border border-white/10 shadow">
+                  <span className="absolute top-3.5 right-3.5 px-2.5 py-1 rounded-lg text-[10px] font-bold text-amber-300 bg-[#070e1e]/85 backdrop-blur-md border border-amber-400/50 shadow">
                     📍 {mainLead.location}
                   </span>
                 )}
                 <div className="absolute bottom-0 inset-x-0 p-4 sm:p-5 space-y-1.5 text-white">
-                  <h2 className="text-base sm:text-xl font-black leading-snug tracking-tight group-hover:text-red-400 transition-colors line-clamp-2">
+                  <h2 className="text-base sm:text-xl font-black leading-snug tracking-tight group-hover:text-amber-300 transition-colors line-clamp-2">
                     {mainLead.title}
                   </h2>
                   <p className="text-xs text-slate-300 line-clamp-2 hidden sm:block">
@@ -402,9 +402,9 @@ export default function HomePage() {
           )}
 
           {/* Feed Header */}
-          <div className="flex items-center justify-between pb-2 border-b-2 border-red-600">
+          <div className="flex items-center justify-between pb-2 border-b-2 border-amber-500">
             <h2 className="text-base sm:text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-red-600 animate-pulse" />
+              <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse" />
               <span>{activeTopicTitle}</span>
             </h2>
             <span className="text-xs text-slate-500 font-semibold">
@@ -439,7 +439,7 @@ export default function HomePage() {
                 return (
                   <article
                     key={art._id}
-                    className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/90 dark:border-slate-800/90 p-4 sm:p-5 shadow-xs hover:shadow-md hover:border-red-500/40 transition-all group flex flex-col sm:flex-row gap-4 sm:gap-5"
+                    className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/90 dark:border-slate-800/90 p-4 sm:p-5 shadow-xs hover:shadow-lg hover:border-amber-400/80 transition-all group flex flex-col sm:flex-row gap-4 sm:gap-5"
                   >
                     {/* Left: Thumbnail with City/Location Badge */}
                     <Link
@@ -455,7 +455,7 @@ export default function HomePage() {
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       />
                       {/* Location Badge (Jammu, Sultanpur, Lucknow, etc.) */}
-                      <span className="absolute top-2.5 left-2.5 px-2.5 py-1 bg-black/85 backdrop-blur-md text-white font-extrabold text-[11px] rounded-lg border border-white/10 shadow-md">
+                      <span className="absolute top-2.5 left-2.5 px-2.5 py-1 bg-[#070e1e]/85 backdrop-blur-md text-amber-300 font-extrabold text-[11px] rounded-lg border border-amber-400/40 shadow-md">
                         {art.location || (catSlug === "state-city" ? "राज्य-शहर" : catLabel)}
                       </span>
                     </Link>
@@ -465,7 +465,7 @@ export default function HomePage() {
                       <div className="space-y-1.5">
                         {/* Category & Desk */}
                         <div className="flex items-center gap-2 text-xs">
-                          <span className="font-extrabold text-red-600 dark:text-red-400 capitalize">
+                          <span className="font-extrabold text-amber-600 dark:text-amber-400 capitalize">
                             {catSlug}
                           </span>
                           <span className="text-slate-400">•</span>
@@ -474,9 +474,9 @@ export default function HomePage() {
                           </span>
                         </div>
 
-                        {/* Bold Red Headline */}
+                        {/* Bold Red / Gold Headline */}
                         <Link href={`/${catSlug}/${art.slug}`}>
-                          <h3 className="text-base sm:text-lg font-black text-red-600 dark:text-red-500 group-hover:text-red-700 dark:group-hover:text-red-400 leading-snug line-clamp-2 transition-colors">
+                          <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white group-hover:text-amber-600 dark:group-hover:text-amber-400 leading-snug line-clamp-2 transition-colors">
                             {art.title}
                           </h3>
                         </Link>
@@ -511,7 +511,7 @@ export default function HomePage() {
                           {/* Reader Comment Button */}
                           <Link
                             href={`/${catSlug}/${art.slug}#comments`}
-                            className="flex items-center gap-1 text-[11px] text-slate-600 dark:text-slate-400 hover:text-red-600 transition-colors py-0.5 px-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"
+                            className="flex items-center gap-1 text-[11px] text-slate-600 dark:text-slate-400 hover:text-amber-600 transition-colors py-0.5 px-1.5 rounded-lg hover:bg-amber-50/50 dark:hover:bg-slate-800"
                             title="टिप्पणी करें या पढ़ें"
                           >
                             <MessageSquare className="w-3.5 h-3.5 text-slate-400" />
@@ -523,16 +523,16 @@ export default function HomePage() {
                           <button
                             type="button"
                             onClick={() => toggleBookmark(art._id)}
-                            className={`p-1 transition-colors ${isSaved ? "text-red-600" : "hover:text-red-600"}`}
+                            className={`p-1 transition-colors ${isSaved ? "text-amber-500" : "hover:text-amber-500"}`}
                             title="Bookmark"
                           >
-                            <Bookmark className={`w-4 h-4 ${isSaved ? "fill-red-600" : ""}`} />
+                            <Bookmark className={`w-4 h-4 ${isSaved ? "fill-amber-500 text-amber-500" : ""}`} />
                           </button>
 
                           <button
                             type="button"
                             onClick={() => handleShareArticle(art)}
-                            className="p-1 hover:text-red-600 transition-colors"
+                            className="p-1 hover:text-amber-500 transition-colors"
                             title="Share"
                           >
                             {isCopied ? <Check className="w-4 h-4 text-emerald-500" /> : <Share2 className="w-4 h-4" />}
@@ -540,7 +540,7 @@ export default function HomePage() {
 
                           <Link
                             href={`/${catSlug}/${art.slug}`}
-                            className="font-bold text-red-600 dark:text-red-400 flex items-center gap-0.5 hover:translate-x-0.5 transition-transform"
+                            className="font-black text-amber-600 dark:text-amber-400 flex items-center gap-0.5 hover:translate-x-0.5 transition-transform"
                           >
                             <span>विस्तार से</span>
                             <ChevronRight className="w-4 h-4" />
@@ -566,12 +566,12 @@ export default function HomePage() {
             {/* 2. Trending / Most Read Widget */}
             {trendingArticles.length > 0 && (
               <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-800 p-4 shadow-sm space-y-3">
-                <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
+                <div className="flex items-center justify-between pb-2 border-b border-amber-200/50 dark:border-slate-800">
                   <h3 className="text-xs sm:text-sm font-black text-slate-900 dark:text-white flex items-center gap-2">
-                    <TrendingUp className="w-4 h-4 text-red-600" />
+                    <TrendingUp className="w-4 h-4 text-amber-500" />
                     <span>{t("mostRead")}</span>
                   </h3>
-                  <span className="text-[10px] font-bold text-red-600 bg-red-50 dark:bg-red-950/40 px-2 py-0.5 rounded-full uppercase">
+                  <span className="text-[10px] font-black text-amber-700 bg-amber-50 border border-amber-300/60 dark:bg-amber-950/40 dark:text-amber-300 px-2 py-0.5 rounded-full uppercase">
                     VIRAL
                   </span>
                 </div>
@@ -585,13 +585,19 @@ export default function HomePage() {
                     >
                       <span
                         className={`text-lg font-black shrink-0 w-5 text-center ${
-                          idx === 0 ? "text-red-600" : idx === 1 ? "text-amber-500" : "text-slate-400"
+                          idx === 0
+                            ? "text-amber-500"
+                            : idx === 1
+                            ? "text-red-600"
+                            : idx === 2
+                            ? "text-blue-600"
+                            : "text-slate-400"
                         }`}
                       >
                         {idx + 1}
                       </span>
                       <div className="space-y-0.5 min-w-0">
-                        <h4 className="text-xs font-bold text-slate-900 dark:text-white group-hover:text-red-600 transition-colors line-clamp-2 leading-snug">
+                        <h4 className="text-xs font-bold text-slate-900 dark:text-white group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors line-clamp-2 leading-snug">
                           {art.title}
                         </h4>
                         <span className="text-[10px] text-slate-400 block">

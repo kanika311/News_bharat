@@ -143,8 +143,8 @@ function LoginContent() {
       </div>
 
       <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
-        {/* Brand Banner with Royal Crimson & Gold theme */}
-        <div className="bg-gradient-to-r from-[#8B0000] via-[#B30D12] to-[#80070a] p-6 text-white text-center relative overflow-hidden border-b border-amber-500/30">
+        {/* Brand Banner with Royal Navy & Rich Gold theme */}
+        <div className="bg-gradient-to-r from-[#070e1e] via-[#0f1d3b] to-[#070e1e] p-6 text-white text-center relative overflow-hidden border-b-2 border-amber-400">
           <div className="absolute -right-8 -top-8 w-32 h-32 bg-amber-400/10 rounded-full blur-xl pointer-events-none" />
           <div className="relative z-10 flex flex-col items-center">
             <Link href="/" className="inline-block hover:scale-105 transition-transform mb-3">
@@ -159,9 +159,9 @@ function LoginContent() {
                 ? (lang === "hi" ? "द स्वर मीडिया में साइन इन करें" : "Sign In to The Swar Media")
                 : (lang === "hi" ? "नया पाठक खाता बनाएं" : "Create Reader Account")}
             </h1>
-            <p className="text-xs text-amber-200 font-extrabold mt-1">
+            <p className="text-xs text-amber-300 font-extrabold mt-1">
               {lang === "hi"
-                ? "हर मुद्दे पर, युवा की आवाज • निष्पक्ष पत्रकारिता"
+                ? "सच के साथ, समाज के लिए • निष्पक्ष पत्रकारिता"
                 : "Inform • Inspire • Empower • Leading News Portal"}
             </p>
           </div>
@@ -178,7 +178,7 @@ function LoginContent() {
             }}
             className={`flex-1 py-2.5 text-xs sm:text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-1.5 ${
               mode === "login"
-                ? "bg-white dark:bg-slate-900 text-red-600 dark:text-red-400 shadow-sm"
+                ? "bg-white dark:bg-slate-900 text-amber-600 dark:text-amber-400 border border-amber-300 dark:border-amber-700 shadow-sm font-black"
                 : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
             }`}
           >
@@ -193,7 +193,7 @@ function LoginContent() {
             }}
             className={`flex-1 py-2.5 text-xs sm:text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-1.5 ${
               mode === "register"
-                ? "bg-white dark:bg-slate-900 text-red-600 dark:text-red-400 shadow-sm"
+                ? "bg-white dark:bg-slate-900 text-amber-600 dark:text-amber-400 border border-amber-300 dark:border-amber-700 shadow-sm font-black"
                 : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
             }`}
           >
@@ -305,11 +305,11 @@ function LoginContent() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 px-4 bg-red-600 hover:bg-red-700 active:scale-[0.99] text-white font-bold rounded-xl shadow-lg shadow-red-600/30 transition-all flex items-center justify-center gap-2 text-sm disabled:opacity-70 disabled:cursor-not-allowed"
+              className="w-full py-3 px-4 bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 hover:from-amber-600 hover:to-yellow-500 active:scale-[0.99] text-slate-950 font-black rounded-xl shadow-lg shadow-amber-500/20 ring-1 ring-amber-400/80 transition-all flex items-center justify-center gap-2 text-sm disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
             >
               {loading ? (
                 <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <Loader2 className="w-4 h-4 animate-spin text-slate-950" />
                   <span>{lang === "hi" ? "कृपया प्रतीक्षा करें..." : "Processing..."}</span>
                 </>
               ) : (
@@ -328,7 +328,7 @@ function LoginContent() {
           {/* Reader Perks */}
           <div className="pt-3 border-t border-slate-100 dark:border-slate-800 text-[11px] text-slate-500 space-y-1.5">
             <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400 font-medium">
-              <ShieldCheck className="w-3.5 h-3.5 text-red-600 shrink-0" />
+              <ShieldCheck className="w-3.5 h-3.5 text-amber-500 shrink-0" />
               <span>
                 {lang === "hi"
                   ? "पसंदीदा खबरें बुकमार्क करें व समाचारों पर टिप्पणी करें"
@@ -336,7 +336,7 @@ function LoginContent() {
               </span>
             </div>
             <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400 font-medium">
-              <Flame className="w-3.5 h-3.5 text-red-600 shrink-0" />
+              <Flame className="w-3.5 h-3.5 text-amber-500 shrink-0" />
               <span>
                 {lang === "hi"
                   ? "ई-पेपर व ब्रेकिंग न्यूज़ अलर्ट्स प्राप्त करें"

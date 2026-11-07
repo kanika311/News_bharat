@@ -52,9 +52,9 @@ export default function AdminNavbar({ toggleSidebar }) {
         {/* Quick action: Create Article */}
         <Link
           href={`${CMS_PATH}/articles/new`}
-          className="hidden sm:inline-flex items-center gap-2 px-3 py-1.5 text-xs font-semibold text-white bg-red-600 rounded-lg hover:bg-red-700 shadow-sm shadow-red-600/20 transition-all"
+          className="hidden sm:inline-flex items-center gap-2 px-3.5 py-1.5 text-xs font-black text-slate-950 bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 hover:from-amber-600 rounded-lg shadow-sm ring-1 ring-amber-400/80 transition-all"
         >
-          <PlusCircle className="w-4 h-4" />
+          <PlusCircle className="w-4 h-4 text-slate-950" />
           <span>Write Story</span>
         </Link>
 

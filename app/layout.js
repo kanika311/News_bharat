@@ -3,15 +3,15 @@ import PublicLayoutWrapper from "@/components/public/PublicLayoutWrapper";
 
 export const metadata = {
   title: {
-    default: "The Swar Media | द स्वर मीडिया - हर मुद्दे पर, युवा की आवाज",
+    default: "The Swar Media | द स्वर मीडिया - सच के साथ, समाज के लिए",
     template: "%s | The Swar Media",
   },
   description:
-    "The Swar Media - हर मुद्दे पर, युवा की आवाज (Inform • Inspire • Empower). निष्पक्ष, विश्वसनीय और ज़मीनी पत्रकारिता का प्रमुख राष्ट्रीय डिजिटल न्यूज़ पोर्टल।",
+    "The Swar Media - सच के साथ, समाज के लिए (Inform • Inspire • Empower). निष्पक्ष, विश्वसनीय और ज़मीनी पत्रकारिता का प्रमुख राष्ट्रीय डिजिटल न्यूज़ पोर्टल।",
   keywords: [
     "The Swar Media",
     "द स्वर मीडिया",
-    "हर मुद्दे पर युवा की आवाज",
+    "सच के साथ समाज के लिए",
     "Hindi News",
     "ताज़ा खबर",
     "Breaking News",
@@ -29,7 +29,7 @@ export const metadata = {
     apple: "/logo.png",
   },
   openGraph: {
-    title: "The Swar Media | द स्वर मीडिया - हर मुद्दे पर, युवा की आवाज",
+    title: "The Swar Media | द स्वर मीडिया - सच के साथ, समाज के लिए",
     description: "Inform • Inspire • Empower - Leading bilingual news portal covering national and international affairs.",
     url: "/",
     siteName: "The Swar Media",
@@ -47,7 +47,7 @@ export const metadata = {
   twitter: {
     card: "summary_large_image",
     title: "The Swar Media | द स्वर मीडिया",
-    description: "हर मुद्दे पर, युवा की आवाज (Inform • Inspire • Empower)",
+    description: "सच के साथ, समाज के लिए (Inform • Inspire • Empower)",
     images: ["/logo.png"],
     creator: "@theswarmedia",
   },

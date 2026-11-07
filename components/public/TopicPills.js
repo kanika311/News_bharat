@@ -54,12 +54,12 @@ export default function TopicPills() {
   };
 
   return (
-    <div className="bg-slate-100 dark:bg-slate-900/90 border-b border-slate-200 dark:border-slate-800 select-none py-1.5 px-2 sm:px-4 transition-colors">
+    <div className="bg-amber-50/40 dark:bg-slate-900/90 border-b border-amber-200/50 dark:border-amber-900/30 select-none py-1.5 px-2 sm:px-4 transition-colors">
       <div className="w-full flex items-center gap-1.5 sm:gap-2">
         {/* Left Scroll Button (Desktop) */}
         <button
           onClick={() => scroll("left")}
-          className="hidden sm:flex w-7 h-7 rounded-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 shadow-xs items-center justify-center text-slate-700 dark:text-slate-300 hover:bg-slate-200 shrink-0"
+          className="hidden sm:flex w-7 h-7 rounded-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 shadow-xs items-center justify-center text-slate-700 dark:text-slate-300 hover:border-amber-400 hover:text-amber-600 shrink-0"
           aria-label="Scroll left"
         >
           <ChevronLeft className="w-4 h-4" />
@@ -77,8 +77,8 @@ export default function TopicPills() {
               href={`/search?q=${encodeURIComponent(topic.query)}`}
               className={`px-2.5 sm:px-3 py-1 text-[11px] sm:text-xs rounded-full whitespace-nowrap font-medium transition-all duration-150 ${
                 topic.isHot
-                  ? "bg-red-600 text-white font-bold shadow-xs hover:bg-red-700"
-                  : "bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:border-red-500 hover:text-red-600 dark:hover:text-red-400"
+                  ? "bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 text-slate-950 font-black shadow-xs border border-amber-400 hover:brightness-105"
+                  : "bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:border-amber-400 hover:text-amber-700 dark:hover:text-amber-400"
               }`}
             >
               {topic.label}
@@ -89,7 +89,7 @@ export default function TopicPills() {
         {/* Right Scroll Button (Desktop) */}
         <button
           onClick={() => scroll("right")}
-          className="hidden sm:flex w-7 h-7 rounded-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 shadow-xs items-center justify-center text-slate-700 dark:text-slate-300 hover:bg-slate-200 shrink-0"
+          className="hidden sm:flex w-7 h-7 rounded-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 shadow-xs items-center justify-center text-slate-700 dark:text-slate-300 hover:border-amber-400 hover:text-amber-600 shrink-0"
           aria-label="Scroll right"
         >
           <ChevronRight className="w-4 h-4" />

@@ -77,29 +77,29 @@ export default function Footer() {
       : settings?.siteName || "The Swar Media";
   const tagLine =
     lang === "hi"
-      ? settings?.tagLineHi || "हर मुद्दे पर, युवा की आवाज"
-      : settings?.tagLine || "हर मुद्दे पर, युवा की आवाज";
+      ? settings?.tagLineHi || "सच के साथ, समाज के लिए"
+      : settings?.tagLine || "सच के साथ, समाज के लिए";
   const footerText = settings?.footerText || "Powered By JCRM Technologies";
   const footerTextHi = settings?.footerTextHi || "Swarmedia4554@gmail.com";
   const social = settings?.socialLinks || {};
 
   return (
-    <footer className="bg-slate-950 text-slate-300 pt-12 pb-8 border-t border-slate-900 mt-0">
+    <footer className="bg-slate-950 text-slate-300 pt-12 pb-8 border-t-2 border-amber-500/40 mt-0">
       <div className="w-full px-4 sm:px-6 lg:px-8 space-y-12">
-        {/* Newsletter Banner in Royal Crimson & Gold */}
-        <div className="p-8 bg-gradient-to-r from-[#8B0000] via-[#B30D12] to-slate-950 rounded-3xl text-white shadow-2xl border border-amber-500/30 flex flex-col md:flex-row items-center justify-between gap-6">
+        {/* Newsletter Banner in Deep Royal Navy & Rich Gold */}
+        <div className="p-8 bg-gradient-to-r from-[#070e1e] via-[#0f1d3b] to-[#070e1e] rounded-3xl text-white shadow-2xl border-2 border-amber-400/70 flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="max-w-xl">
-            <span className="text-[10px] font-black uppercase tracking-widest bg-amber-500/20 text-amber-300 border border-amber-500/40 px-2.5 py-0.5 rounded-full inline-block mb-2">
+            <span className="text-[10px] font-black uppercase tracking-widest bg-amber-500/20 text-amber-300 border border-amber-400/50 px-3 py-0.5 rounded-full inline-block mb-2">
               INFORM • INSPIRE • EMPOWER
             </span>
             <h3 className="text-xl sm:text-2xl font-black tracking-tight">
               {t("newsletterTitle")}
             </h3>
-            <p className="text-xs text-red-100 mt-1">{t("newsletterDesc")}</p>
+            <p className="text-xs text-amber-100/90 mt-1">{t("newsletterDesc")}</p>
           </div>
 
           <form onSubmit={handleSubscribe} className="w-full md:w-auto flex-1 max-w-md">
-            <div className="flex items-center gap-2 bg-slate-900/80 p-1.5 rounded-2xl border border-red-700/50">
+            <div className="flex items-center gap-2 bg-slate-900/90 p-1.5 rounded-2xl border border-amber-400/50">
               <input
                 type="email"
                 required
@@ -111,9 +111,9 @@ export default function Footer() {
               <button
                 type="submit"
                 disabled={subscribing}
-                className="px-5 py-2.5 text-xs font-bold text-white bg-red-600 hover:bg-red-700 rounded-xl shrink-0 transition-colors shadow-md disabled:opacity-70 cursor-pointer"
+                className="px-5 py-2.5 text-xs font-black text-slate-950 bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 hover:from-amber-600 hover:to-yellow-500 rounded-xl shrink-0 transition-all shadow-md disabled:opacity-70 cursor-pointer"
               >
-                {subscribing ? <Loader2 className="w-4 h-4 animate-spin" /> : t("subscribe")}
+                {subscribing ? <Loader2 className="w-4 h-4 animate-spin text-slate-950" /> : t("subscribe")}
               </button>
             </div>
             {subMessage && (

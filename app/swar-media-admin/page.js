@@ -78,28 +78,28 @@ export default function AdminDashboardPage() {
 
   return (
     <div className="space-y-6">
-      {/* Top Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 bg-gradient-to-r from-red-600 to-red-700 rounded-3xl text-white shadow-xl shadow-red-600/20">
+      {/* Top Banner with Royal Navy & Gold Theme */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 bg-gradient-to-r from-[#070e1e] via-[#0f1d3b] to-[#070e1e] border-2 border-amber-400/70 rounded-3xl text-white shadow-xl">
         <div>
-          <span className="inline-block px-2.5 py-0.5 rounded-full bg-white/20 text-white text-[11px] font-bold uppercase tracking-wider mb-2">
+          <span className="inline-block px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-400/50 text-[11px] font-black uppercase tracking-wider mb-2">
             Newsroom Desk
           </span>
           <h1 className="text-2xl font-black tracking-tight">Swar Media Editorial Command</h1>
-          <p className="text-sm text-red-100 mt-1 max-w-xl">
+          <p className="text-sm text-amber-100/90 mt-1 max-w-xl">
             Real-time multi-channel overview across national, state, and digital publication feeds.
           </p>
         </div>
         <div className="flex items-center gap-2">
           <Link
             href="/swar-media-admin/articles/new"
-            className="flex items-center gap-2 px-4 py-2.5 bg-white text-red-600 font-bold text-xs rounded-xl hover:bg-red-50 transition-colors shadow-md shadow-black/10"
+            className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 hover:from-amber-600 text-slate-950 font-black text-xs rounded-xl transition-all shadow-md"
           >
-            <PlusCircle className="w-4 h-4" />
+            <PlusCircle className="w-4 h-4 text-slate-950" />
             <span>Create Article</span>
           </Link>
           <Link
             href="/swar-media-admin/live-blogs"
-            className="flex items-center gap-2 px-4 py-2.5 bg-red-800 text-white font-bold text-xs rounded-xl hover:bg-red-900 transition-colors"
+            className="flex items-center gap-2 px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-xl transition-colors shadow-md"
           >
             <span>Live Coverage</span>
           </Link>
