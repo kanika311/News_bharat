@@ -1,4 +1,5 @@
 const express = require("express");
+const compression = require("compression");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const rateLimit = require("express-rate-limit");
@@ -27,6 +28,9 @@ const epaperRoutes = require("./routes/epaperRoutes");
 
 const app = express();
 app.set("trust proxy", 1);
+
+// Enable gzip/deflate compression across all API responses for fast load times
+app.use(compression());
 
 // Scope CORS, cookies and body parsing strictly to /api routes so Next.js static assets & CSS remain completely untouched
 const apiCors = cors({

@@ -11,6 +11,7 @@ exports.getTickers = async (req, res) => {
     }
 
     const tickers = await Ticker.find(filter).sort("-priority -createdAt").lean();
+    res.set("Cache-Control", "public, s-maxage=60, stale-while-revalidate=180");
     return res.json({ success: true, tickers });
   } catch (err) {
     return res.status(500).json({ success: false, message: err.message });

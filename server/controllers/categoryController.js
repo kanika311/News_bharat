@@ -16,6 +16,7 @@ exports.getCategories = async (req, res) => {
       .sort("order")
       .lean();
 
+    res.set("Cache-Control", "public, s-maxage=120, stale-while-revalidate=300");
     return res.json({ success: true, categories });
   } catch (err) {
     return res.status(500).json({ success: false, message: err.message });

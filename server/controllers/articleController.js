@@ -85,6 +85,11 @@ exports.getArticles = async (req, res) => {
       Article.countDocuments(query),
     ]);
 
+    // Fast Edge caching for public queries
+    if (!author && (!status || status === "published") && trashed !== "true") {
+      res.set("Cache-Control", "public, s-maxage=45, stale-while-revalidate=120");
+    }
+
     return res.json({
       success: true,
       articles,

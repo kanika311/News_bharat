@@ -33,7 +33,15 @@ export default function Header() {
   const { lang, setLang, t } = useLang();
   const { user: authUser, logout } = useAuth();
 
-  const [categories, setCategories] = useState([]);
+  const [categories, setCategories] = useState(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const cached = localStorage.getItem("swar_categories_cache");
+        return cached ? JSON.parse(cached) : [];
+      } catch (e) {}
+    }
+    return [];
+  });
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -42,7 +50,15 @@ export default function Header() {
 
   // User Auth State
   const [currentUser, setCurrentUser] = useState(null);
-  const [siteSettings, setSiteSettings] = useState(null);
+  const [siteSettings, setSiteSettings] = useState(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const cached = localStorage.getItem("swar_settings_cache");
+        return cached ? JSON.parse(cached) : null;
+      } catch (e) {}
+    }
+    return null;
+  });
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const [notificationDrawerOpen, setNotificationDrawerOpen] = useState(false);
   const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
@@ -75,13 +91,19 @@ export default function Header() {
   useEffect(() => {
     apiFetch("/api/settings")
       .then((res) => {
-        if (res.success && res.settings) setSiteSettings(res.settings);
+        if (res.success && res.settings) {
+          setSiteSettings(res.settings);
+          try { localStorage.setItem("swar_settings_cache", JSON.stringify(res.settings)); } catch (e) {}
+        }
       })
       .catch(() => {});
 
     apiFetch("/api/categories?menuOnly=true")
       .then((res) => {
-        if (res.success) setCategories(res.categories || []);
+        if (res.success && res.categories) {
+          setCategories(res.categories);
+          try { localStorage.setItem("swar_categories_cache", JSON.stringify(res.categories)); } catch (e) {}
+        }
       })
       .catch(() => {});
 

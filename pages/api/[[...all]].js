@@ -41,7 +41,8 @@ export default async function handler(req, res) {
   try {
     await connectDB();
     if (process.env.VERCEL) {
-      await ensureSeeded();
+      // Run seed check in background without blocking user request latency
+      ensureSeeded().catch(() => {});
     }
     ensureApiUrl(req);
     return app(req, res);

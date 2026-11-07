@@ -7,14 +7,25 @@ import { apiFetch } from "@/lib/api";
 import { useLang } from "@/lib/langContext";
 
 export default function Ticker() {
-  const [tickers, setTickers] = useState([]);
+  const [tickers, setTickers] = useState(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const cached = localStorage.getItem("swar_tickers_cache");
+        return cached ? JSON.parse(cached) : [];
+      } catch (e) {}
+    }
+    return [];
+  });
   const [dismissed, setDismissed] = useState(false);
   const { lang, t } = useLang();
 
   useEffect(() => {
     apiFetch("/api/ticker?activeOnly=true")
       .then((res) => {
-        if (res.success) setTickers(res.tickers || []);
+        if (res.success && res.tickers) {
+          setTickers(res.tickers);
+          try { localStorage.setItem("swar_tickers_cache", JSON.stringify(res.tickers)); } catch (e) {}
+        }
       })
       .catch(() => {});
   }, []);

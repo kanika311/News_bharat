@@ -21,6 +21,7 @@ async function getOrCreateSettings() {
 exports.getSettings = async (req, res) => {
   try {
     const settings = await getOrCreateSettings();
+    res.set("Cache-Control", "public, s-maxage=120, stale-while-revalidate=300");
     return res.json({ success: true, settings });
   } catch (err) {
     return res.status(500).json({ success: false, message: err.message });
