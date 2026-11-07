@@ -19,6 +19,11 @@ import {
   User,
   Radio,
   Tv,
+  Newspaper,
+  Scale,
+  BookOpen,
+  Megaphone,
+  Briefcase,
 } from "lucide-react";
 import { useLang } from "@/lib/langContext";
 import { apiFetch } from "@/lib/api";
@@ -84,296 +89,331 @@ export default function Footer() {
   const social = settings?.socialLinks || {};
 
   return (
-    <footer className="bg-slate-950 text-slate-300 pt-12 pb-8 border-t-2 border-amber-500/40 mt-0">
-      <div className="w-full px-4 sm:px-6 lg:px-8 space-y-12">
-        {/* Newsletter Banner in Deep Royal Navy & Rich Gold */}
-        <div className="p-8 bg-gradient-to-r from-[#070e1e] via-[#0f1d3b] to-[#070e1e] rounded-3xl text-white shadow-2xl border-2 border-amber-400/70 flex flex-col md:flex-row items-center justify-between gap-6">
+    <footer className="bg-[#FFF8EE] text-slate-800 pt-10 pb-8 border-t-4 border-[#C9962A] mt-0 shadow-inner">
+      <div className="w-full px-4 sm:px-6 lg:px-8 space-y-10">
+        {/* Newsletter Banner in Warm Ivory & Gold Theme */}
+        <div className="p-6 sm:p-8 bg-white/95 rounded-3xl text-slate-900 shadow-md border-2 border-[#E4C56A] flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="max-w-xl">
-            <span className="text-[10px] font-black uppercase tracking-widest bg-amber-500/20 text-amber-300 border border-amber-400/50 px-3 py-0.5 rounded-full inline-block mb-2">
+            <span className="text-[10px] font-black uppercase tracking-widest bg-amber-100 text-[#854D0E] border border-[#C9962A]/60 px-3 py-1 rounded-full inline-block mb-2">
               INFORM • INSPIRE • EMPOWER
             </span>
-            <h3 className="text-xl sm:text-2xl font-black tracking-tight">
+            <h3 className="text-xl sm:text-2xl font-black text-[#16325C] tracking-tight">
               {t("newsletterTitle")}
             </h3>
-            <p className="text-xs text-amber-100/90 mt-1">{t("newsletterDesc")}</p>
+            <p className="text-xs text-slate-600 mt-1">{t("newsletterDesc")}</p>
           </div>
 
           <form onSubmit={handleSubscribe} className="w-full md:w-auto flex-1 max-w-md">
-            <div className="flex items-center gap-2 bg-slate-900/90 p-1.5 rounded-2xl border border-amber-400/50">
+            <div className="flex items-center gap-2 bg-[#FFF8EE] p-1.5 rounded-2xl border border-[#E4C56A] focus-within:border-[#C9962A] transition-colors">
               <input
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder={t("emailPlaceholder")}
-                className="w-full px-3 py-2 text-xs bg-transparent text-white placeholder-slate-400 focus:outline-none"
+                className="w-full px-3 py-2 text-xs bg-transparent text-slate-900 placeholder-slate-400 focus:outline-none"
               />
               <button
                 type="submit"
                 disabled={subscribing}
-                className="px-5 py-2.5 text-xs font-black text-slate-950 bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 hover:from-amber-600 hover:to-yellow-500 rounded-xl shrink-0 transition-all shadow-md disabled:opacity-70 cursor-pointer"
+                className="px-5 py-2.5 text-xs font-black text-slate-950 bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 hover:from-amber-600 hover:to-yellow-500 rounded-xl shrink-0 transition-all shadow-sm ring-1 ring-amber-400/80 disabled:opacity-70 cursor-pointer"
               >
                 {subscribing ? <Loader2 className="w-4 h-4 animate-spin text-slate-950" /> : t("subscribe")}
               </button>
             </div>
             {subMessage && (
-              <p className="text-xs text-yellow-300 font-semibold mt-2 pl-2 flex items-center gap-1">
-                <CheckCircle className="w-3.5 h-3.5" />
+              <p className="text-xs text-emerald-700 font-bold mt-2 pl-2 flex items-center gap-1">
+                <CheckCircle className="w-3.5 h-3.5 text-emerald-600" />
                 <span>{subMessage}</span>
               </p>
             )}
           </form>
         </div>
 
-        {/* Multi-column Navigation */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 text-xs">
-          {/* Col 1: Brand & Dynamic Social Channels */}
-          <div className="sm:col-span-2 lg:col-span-1 space-y-4">
+        {/* Multi-column Navigation (Exact Swarnim Dastavej Layout & Styling) */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 text-xs">
+          {/* Col 1: Brand Logo, Description, RNI Registration, Social & WhatsApp Community */}
+          <div className="space-y-4">
             <div className="flex items-center gap-3">
               <img
                 src={logoUrl}
                 alt={siteName}
-                className="h-14 sm:h-16 w-auto object-contain drop-shadow-xl"
+                className="h-14 sm:h-16 w-auto object-contain drop-shadow"
               />
+              <div className="flex flex-col">
+                <span className="text-xl sm:text-2xl font-black text-[#16325C] font-hindi tracking-tight">
+                  {siteName}
+                </span>
+                <span className="text-[11px] font-bold text-[#C9962A]">
+                  {tagLine}
+                </span>
+              </div>
             </div>
 
-            <p className="text-amber-400 font-black text-xs font-hindi tracking-wide flex items-center gap-1.5">
-              <span>{tagLine}</span>
+            <p className="text-slate-600 leading-relaxed text-xs">
+              उत्तर प्रदेश व राष्ट्रीय स्तर का अग्रणी, निष्पक्ष एवं निर्भीक हिंदी दैनिक समाचार पत्र व डिजिटल मीडिया नेटवर्क।
             </p>
 
-            <p className="text-slate-400 leading-relaxed text-xs">
-              द स्वर मीडिया निष्पक्ष, विश्वसनीय और ज़मीनी पत्रकारिता का प्रमुख हिंदी एवं राष्ट्रीय डिजिटल न्यूज़ पोर्टल है।
-            </p>
+            {/* RNI / Registration Box */}
+            <div>
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-[#C9962A] bg-[#FFF5E2] text-[#854D0E] font-bold text-xs shadow-2xs">
+                <span>पंजीकरण: RNI No. UP/HIN/2026/876</span>
+              </div>
+            </div>
 
-            {/* Social Icons from Site Settings */}
-            <div className="flex flex-wrap items-center gap-2 pt-2">
-              {social.youtube && (
-                <a
-                  href={social.youtube}
-                  target="_blank"
-                  rel="noreferrer"
-                  title="YouTube"
-                  className="w-8 h-8 rounded-full bg-slate-900 hover:bg-red-600 text-slate-300 hover:text-white flex items-center justify-center transition-colors"
-                >
-                  <Youtube className="w-4 h-4" />
-                </a>
-              )}
-              {social.twitter && (
-                <a
-                  href={social.twitter}
-                  target="_blank"
-                  rel="noreferrer"
-                  title="X (Twitter)"
-                  className="w-8 h-8 rounded-full bg-slate-900 hover:bg-red-600 text-slate-300 hover:text-white flex items-center justify-center transition-colors"
-                >
-                  <Twitter className="w-4 h-4" />
-                </a>
-              )}
-              {social.facebook && (
-                <a
-                  href={social.facebook}
-                  target="_blank"
-                  rel="noreferrer"
-                  title="Facebook"
-                  className="w-8 h-8 rounded-full bg-slate-900 hover:bg-red-600 text-slate-300 hover:text-white flex items-center justify-center transition-colors"
-                >
-                  <Facebook className="w-4 h-4" />
-                </a>
-              )}
-              {social.instagram && (
-                <a
-                  href={social.instagram}
-                  target="_blank"
-                  rel="noreferrer"
-                  title="Instagram"
-                  className="w-8 h-8 rounded-full bg-slate-900 hover:bg-red-600 text-slate-300 hover:text-white flex items-center justify-center transition-colors"
-                >
-                  <Instagram className="w-4 h-4" />
-                </a>
-              )}
-              {social.telegram && (
-                <a
-                  href={social.telegram}
-                  target="_blank"
-                  rel="noreferrer"
-                  title="Telegram"
-                  className="w-8 h-8 rounded-full bg-slate-900 hover:bg-red-600 text-slate-300 hover:text-white flex items-center justify-center transition-colors"
-                >
-                  <Send className="w-4 h-4" />
-                </a>
-              )}
-              {social.whatsapp && (
-                <a
-                  href={social.whatsapp}
-                  target="_blank"
-                  rel="noreferrer"
-                  title="WhatsApp"
-                  className="w-8 h-8 rounded-full bg-slate-900 hover:bg-emerald-600 text-slate-300 hover:text-white flex items-center justify-center transition-colors"
-                >
-                  <MessageCircle className="w-4 h-4" />
-                </a>
-              )}
+            {/* Social Media Links */}
+            <div className="space-y-2 pt-1">
+              <h5 className="text-xs font-black text-[#16325C] uppercase tracking-wide">
+                सोशल मीडिया पर जुड़ें
+              </h5>
+              <div className="flex flex-wrap items-center gap-2">
+                {social.facebook && (
+                  <a
+                    href={social.facebook}
+                    target="_blank"
+                    rel="noreferrer"
+                    title="Facebook"
+                    className="w-8 h-8 rounded-xl bg-white border border-[#C9962A]/50 text-blue-600 hover:bg-[#C9962A] hover:text-white shadow-2xs flex items-center justify-center transition-all hover:scale-105"
+                  >
+                    <Facebook className="w-4 h-4" />
+                  </a>
+                )}
+                {social.twitter && (
+                  <a
+                    href={social.twitter}
+                    target="_blank"
+                    rel="noreferrer"
+                    title="X (Twitter)"
+                    className="w-8 h-8 rounded-xl bg-white border border-[#C9962A]/50 text-slate-900 hover:bg-[#C9962A] hover:text-white shadow-2xs flex items-center justify-center transition-all hover:scale-105"
+                  >
+                    <Twitter className="w-4 h-4" />
+                  </a>
+                )}
+                {social.instagram && (
+                  <a
+                    href={social.instagram}
+                    target="_blank"
+                    rel="noreferrer"
+                    title="Instagram"
+                    className="w-8 h-8 rounded-xl bg-white border border-[#C9962A]/50 text-pink-600 hover:bg-[#C9962A] hover:text-white shadow-2xs flex items-center justify-center transition-all hover:scale-105"
+                  >
+                    <Instagram className="w-4 h-4" />
+                  </a>
+                )}
+                {social.youtube && (
+                  <a
+                    href={social.youtube}
+                    target="_blank"
+                    rel="noreferrer"
+                    title="YouTube"
+                    className="w-8 h-8 rounded-xl bg-white border border-[#C9962A]/50 text-red-600 hover:bg-[#C9962A] hover:text-white shadow-2xs flex items-center justify-center transition-all hover:scale-105"
+                  >
+                    <Youtube className="w-4 h-4" />
+                  </a>
+                )}
+                {social.whatsapp && (
+                  <a
+                    href={social.whatsapp}
+                    target="_blank"
+                    rel="noreferrer"
+                    title="WhatsApp"
+                    className="w-8 h-8 rounded-xl bg-white border border-[#C9962A]/50 text-emerald-600 hover:bg-[#C9962A] hover:text-white shadow-2xs flex items-center justify-center transition-all hover:scale-105"
+                  >
+                    <MessageCircle className="w-4 h-4" />
+                  </a>
+                )}
+              </div>
+            </div>
+
+            {/* WhatsApp Community Follow Button (Exact green button from screenshot) */}
+            <div className="pt-1">
+              <a
+                href={social.whatsapp || "https://whatsapp.com/channel/swarmedia"}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#25D366] hover:bg-[#20ba5c] text-white text-xs font-black shadow-sm shadow-emerald-500/20 transition-all hover:scale-105 active:scale-95 cursor-pointer"
+              >
+                <MessageCircle className="w-4 h-4 fill-white text-white" />
+                <span>व्हाट्सएप कम्युनिटी फॉलो करें</span>
+              </a>
             </div>
           </div>
 
-          {/* Col 2: Categories */}
+          {/* Col 2: प्रमुख श्रेणियां (Top Categories) */}
           <div className="space-y-3">
-            <h4 className="text-white font-bold uppercase tracking-wider text-xs border-b border-red-600 pb-1 inline-block">
-              News Desks (प्रमुख श्रेणियां)
+            <h4 className="text-sm font-black text-[#16325C] border-b-2 border-[#E4C56A] pb-1.5 flex items-center gap-1.5">
+              <span>प्रमुख श्रेणियां</span>
             </h4>
-            <ul className="space-y-2 text-slate-400">
-              {categories.slice(0, 6).map((c) => (
-                <li key={c._id}>
-                  <Link href={`/${c.slug}`} className="hover:text-red-500 transition-colors">
-                    {lang === "hi" ? c.nameHi : c.name}
+            <div className="grid grid-cols-2 gap-x-3 gap-y-2 text-slate-700">
+              {categories.length > 0 ? (
+                categories.slice(0, 10).map((c) => (
+                  <Link
+                    key={c._id}
+                    href={`/${c.slug}`}
+                    className="hover:text-[#C9962A] font-medium transition-colors line-clamp-1 py-0.5"
+                  >
+                    {lang === "hi" && c.nameHi ? c.nameHi : c.name}
                   </Link>
-                </li>
-              ))}
-            </ul>
+                ))
+              ) : (
+                <>
+                  <Link href="/state-city" className="hover:text-[#C9962A] font-medium py-0.5">उत्तर प्रदेश</Link>
+                  <Link href="/search?q=सुलतानपुर" className="hover:text-[#C9962A] font-medium py-0.5">सुल्तानपुर विशेष</Link>
+                  <Link href="/search?q=लखनऊ" className="hover:text-[#C9962A] font-medium py-0.5">लखनऊ दैनिक</Link>
+                  <Link href="/india" className="hover:text-[#C9962A] font-medium py-0.5">देश / राष्ट्रीय</Link>
+                  <Link href="/politics" className="hover:text-[#C9962A] font-medium py-0.5">राजनीति</Link>
+                  <Link href="/business" className="hover:text-[#C9962A] font-medium py-0.5">कारोबार</Link>
+                  <Link href="/sports" className="hover:text-[#C9962A] font-medium py-0.5">खेल जगत</Link>
+                  <Link href="/videos" className="hover:text-[#C9962A] font-medium py-0.5">वीडियो न्यूज़</Link>
+                </>
+              )}
+            </div>
           </div>
 
-          {/* Col 3: Special Features */}
+          {/* Col 3: डिजिटल सेवाएं व नीतियां (Digital Services & Policies with Gold Icons) */}
           <div className="space-y-3">
-            <h4 className="text-white font-bold uppercase tracking-wider text-xs border-b border-red-600 pb-1 inline-block">
-              Special Features (विशेष)
+            <h4 className="text-sm font-black text-[#16325C] border-b-2 border-[#E4C56A] pb-1.5 flex items-center gap-1.5">
+              <span>डिजिटल सेवाएं व नीतियां</span>
             </h4>
-            <ul className="space-y-2 text-slate-400">
+            <ul className="space-y-2.5 text-slate-700">
               <li>
-                <Link href="/live" className="hover:text-red-500 transition-colors flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-red-600 animate-ping shrink-0" />
-                  <span>{lang === "hi" ? "लाइव न्यूज़ प्रसारण" : "Live News"}</span>
+                <Link
+                  href="/dashboard"
+                  className="flex items-center gap-2 hover:text-[#C9962A] font-semibold transition-colors group"
+                >
+                  <Megaphone className="w-4 h-4 text-[#C9962A] group-hover:scale-110 transition-transform shrink-0" />
+                  <span>नागरिक पत्रकारिता</span>
                 </Link>
               </li>
               <li>
-                <Link href="/epaper" className="hover:text-red-500 transition-colors">
-                  {lang === "hi" ? "दैनिक ई-पेपर संस्करण" : "Daily e-Paper"}
+                <Link
+                  href="/epaper"
+                  className="flex items-center gap-2 hover:text-[#C9962A] font-semibold transition-colors group"
+                >
+                  <Newspaper className="w-4 h-4 text-[#C9962A] group-hover:scale-110 transition-transform shrink-0" />
+                  <span>दैनिक ई-पेपर (डिजिटल संस्करण)</span>
                 </Link>
               </li>
               <li>
-                <Link href="/videos" className="hover:text-red-500 transition-colors">
-                  {t("videos")}
+                <Link
+                  href="/pages/advertise"
+                  className="flex items-center gap-2 hover:text-[#C9962A] font-semibold transition-colors group"
+                >
+                  <Briefcase className="w-4 h-4 text-[#C9962A] group-hover:scale-110 transition-transform shrink-0" />
+                  <span>क्लासिफाइड एवं निविदाएं</span>
                 </Link>
               </li>
               <li>
-                <Link href="/live-blogs" className="hover:text-red-500 transition-colors">
-                  {lang === "hi" ? "लाइव ब्लॉग्स" : "Live Blogs"}
+                <Link
+                  href="/pages/privacy-policy"
+                  className="flex items-center gap-2 hover:text-[#C9962A] font-semibold transition-colors group"
+                >
+                  <Shield className="w-4 h-4 text-[#C9962A] group-hover:scale-110 transition-transform shrink-0" />
+                  <span>गोपनीयता नीति</span>
                 </Link>
               </li>
               <li>
-                <Link href="/dashboard" className="hover:text-red-500 transition-colors">
-                  {lang === "hi" ? "नागरिक पत्रकार डैशबोर्ड" : "Citizen Journalist Desk"}
+                <Link
+                  href="/pages/terms"
+                  className="flex items-center gap-2 hover:text-[#C9962A] font-semibold transition-colors group"
+                >
+                  <Scale className="w-4 h-4 text-[#C9962A] group-hover:scale-110 transition-transform shrink-0" />
+                  <span>नियम एवं शर्तें</span>
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/pages/about"
+                  className="flex items-center gap-2 hover:text-[#C9962A] font-semibold transition-colors group"
+                >
+                  <BookOpen className="w-4 h-4 text-[#C9962A] group-hover:scale-110 transition-transform shrink-0" />
+                  <span>संपादकीय नीति व परिचय</span>
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Col 4: Corporate & Legal (Contact Us removed) */}
-          <div className="space-y-3">
-            <h4 className="text-white font-bold uppercase tracking-wider text-xs border-b border-red-600 pb-1 inline-block">
-              Corporate & Legal
-            </h4>
-            <ul className="space-y-2 text-slate-400">
-              <li>
-                <Link href="/pages/about" className="hover:text-red-500 transition-colors">
-                  About Us (हमारे बारे में)
-                </Link>
-              </li>
-              <li>
-                <Link href="/pages/privacy-policy" className="hover:text-red-500 transition-colors">
-                  Privacy Policy (गोपनीयता नीति)
-                </Link>
-              </li>
-              <li>
-                <Link href="/pages/terms" className="hover:text-red-500 transition-colors">
-                  Terms of Service (नियम और शर्तें)
-                </Link>
-              </li>
-              <li>
-                <Link href="/pages/advertise" className="hover:text-red-500 transition-colors">
-                  Advertise With Us (विज्ञापन दें)
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Col 5: Editorial & Contact Details (Live from Admin Settings) */}
-          <div className="space-y-3 bg-slate-900/60 p-4 rounded-2xl border border-slate-800/80">
-            <h4 className="text-white font-bold uppercase tracking-wider text-xs border-b border-red-600 pb-1 inline-block">
+          {/* Col 4: संपादकीय एवं संपर्क (Editorial & Contact Desk) */}
+          <div className="space-y-3 bg-white/90 p-4 rounded-2xl border border-[#E4C56A] shadow-xs">
+            <h4 className="text-sm font-black text-[#16325C] border-b border-[#E4C56A] pb-1.5">
               संपादकीय एवं संपर्क
             </h4>
-            <div className="space-y-3 text-slate-300">
+            <div className="space-y-3 text-slate-700">
               {/* Admin / Chief Editor Name */}
               <div className="space-y-0.5">
-                <span className="text-[10px] text-slate-500 uppercase tracking-wider block font-semibold">
+                <span className="text-[10px] text-slate-500 uppercase tracking-wider block font-bold">
                   प्रधान संपादक / एडमिन
                 </span>
-                <p className="text-xs font-black text-white flex items-center gap-1.5 font-hindi">
-                  <User className="w-3.5 h-3.5 text-red-500 shrink-0" />
+                <p className="text-xs font-black text-slate-900 flex items-center gap-1.5 font-hindi">
+                  <User className="w-3.5 h-3.5 text-[#C9962A] shrink-0" />
                   <span>{adminName}</span>
                 </p>
               </div>
 
               {/* Email */}
               <div className="space-y-0.5">
-                <span className="text-[10px] text-slate-500 uppercase tracking-wider block font-semibold">
+                <span className="text-[10px] text-slate-500 uppercase tracking-wider block font-bold">
                   ईमेल (Email)
                 </span>
                 <a
                   href={`mailto:${contactEmail}`}
-                  className="flex items-center gap-1.5 text-xs text-slate-200 hover:text-red-400 transition-colors break-all font-medium"
+                  className="flex items-center gap-1.5 text-xs text-slate-800 hover:text-[#C9962A] transition-colors break-all font-semibold"
                 >
-                  <Mail className="w-3.5 h-3.5 text-red-500 shrink-0" />
+                  <Mail className="w-3.5 h-3.5 text-[#C9962A] shrink-0" />
                   <span>{contactEmail}</span>
                 </a>
               </div>
 
               {/* Phone */}
               <div className="space-y-0.5">
-                <span className="text-[10px] text-slate-500 uppercase tracking-wider block font-semibold">
+                <span className="text-[10px] text-slate-500 uppercase tracking-wider block font-bold">
                   न्यूज़रूम फ़ोन (Phone)
                 </span>
                 <a
                   href={`tel:${contactPhone.replace(/\s+/g, "")}`}
-                  className="flex items-center gap-1.5 text-xs text-slate-200 hover:text-red-400 font-bold transition-colors"
+                  className="flex items-center gap-1.5 text-xs text-slate-800 hover:text-[#C9962A] font-black transition-colors"
                 >
-                  <Phone className="w-3.5 h-3.5 text-red-500 shrink-0" />
+                  <Phone className="w-3.5 h-3.5 text-[#C9962A] shrink-0" />
                   <span>{contactPhone}</span>
                 </a>
               </div>
 
-              {/* WhatsApp Community Direct Link */}
-              {social.whatsapp && (
-                <div className="pt-1">
-                  <a
-                    href={social.whatsapp}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-950/80 text-emerald-400 border border-emerald-800/80 hover:bg-emerald-900 transition-colors text-[11px] font-bold"
-                  >
-                    <MessageCircle className="w-3.5 h-3.5" />
-                    <span>WhatsApp चैनल जुड़ें</span>
-                  </a>
-                </div>
-              )}
+              {/* Live Link to E-paper & Studio */}
+              <div className="pt-1 flex items-center gap-2">
+                <Link
+                  href="/epaper"
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-100/90 text-[#854D0E] font-bold text-[10px] border border-[#C9962A]/50 hover:bg-[#C9962A] hover:text-white transition-colors"
+                >
+                  <Newspaper className="w-3 h-3" />
+                  <span>ई-अखबार पढ़ें</span>
+                </Link>
+                <Link
+                  href="/live"
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-red-100 text-red-700 font-bold text-[10px] border border-red-300 hover:bg-red-600 hover:text-white transition-colors"
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-red-600 animate-ping" />
+                  <span>लाइव न्यूज़</span>
+                </Link>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Bottom Copyright (Live from Admin Settings) */}
-        <div className="pt-8 border-t border-slate-900 text-[11px] text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-4">
+        {/* Bottom Copyright Strip */}
+        <div className="pt-6 border-t border-[#E4C56A] text-[11px] text-slate-600 flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="flex flex-col sm:flex-row items-center gap-2 text-center sm:text-left">
-            <p className="font-semibold text-slate-400">{footerText}</p>
-            <span className="hidden sm:inline text-slate-700">•</span>
-            <p className="text-slate-500">{footerTextHi}</p>
+            <p className="font-bold text-slate-700">{footerText}</p>
+            <span className="hidden sm:inline text-slate-400">•</span>
+            <p className="text-slate-600">{footerTextHi}</p>
           </div>
           <div className="flex items-center gap-4">
-            <Link href="/sitemap.xml" className="hover:underline">
+            <Link href="/sitemap.xml" className="hover:text-[#C9962A] font-semibold transition-colors">
               Sitemap
             </Link>
-            <Link href="/robots.txt" className="hover:underline">
+            <Link href="/robots.txt" className="hover:text-[#C9962A] font-semibold transition-colors">
               Robots
             </Link>
-            <span className="text-slate-600">Press Council of India Guidelines Compliant</span>
+            <span className="text-slate-500 hidden md:inline">Press Council of India Guidelines Compliant</span>
           </div>
         </div>
       </div>
