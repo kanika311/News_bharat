@@ -5,3 +5,12 @@ node_modules/
 dist/
 build/
 coverage/
+
+# Media binaries (videos should be hosted on YouTube/CDN, not inside git repo)
+*.webm
+*.mp4
+*.mov
+*.avi
+public/uploads/*.webm
+public/uploads/*.mp4
+public/uploads/*.mov
