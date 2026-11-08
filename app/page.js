@@ -101,15 +101,37 @@ export default function HomePage() {
           }
         }
         setLikedArticles(likedSet);
+
+        // Instant hydrate cached articles from localStorage (0 ms first paint)
+        const cached = localStorage.getItem("swar_cached_articles");
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setAllArticles(parsed);
+            setLeadArticles(parsed.slice(0, 5));
+            setTopStories(parsed.slice(1, 5));
+            const sorted = [...parsed].sort((a, b) => (b.viewCount || 0) - (a.viewCount || 0));
+            setTrendingArticles(sorted.slice(0, 5));
+            setLoading(false);
+          }
+        }
+
+        const cachedCats = localStorage.getItem("swar_cached_categories");
+        if (cachedCats) {
+          const parsedCats = JSON.parse(cachedCats);
+          if (Array.isArray(parsedCats) && parsedCats.length > 0) {
+            setCategories(parsedCats);
+          }
+        }
       } catch (e) {}
     }
   }, []);
 
   useEffect(() => {
-    // Safety timer: Never block visitor for more than 1.2s on loading screen
+    // Safety timer: Never block visitor for more than 1.5s on loading screen
     const safetyTimer = setTimeout(() => {
       setLoading(false);
-    }, 1200);
+    }, 1500);
 
     async function loadHomeContent() {
       try {
@@ -133,28 +155,32 @@ export default function HomePage() {
         ]);
 
         const rawArticles = articlesRes.articles || [];
-        // Sort strictly by latest updated/published news first (Last updated on top)
-        const all = [...rawArticles].sort((a, b) => {
-          const timeA = new Date(a.updatedAt || a.publishedAt || a.createdAt || 0).getTime();
-          const timeB = new Date(b.updatedAt || b.publishedAt || b.createdAt || 0).getTime();
-          return timeB - timeA;
-        });
+        if (rawArticles.length > 0) {
+          // Sort strictly by latest updated/published news first (Last updated on top)
+          const all = [...rawArticles].sort((a, b) => {
+            const timeA = new Date(a.updatedAt || a.publishedAt || a.createdAt || 0).getTime();
+            const timeB = new Date(b.updatedAt || b.publishedAt || b.createdAt || 0).getTime();
+            return timeB - timeA;
+          });
+
+          setAllArticles(all);
+          setLeadArticles(all.slice(0, 5));
+          setTopStories(all.slice(1, 5));
+          const sortedByViews = [...all].sort((a, b) => (b.viewCount || 0) - (a.viewCount || 0));
+          setTrendingArticles(sortedByViews.length ? sortedByViews.slice(0, 5) : all.slice(0, 5));
+
+          try {
+            localStorage.setItem("swar_cached_articles", JSON.stringify(all));
+          } catch (e) {}
+        }
 
         const cats = catsRes.categories || [];
-
-        setAllArticles(all);
-        setCategories(cats);
-
-        // Simple: Latest updated news is directly at the top (main lead)
-        setLeadArticles(all.slice(0, 5));
-
-        // Top Stories
-        const tops = all.slice(1, 5);
-        setTopStories(tops);
-
-        // Trending Articles (Most views)
-        const sortedByViews = [...all].sort((a, b) => (b.viewCount || 0) - (a.viewCount || 0));
-        setTrendingArticles(sortedByViews.length ? sortedByViews.slice(0, 5) : all.slice(0, 5));
+        if (cats.length > 0) {
+          setCategories(cats);
+          try {
+            localStorage.setItem("swar_cached_categories", JSON.stringify(cats));
+          } catch (e) {}
+        }
       } catch (err) {
         console.error("Home loading error:", err);
       } finally {
@@ -413,7 +439,24 @@ export default function HomePage() {
           </div>
 
           {/* News Articles List (Exact Horizontal Card Design) */}
-          {filteredArticles.length === 0 ? (
+          {loading && filteredArticles.length === 0 ? (
+            <div className="space-y-4 animate-pulse">
+              {[1, 2, 3, 4].map((i) => (
+                <div
+                  key={i}
+                  className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-4 sm:p-5 flex flex-col sm:flex-row gap-4"
+                >
+                  <div className="w-full sm:w-56 h-36 rounded-2xl bg-slate-200 dark:bg-slate-800 shrink-0" />
+                  <div className="flex-1 space-y-3 py-1">
+                    <div className="h-4 w-28 bg-amber-200/60 dark:bg-amber-900/40 rounded-md" />
+                    <div className="h-5 w-5/6 bg-slate-200 dark:bg-slate-800 rounded-md" />
+                    <div className="h-4 w-full bg-slate-100 dark:bg-slate-800/60 rounded-md" />
+                    <div className="h-3 w-32 bg-slate-100 dark:bg-slate-800/40 rounded-md pt-2" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : filteredArticles.length === 0 ? (
             <div className="p-12 text-center bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 space-y-2">
               <Flame className="w-10 h-10 text-slate-300 mx-auto" />
               <p className="text-sm font-bold text-slate-700 dark:text-slate-300">

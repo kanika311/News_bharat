@@ -5,7 +5,7 @@ import { Upload, X, Loader2, Video as VideoIcon, Film, FolderArchive, Link as Li
 import { apiFetch } from "@/lib/api";
 
 export default function VideoUploader({ value, onChange, onDurationDetected, label = "Video Source" }) {
-  const [tab, setTab] = useState(value && !value.startsWith("/uploads/") ? "embed" : "upload");
+  const [tab, setTab] = useState(value && value.startsWith("/uploads/") ? "upload" : "embed");
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [error, setError] = useState("");
@@ -241,6 +241,10 @@ export default function VideoUploader({ value, onChange, onDurationDetected, lab
               <p className="text-[10px] text-slate-400">
                 Paste any public YouTube, Vimeo, or direct `.mp4` video URL
               </p>
+              <div className="flex items-center gap-1.5 p-2 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/50 rounded-xl text-[10px] text-amber-800 dark:text-amber-300 font-semibold">
+                <span className="text-xs">💡</span>
+                <span>अनुशंसित (Recommended): YouTube लिंक का उपयोग करने से सर्वर बैंडविड्थ और मेमोरी पूरी तरह सुरक्षित रहती है।</span>
+              </div>
             </div>
           )}
         </div>
