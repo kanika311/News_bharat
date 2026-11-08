@@ -13,4 +13,4 @@ coverage/
 *.avi
 public/uploads/*.webm
 public/uploads/*.mp4
-public/uploads/*.mov
+public/uploads/*.mov
