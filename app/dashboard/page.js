@@ -41,7 +41,7 @@ import { useAuth } from "@/lib/authContext";
 export default function CitizenJournalistDashboard() {
   const router = useRouter();
   const { lang, t } = useLang();
-  const { refreshUser } = useAuth();
+  const { refreshUser, logout } = useAuth();
 
   // Authentication & User State
   const [user, setUser] = useState(null);
@@ -490,16 +490,12 @@ export default function CitizenJournalistDashboard() {
   // Logout
   const handleLogout = async () => {
     try {
-      await apiFetch("/api/auth/logout", { method: "POST" });
-      if (typeof window !== "undefined") {
-        try {
-          localStorage.removeItem("token");
-        } catch (e) {}
-      }
-      router.push("/");
-      router.refresh();
+      setUser(null);
+      await logout("/login");
     } catch (e) {
-      console.error(e);
+      if (typeof window !== "undefined") {
+        window.location.href = "/login";
+      }
     }
   };
 

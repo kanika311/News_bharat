@@ -62,6 +62,22 @@ export default function Header() {
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const [notificationDrawerOpen, setNotificationDrawerOpen] = useState(false);
   const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
+  const userMenuRef = React.useRef(null);
+
+  // Close desktop user dropdown on outside click
+  useEffect(() => {
+    const handleOutsideClick = (e) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target)) {
+        setUserDropdownOpen(false);
+      }
+    };
+    if (userDropdownOpen) {
+      document.addEventListener("mousedown", handleOutsideClick);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick);
+    };
+  }, [userDropdownOpen]);
 
   // Live ticking clock in IST
   useEffect(() => {
@@ -144,17 +160,15 @@ export default function Header() {
 
   const handleLogout = async () => {
     try {
-      await apiFetch("/api/auth/logout", { method: "POST" });
-      if (typeof window !== "undefined") {
-        try {
-          localStorage.removeItem("token");
-        } catch (e) {}
-      }
-      setCurrentUser(null);
       setUserDropdownOpen(false);
-      router.refresh();
+      setMobileMenuOpen(false);
+      setCurrentUser(null);
+      await logout("/login");
     } catch (err) {
       console.error("Logout error", err);
+      if (typeof window !== "undefined") {
+        window.location.href = "/login";
+      }
     }
   };
 
@@ -306,27 +320,98 @@ export default function Header() {
             {darkMode ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4" />}
           </button>
 
-          {/* Desktop Only: Reader Login / Profile Button to Dashboard (Hidden in Mobile, available inside Hamburger) */}
+          {/* Desktop Only: Reader Login / Profile Button with Dropdown (Hidden in Mobile, available inside Hamburger) */}
           {activeUser ? (
-            <Link
-              href="/dashboard"
-              title={lang === "hi" ? "डैशबोर्ड खोलें" : "Open Dashboard"}
-              className="hidden md:flex items-center gap-1 sm:gap-2 px-1.5 sm:px-3 py-1 bg-gradient-to-r from-amber-50 to-blue-50 hover:from-amber-100 hover:to-blue-100 dark:from-slate-800 dark:to-slate-800/80 dark:hover:from-amber-950/40 border border-amber-300/80 dark:border-amber-700/60 rounded-full text-xs font-bold transition-all shadow-xs group cursor-pointer shrink-0"
-            >
-              <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-gradient-to-tr from-amber-500 via-yellow-400 to-amber-600 text-slate-950 flex items-center justify-center font-black text-xs shadow-xs overflow-hidden shrink-0">
-                {activeUser.avatar ? (
-                  <img src={activeUser.avatar} alt="" className="w-full h-full object-cover" />
-                ) : (
-                  <span>{activeUser.name ? activeUser.name.charAt(0).toUpperCase() : "U"}</span>
-                )}
-              </div>
-              <span className="hidden sm:inline font-bold text-slate-800 dark:text-slate-200 group-hover:text-amber-600 dark:group-hover:text-amber-400 max-w-[90px] truncate leading-tight">
-                {activeUser.name || (lang === "hi" ? "प्रोफ़ाइल" : "Profile")}
-              </span>
-              <span className="text-[10px] text-amber-600 dark:text-amber-400 font-extrabold hidden md:inline">
-                डैशबोर्ड &rarr;
-              </span>
-            </Link>
+            <div className="relative hidden md:block" ref={userMenuRef}>
+              <button
+                type="button"
+                onClick={() => setUserDropdownOpen(!userDropdownOpen)}
+                className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1 bg-gradient-to-r from-amber-50 to-yellow-50 hover:from-amber-100 hover:to-yellow-100 dark:from-slate-800 dark:to-slate-800/80 dark:hover:from-amber-950/40 border border-amber-300/80 dark:border-amber-700/60 rounded-full text-xs font-bold transition-all shadow-xs group cursor-pointer shrink-0"
+              >
+                <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-gradient-to-tr from-amber-500 via-yellow-400 to-amber-600 text-slate-950 flex items-center justify-center font-black text-xs shadow-xs overflow-hidden shrink-0">
+                  {activeUser.avatar ? (
+                    <img src={activeUser.avatar} alt="" className="w-full h-full object-cover" />
+                  ) : (
+                    <span>{activeUser.name ? activeUser.name.charAt(0).toUpperCase() : "U"}</span>
+                  )}
+                </div>
+                <div className="flex flex-col text-left">
+                  <span className="font-black text-slate-900 dark:text-slate-100 max-w-[85px] truncate leading-tight text-xs">
+                    {activeUser.name || (lang === "hi" ? "यूज़र" : "User")}
+                  </span>
+                  <span className="text-[9px] text-amber-700 dark:text-amber-400 font-extrabold leading-none">
+                    {activeUser.role === "admin" || activeUser.role === "superadmin" ? "संपादक" : "पाठक"}
+                  </span>
+                </div>
+                <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform ${userDropdownOpen ? "rotate-180" : ""}`} />
+              </button>
+
+              {/* Desktop User Dropdown Menu */}
+              {userDropdownOpen && (
+                <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-slate-900 rounded-2xl border border-amber-200 dark:border-slate-800 shadow-2xl py-3 px-3 space-y-2 z-50 animate-in fade-in slide-in-from-top-2">
+                  <div className="pb-2 border-b border-slate-100 dark:border-slate-800">
+                    <div className="font-black text-slate-900 dark:text-white text-sm truncate">
+                      {activeUser.name}
+                    </div>
+                    <div className="text-[11px] text-slate-500 truncate">
+                      {activeUser.email}
+                    </div>
+                    <span className="inline-block mt-1 px-2 py-0.5 rounded-full bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200/80 dark:border-amber-800/40 text-[10px] font-bold">
+                      {activeUser.role === "admin" || activeUser.role === "superadmin" ? "👑 मुख्य संपादक (Editor)" : "📖 सामान्य पाठक (Reader)"}
+                    </span>
+                  </div>
+
+                  <div className="space-y-1">
+                    <Link
+                      href="/dashboard"
+                      onClick={() => setUserDropdownOpen(false)}
+                      className="flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-amber-50 dark:hover:bg-slate-800 rounded-xl transition-colors"
+                    >
+                      <LayoutDashboard className="w-4 h-4 text-amber-600" />
+                      <span>डैशबोर्ड (Dashboard)</span>
+                    </Link>
+
+                    <Link
+                      href="/dashboard"
+                      onClick={() => setUserDropdownOpen(false)}
+                      className="flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-xl transition-colors"
+                    >
+                      <span className="text-red-600 text-sm">✍️</span>
+                      <span>नई खबर / रिपोर्ट दर्ज करें</span>
+                    </Link>
+
+                    <Link
+                      href="/dashboard"
+                      onClick={() => setUserDropdownOpen(false)}
+                      className="flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-amber-50 dark:hover:bg-slate-800 rounded-xl transition-colors"
+                    >
+                      <span className="text-amber-600 text-sm">📰</span>
+                      <span>मेरी भेजी गई खबरें व स्टेटस</span>
+                    </Link>
+
+                    <Link
+                      href="/dashboard"
+                      onClick={() => setUserDropdownOpen(false)}
+                      className="flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-amber-50 dark:hover:bg-slate-800 rounded-xl transition-colors"
+                    >
+                      <User className="w-4 h-4 text-slate-500" />
+                      <span>मेरी प्रोफ़ाइल (Profile)</span>
+                    </Link>
+                  </div>
+
+                  <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
+                    <button
+                      type="button"
+                      onClick={handleLogout}
+                      className="w-full flex items-center gap-2 px-3 py-2 text-xs font-extrabold text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-xl transition-colors cursor-pointer"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      <span>लॉगआउट (Logout)</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           ) : (
             <Link
               href="/login"

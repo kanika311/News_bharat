@@ -50,11 +50,12 @@ exports.login = async (req, res) => {
 
     const token = signToken(user._id, user.role);
 
-    // Set HTTP-Only Cookie
+    // Set HTTP-Only Cookie with explicit root path
     res.cookie("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
+      path: "/",
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
@@ -95,7 +96,27 @@ exports.getMe = async (req, res) => {
 
 // POST /api/auth/logout
 exports.logout = async (req, res) => {
+  const isProd = process.env.NODE_ENV === "production";
+
+  // Explicitly clear cookie for root and API paths with matching attributes
+  res.clearCookie("token", {
+    path: "/",
+    httpOnly: true,
+    sameSite: "lax",
+    secure: isProd,
+  });
+  res.clearCookie("token", { path: "/" });
+  res.clearCookie("token", { path: "/api" });
+  res.clearCookie("token", { path: "/api/auth" });
   res.clearCookie("token");
+
+  // Force Set-Cookie header overrides to guarantee that all browsers invalidate it
+  res.setHeader("Set-Cookie", [
+    `token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Max-Age=0; HttpOnly; SameSite=Lax${isProd ? "; Secure" : ""}`,
+    `token=; Path=/api; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Max-Age=0; HttpOnly; SameSite=Lax${isProd ? "; Secure" : ""}`,
+    `token=; Path=/api/auth; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Max-Age=0; HttpOnly; SameSite=Lax${isProd ? "; Secure" : ""}`,
+  ]);
+
   return res.json({ success: true, message: "Logged out successfully" });
 };
 
@@ -130,6 +151,7 @@ exports.register = async (req, res) => {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
+      path: "/",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
