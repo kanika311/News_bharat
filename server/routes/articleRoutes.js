@@ -13,6 +13,7 @@ router.get("/:id", articleController.getArticleById);
 // Protected endpoints (reporters, editors, superadmins)
 router.post("/", requireAuth, articleController.createArticle);
 router.put("/:id", requireAuth, articleController.updateArticle);
+router.post("/:id/social-share", requireAuth, articleController.recordSocialShare);
 router.delete("/:id", requireAuth, articleController.softDeleteArticle);
 router.post("/:id/restore", requireAuth, articleController.restoreArticle);
 

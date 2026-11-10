@@ -10,12 +10,19 @@ import {
   Loader2,
   AlertCircle,
   CheckCircle2,
+  Share2,
+  MessageCircle,
+  Twitter,
+  Facebook,
+  Instagram,
+  Send,
 } from "lucide-react";
 import Link from "next/link";
 import { apiFetch } from "@/lib/api";
 import RichTextEditor from "./RichTextEditor";
 import ImageUploader from "./ImageUploader";
 import MultiMediaManager from "./MultiMediaManager";
+import ShareArticleModal from "./ShareArticleModal";
 
 export default function ArticleForm({ initialData = null, isEdit = false }) {
   const router = useRouter();
@@ -57,24 +64,38 @@ export default function ArticleForm({ initialData = null, isEdit = false }) {
   const [metaDescription, setMetaDescription] = useState(initialData?.seo?.metaDescription || "");
   const [keywords, setKeywords] = useState(initialData?.seo?.keywords?.join(", ") || "");
 
-  // Metadata Dropdowns
+  // Metadata Dropdowns & Settings
   const [categoriesList, setCategoriesList] = useState([]);
   const [tagsList, setTagsList] = useState([]);
+  const [settings, setSettings] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
+  // Social Sharing & Broadcast State
+  const [askShareOnPublish, setAskShareOnPublish] = useState(true);
+  const [shareModalArticle, setShareModalArticle] = useState(null);
+  const [selectedSocials, setSelectedSocials] = useState({
+    whatsapp: true,
+    facebook: true,
+    twitter: true,
+    instagram: true,
+    telegram: true,
+  });
+
   useEffect(() => {
-    // Fetch categories and tags
+    // Fetch categories, tags, and site settings for social links
     Promise.all([
       apiFetch("/api/categories"),
       apiFetch("/api/tags"),
+      apiFetch("/api/settings"),
     ])
-      .then(([cats, tgs]) => {
+      .then(([cats, tgs, sets]) => {
         if (cats.success) setCategoriesList(cats.categories || []);
         if (tgs.success) setTagsList(tgs.tags || []);
+        if (sets?.success && sets.settings) setSettings(sets.settings);
       })
-      .catch((err) => console.error("Error loading categories/tags", err));
+      .catch((err) => console.error("Error loading categories/tags/settings", err));
   }, []);
 
   const handleTitleBlur = () => {
@@ -128,18 +149,27 @@ export default function ArticleForm({ initialData = null, isEdit = false }) {
     };
 
     try {
+      let savedArticle = null;
       if (isEdit && initialData?._id) {
-        await apiFetch(`/api/articles/${initialData._id}`, {
+        const res = await apiFetch(`/api/articles/${initialData._id}`, {
           method: "PUT",
           body: JSON.stringify(payload),
         });
+        savedArticle = res?.article || { ...initialData, ...payload };
         setSuccess("Article successfully updated!");
       } else {
         const res = await apiFetch("/api/articles", {
           method: "POST",
           body: JSON.stringify(payload),
         });
+        savedArticle = res?.article || payload;
         setSuccess("Article successfully created!");
+      }
+
+      // Prompt to share to official social channels if published
+      if (status === "published" && askShareOnPublish && savedArticle) {
+        setShareModalArticle(savedArticle);
+      } else {
         setTimeout(() => {
           router.push("/swar-media-admin/articles");
         }, 1000);
@@ -530,8 +560,171 @@ export default function ArticleForm({ initialData = null, isEdit = false }) {
             videos={galleryVideos}
             onVideosChange={setGalleryVideos}
           />
+
+          {/* Social Auto-Share Card */}
+          <div className="p-6 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-3.5">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+                <Share2 className="w-3.5 h-3.5 text-amber-500" />
+                <span>सोशल मीडिया ऑटो-शेयर</span>
+              </h3>
+              <button
+                type="button"
+                onClick={() =>
+                  setShareModalArticle({
+                    title: title || "Story Preview",
+                    excerpt: excerpt || subtitle || title,
+                    slug: slug || "preview-story",
+                    category: categoriesList.find((c) => c._id === category),
+                    featuredImage,
+                  })
+                }
+                className="text-[10px] font-bold text-amber-600 hover:underline cursor-pointer"
+              >
+                शेयर प्रीव्यू देखें
+              </button>
+            </div>
+
+            <p className="text-[11px] text-slate-500">
+              पब्लिश होते ही साइट सेटिंग्स में जुड़े आधिकारिक सोशल चैनल्स पर भेजने का विकल्प:
+            </p>
+
+            <div className="space-y-2">
+              <label className="flex items-center justify-between p-2 rounded-xl bg-slate-50 dark:bg-slate-800/60 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer text-xs">
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={selectedSocials.whatsapp}
+                    onChange={(e) =>
+                      setSelectedSocials({ ...selectedSocials, whatsapp: e.target.checked })
+                    }
+                    className="w-4 h-4 text-emerald-600 rounded border-slate-300"
+                  />
+                  <div className="flex items-center gap-1.5">
+                    <MessageCircle className="w-3.5 h-3.5 text-emerald-600" />
+                    <span className="font-semibold text-slate-800 dark:text-slate-200">
+                      WhatsApp कम्युनिटी
+                    </span>
+                  </div>
+                </div>
+                <span className="text-[10px] text-slate-400 font-mono truncate max-w-[110px]">
+                  {settings?.socialLinks?.whatsapp ? "सक्रिय" : "लिंक सेट करें"}
+                </span>
+              </label>
+
+              <label className="flex items-center justify-between p-2 rounded-xl bg-slate-50 dark:bg-slate-800/60 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer text-xs">
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={selectedSocials.facebook}
+                    onChange={(e) =>
+                      setSelectedSocials({ ...selectedSocials, facebook: e.target.checked })
+                    }
+                    className="w-4 h-4 text-blue-600 rounded border-slate-300"
+                  />
+                  <div className="flex items-center gap-1.5">
+                    <Facebook className="w-3.5 h-3.5 text-blue-600" />
+                    <span className="font-semibold text-slate-800 dark:text-slate-200">
+                      फेसबुक पेज
+                    </span>
+                  </div>
+                </div>
+                <span className="text-[10px] text-slate-400 font-mono truncate max-w-[110px]">
+                  {settings?.socialLinks?.facebook ? "सक्रिय" : "लिंक सेट करें"}
+                </span>
+              </label>
+
+              <label className="flex items-center justify-between p-2 rounded-xl bg-slate-50 dark:bg-slate-800/60 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer text-xs">
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={selectedSocials.twitter}
+                    onChange={(e) =>
+                      setSelectedSocials({ ...selectedSocials, twitter: e.target.checked })
+                    }
+                    className="w-4 h-4 text-slate-900 rounded border-slate-300"
+                  />
+                  <div className="flex items-center gap-1.5">
+                    <Twitter className="w-3.5 h-3.5 text-slate-900 dark:text-white" />
+                    <span className="font-semibold text-slate-800 dark:text-slate-200">X (Twitter)</span>
+                  </div>
+                </div>
+                <span className="text-[10px] text-slate-400 font-mono truncate max-w-[110px]">
+                  {settings?.socialLinks?.twitter ? "सक्रिय" : "लिंक सेट करें"}
+                </span>
+              </label>
+
+              <label className="flex items-center justify-between p-2 rounded-xl bg-slate-50 dark:bg-slate-800/60 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer text-xs">
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={selectedSocials.telegram}
+                    onChange={(e) =>
+                      setSelectedSocials({ ...selectedSocials, telegram: e.target.checked })
+                    }
+                    className="w-4 h-4 text-sky-500 rounded border-slate-300"
+                  />
+                  <div className="flex items-center gap-1.5">
+                    <Send className="w-3.5 h-3.5 text-sky-500" />
+                    <span className="font-semibold text-slate-800 dark:text-slate-200">
+                      Telegram चैनल
+                    </span>
+                  </div>
+                </div>
+                <span className="text-[10px] text-slate-400 font-mono truncate max-w-[110px]">
+                  {settings?.socialLinks?.telegram ? "सक्रिय" : "लिंक सेट करें"}
+                </span>
+              </label>
+
+              <label className="flex items-center justify-between p-2 rounded-xl bg-slate-50 dark:bg-slate-800/60 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer text-xs">
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={selectedSocials.instagram}
+                    onChange={(e) =>
+                      setSelectedSocials({ ...selectedSocials, instagram: e.target.checked })
+                    }
+                    className="w-4 h-4 text-pink-600 rounded border-slate-300"
+                  />
+                  <div className="flex items-center gap-1.5">
+                    <Instagram className="w-3.5 h-3.5 text-pink-600" />
+                    <span className="font-semibold text-slate-800 dark:text-slate-200">
+                      Instagram प्रोफाइल
+                    </span>
+                  </div>
+                </div>
+                <span className="text-[10px] text-slate-400 font-mono truncate max-w-[110px]">
+                  {settings?.socialLinks?.instagram ? "सक्रिय" : "लिंक सेट करें"}
+                </span>
+              </label>
+            </div>
+
+            <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
+              <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-300 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={askShareOnPublish}
+                  onChange={(e) => setAskShareOnPublish(e.target.checked)}
+                  className="w-4 h-4 text-amber-500 rounded border-slate-300"
+                />
+                <span>पब्लिश होते ही शेयरिंग पॉपअप पूछें (Ask to share on publish)</span>
+              </label>
+            </div>
+          </div>
         </div>
       </div>
+
+      {/* Share Modal Dialog */}
+      <ShareArticleModal
+        isOpen={Boolean(shareModalArticle)}
+        onClose={() => {
+          setShareModalArticle(null);
+          router.push("/swar-media-admin/articles");
+        }}
+        article={shareModalArticle}
+        settings={settings}
+        selectedPlatforms={selectedSocials}
+      />
     </form>
   );
 }

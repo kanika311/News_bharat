@@ -145,6 +145,14 @@ const ArticleSchema = new mongoose.Schema(
       canonicalUrl: { type: String, default: "" },
       keywords: [{ type: String }],
     },
+    socialShares: {
+      whatsapp: { type: Boolean, default: false },
+      facebook: { type: Boolean, default: false },
+      twitter: { type: Boolean, default: false },
+      instagram: { type: Boolean, default: false },
+      telegram: { type: Boolean, default: false },
+      sharedAt: { type: Date, default: null },
+    },
     isDeleted: {
       type: Boolean,
       default: false,

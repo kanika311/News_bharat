@@ -171,6 +171,7 @@ exports.createArticle = async (req, res) => {
       isTrending = false,
       isTopStory = false,
       seo,
+      socialShares,
     } = req.body;
 
     if (!title || !content || !category) {
@@ -245,6 +246,7 @@ exports.createArticle = async (req, res) => {
         metaDescription: excerpt || title,
         keywords: [],
       },
+      socialShares: socialShares || {},
     });
 
     await newArticle.save();
@@ -301,6 +303,7 @@ exports.updateArticle = async (req, res) => {
       isTrending,
       isTopStory,
       seo,
+      socialShares,
     } = req.body;
 
     if (title !== undefined) article.title = title;
@@ -361,6 +364,9 @@ exports.updateArticle = async (req, res) => {
     if (isTrending !== undefined) article.isTrending = Boolean(isTrending);
     if (isTopStory !== undefined) article.isTopStory = Boolean(isTopStory);
     if (seo !== undefined) article.seo = seo;
+    if (socialShares !== undefined) {
+      article.socialShares = { ...(article.socialShares || {}), ...socialShares };
+    }
 
     await article.save();
 
@@ -534,6 +540,38 @@ exports.likeArticle = async (req, res) => {
       likesCount: newLikes,
       message: action === "unlike" ? "Article unliked" : "Article liked successfully",
     });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// POST /api/articles/:id/social-share (Record social broadcast)
+exports.recordSocialShare = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { platform } = req.body || {};
+    const article = await Article.findById(id);
+    if (!article) {
+      return res.status(404).json({ success: false, message: "Article not found" });
+    }
+
+    if (!article.socialShares) {
+      article.socialShares = {};
+    }
+    if (platform) {
+      article.socialShares[platform] = true;
+    }
+    article.socialShares.sharedAt = new Date();
+    await article.save();
+
+    await logActivity(
+      req,
+      "SHARE_ARTICLE",
+      "article",
+      `Shared article "${article.title}" to ${platform || "social channels"}`
+    );
+
+    return res.json({ success: true, socialShares: article.socialShares });
   } catch (err) {
     return res.status(500).json({ success: false, message: err.message });
   }

@@ -18,13 +18,17 @@ import {
   Layers,
   ChevronLeft,
   ChevronRight,
+  Share2,
 } from "lucide-react";
 import { apiFetch } from "@/lib/api";
 import ConfirmModal from "@/components/admin/ConfirmModal";
+import ShareArticleModal from "@/components/admin/ShareArticleModal";
 
 export default function ArticlesListPage() {
   const [articles, setArticles] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [settings, setSettings] = useState(null);
+  const [shareModalArticle, setShareModalArticle] = useState(null);
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [page, setPage] = useState(1);
@@ -77,6 +81,12 @@ export default function ArticlesListPage() {
     apiFetch("/api/categories")
       .then((res) => {
         if (res.success) setCategories(res.categories || []);
+      })
+      .catch((e) => console.error(e));
+
+    apiFetch("/api/settings")
+      .then((res) => {
+        if (res?.success && res.settings) setSettings(res.settings);
       })
       .catch((e) => console.error(e));
   }, []);
@@ -449,6 +459,14 @@ export default function ArticlesListPage() {
                               </Link>
                               <button
                                 type="button"
+                                onClick={() => setShareModalArticle(art)}
+                                className="p-1.5 text-emerald-600 hover:text-emerald-800 rounded-lg hover:bg-emerald-50 dark:hover:bg-emerald-950/40 cursor-pointer"
+                                title="सोशल मीडिया / WhatsApp पर साझा करें"
+                              >
+                                <Share2 className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                type="button"
                                 onClick={() => handleTrash(art._id, art.title)}
                                 className="p-1.5 text-red-600 hover:text-red-800 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/40"
                                 title="Move to trash"
@@ -518,6 +536,14 @@ export default function ArticlesListPage() {
         message={confirmModal.message}
         onConfirm={confirmModal.onConfirm}
         onClose={() => setConfirmModal((prev) => ({ ...prev, isOpen: false }))}
+      />
+
+      {/* Share to Social Media Modal */}
+      <ShareArticleModal
+        isOpen={Boolean(shareModalArticle)}
+        onClose={() => setShareModalArticle(null)}
+        article={shareModalArticle}
+        settings={settings}
       />
     </div>
   );
