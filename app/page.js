@@ -392,25 +392,37 @@ export default function HomePage() {
               href={`/${mainLead.category?.slug || "news"}/${mainLead.slug}`}
               className="group block relative rounded-3xl overflow-hidden bg-slate-900 shadow-sm hover:shadow-xl transition-all border border-amber-300/40 dark:border-slate-800 hover:border-amber-400"
             >
-              <div className="relative aspect-[16/9] w-full overflow-hidden">
+              <div className="relative aspect-[16/10] sm:aspect-[16/10] min-h-[350px] sm:min-h-[440px] md:min-h-[480px] w-full overflow-hidden bg-slate-950">
+                {/* Ambient blur backdrop for natural framing of vertical/tall images */}
+                <img
+                  src={
+                    mainLead.featuredImage?.url ||
+                    "https://images.unsplash.com/photo-1585829365295-ab7cd400c167?auto=format&fit=crop&w=1200&q=80"
+                  }
+                  alt=""
+                  aria-hidden="true"
+                  className="absolute inset-0 w-full h-full object-cover blur-2xl opacity-40 scale-125 pointer-events-none"
+                />
+                {/* Main Image: object-top ensures heads and faces are never cropped */}
                 <img
                   src={
                     mainLead.featuredImage?.url ||
                     "https://images.unsplash.com/photo-1585829365295-ab7cd400c167?auto=format&fit=crop&w=1200&q=80"
                   }
                   alt={mainLead.title}
-                  className="w-full h-full object-cover object-top sm:object-center group-hover:scale-105 transition-transform duration-500"
+                  className="relative z-0 w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
                 />
-                <div className="absolute inset-x-0 bottom-0 h-3/5 bg-gradient-to-t from-black/95 via-black/50 to-transparent pointer-events-none" />
-                <span className="absolute top-3.5 left-3.5 px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wider text-slate-950 bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 shadow-md ring-1 ring-amber-400">
+                {/* Gradient limited to bottom 50% so top faces are 100% visible and bright */}
+                <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/95 via-black/60 to-transparent pointer-events-none z-10" />
+                <span className="absolute top-3.5 left-3.5 z-20 px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wider text-slate-950 bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 shadow-md ring-1 ring-amber-400">
                   {lang === "hi" && mainLead.category?.nameHi ? mainLead.category.nameHi : mainLead.category?.name}
                 </span>
                 {mainLead.location && (
-                  <span className="absolute top-3.5 right-3.5 px-2.5 py-1 rounded-lg text-[10px] font-bold text-amber-300 bg-[#070e1e]/85 backdrop-blur-md border border-amber-400/50 shadow">
+                  <span className="absolute top-3.5 right-3.5 z-20 px-2.5 py-1 rounded-lg text-[10px] font-bold text-amber-300 bg-[#070e1e]/85 backdrop-blur-md border border-amber-400/50 shadow">
                     📍 {mainLead.location}
                   </span>
                 )}
-                <div className="absolute bottom-0 inset-x-0 p-4 sm:p-5 space-y-1.5 text-white">
+                <div className="absolute bottom-0 inset-x-0 p-4 sm:p-5 space-y-1.5 text-white z-20">
                   <h2 className="text-base sm:text-xl font-black leading-snug tracking-tight group-hover:text-amber-300 transition-colors line-clamp-2">
                     {mainLead.title}
                   </h2>
@@ -495,7 +507,7 @@ export default function HomePage() {
                           "https://images.unsplash.com/photo-1585829365295-ab7cd400c167?auto=format&fit=crop&w=600&q=80"
                         }
                         alt={art.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
                       />
                       {/* Location Badge (Jammu, Sultanpur, Lucknow, etc.) */}
                       <span className="absolute top-2.5 left-2.5 px-2.5 py-1 bg-[#070e1e]/85 backdrop-blur-md text-amber-300 font-extrabold text-[11px] rounded-lg border border-amber-400/40 shadow-md">

@@ -83,7 +83,7 @@ export default function CategoryPage() {
                     <img
                       src={art.featuredImage?.url || "https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=600&q=80"}
                       alt=""
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-300"
                     />
                     <span className="absolute bottom-2 left-2 px-2 py-0.5 rounded text-[10px] font-bold uppercase text-white bg-red-600">
                       {lang === "hi" && art.category?.nameHi ? art.category.nameHi : art.category?.name}

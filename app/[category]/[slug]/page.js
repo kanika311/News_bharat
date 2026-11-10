@@ -318,7 +318,7 @@ export default function ArticleDetailPage() {
                 <img
                   src={article.featuredImage.url}
                   alt={article.featuredImage.alt || article.title}
-                  className="w-full max-h-[500px] object-cover"
+                  className="w-full max-h-[580px] object-cover object-top"
                 />
               </div>
               {article.featuredImage.caption && (
