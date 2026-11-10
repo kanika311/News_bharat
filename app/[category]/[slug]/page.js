@@ -17,10 +17,22 @@ import {
   AlertCircle,
   Heart,
   ThumbsUp,
+  Images,
+  Film,
+  ZoomIn,
+  ChevronLeft,
+  X,
 } from "lucide-react";
 import { apiFetch } from "@/lib/api";
 import { useLang } from "@/lib/langContext";
 import AdSlot from "@/components/public/AdSlot";
+
+function getYouTubeEmbedUrl(url) {
+  if (!url) return null;
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+  const match = url.match(regExp);
+  return match && match[2].length === 11 ? `https://www.youtube.com/embed/${match[2]}` : null;
+}
 
 export default function ArticleDetailPage() {
   const params = useParams();
@@ -37,6 +49,7 @@ export default function ArticleDetailPage() {
   // Likes state
   const [likesCount, setLikesCount] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(null);
 
   // Comment submission state
   const [name, setName] = useState("");
@@ -335,6 +348,110 @@ export default function ArticleDetailPage() {
             className="article-prose font-sans leading-relaxed text-slate-800 dark:text-slate-200 pt-2"
           />
 
+          {/* Multiple Photos Gallery */}
+          {article.galleryImages && article.galleryImages.length > 0 && (
+            <section className="space-y-4 pt-6 border-t border-slate-200 dark:border-slate-800">
+              <div className="flex items-center justify-between">
+                <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
+                  <Images className="w-5 h-5 text-amber-500" />
+                  <span>{lang === "hi" ? "तस्वीरें / फोटो गैलरी" : "Photo Gallery"}</span>
+                  <span className="text-xs px-2.5 py-0.5 rounded-full font-bold bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300">
+                    {article.galleryImages.length} फोटो
+                  </span>
+                </h3>
+                <span className="text-xs text-slate-400">
+                  {lang === "hi" ? "बड़ा देखने के लिए क्लिक करें" : "Click to enlarge"}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                {article.galleryImages.map((img, gIdx) => (
+                  <figure
+                    key={gIdx}
+                    onClick={() => setLightboxIndex(gIdx)}
+                    className="group relative rounded-2xl overflow-hidden bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm cursor-pointer"
+                  >
+                    <div className="aspect-[4/3] w-full overflow-hidden">
+                      <img
+                        src={img.url}
+                        alt={img.caption || `Photo ${gIdx + 1}`}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                      />
+                    </div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
+                      <div className="flex items-center justify-between w-full text-white text-xs">
+                        <span className="truncate pr-2 font-medium">{img.caption || `Photo ${gIdx + 1}`}</span>
+                        <ZoomIn className="w-4 h-4 shrink-0 text-amber-400" />
+                      </div>
+                    </div>
+                    {img.caption && (
+                      <figcaption className="p-2 text-[11px] text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 truncate">
+                        {img.caption}
+                      </figcaption>
+                    )}
+                  </figure>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* Multiple Videos Gallery */}
+          {article.galleryVideos && article.galleryVideos.length > 0 && (
+            <section className="space-y-4 pt-6 border-t border-slate-200 dark:border-slate-800">
+              <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
+                <Film className="w-5 h-5 text-red-600" />
+                <span>{lang === "hi" ? "वीडियो कवरेज" : "Video Coverage"}</span>
+                <span className="text-xs px-2.5 py-0.5 rounded-full font-bold bg-red-100 dark:bg-red-950/60 text-red-800 dark:text-red-300">
+                  {article.galleryVideos.length} वीडियो
+                </span>
+              </h3>
+
+              <div className="space-y-6">
+                {article.galleryVideos.map((vid, vIdx) => {
+                  const ytEmbed = getYouTubeEmbedUrl(vid.url);
+                  return (
+                    <div
+                      key={vIdx}
+                      className="rounded-3xl overflow-hidden bg-black border border-slate-200 dark:border-slate-800 shadow-md"
+                    >
+                      <div className="aspect-video w-full bg-black">
+                        {ytEmbed ? (
+                          <iframe
+                            src={ytEmbed}
+                            title={vid.title || `Video ${vIdx + 1}`}
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowFullScreen
+                            className="w-full h-full border-0"
+                          />
+                        ) : (
+                          <video
+                            src={vid.url}
+                            controls
+                            className="w-full h-full object-contain"
+                          />
+                        )}
+                      </div>
+                      {(vid.title || vid.caption) && (
+                        <div className="p-4 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800">
+                          {vid.title && (
+                            <h4 className="text-sm font-bold text-slate-900 dark:text-white">
+                              {vid.title}
+                            </h4>
+                          )}
+                          {vid.caption && (
+                            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                              {vid.caption}
+                            </p>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </section>
+          )}
+
           {/* Tags list */}
           {article.tags && article.tags.length > 0 && (
             <div className="pt-6 border-t border-slate-100 dark:border-slate-800 space-y-2">
@@ -518,6 +635,67 @@ export default function ArticleDetailPage() {
           )}
         </aside>
       </div>
+
+      {/* Lightbox Modal for Photo Gallery */}
+      {lightboxIndex !== null && article?.galleryImages?.[lightboxIndex] && (
+        <div
+          onClick={() => setLightboxIndex(null)}
+          className="fixed inset-0 z-50 bg-black/95 backdrop-blur-md flex items-center justify-center p-4 cursor-pointer"
+        >
+          <button
+            onClick={() => setLightboxIndex(null)}
+            className="absolute top-4 right-4 p-2 text-white/80 hover:text-white bg-white/10 rounded-full cursor-pointer z-10"
+            title="Close"
+          >
+            <X className="w-6 h-6" />
+          </button>
+
+          {lightboxIndex > 0 && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setLightboxIndex(lightboxIndex - 1);
+              }}
+              className="absolute left-4 p-3 text-white/80 hover:text-white bg-white/10 hover:bg-white/20 rounded-full cursor-pointer z-10"
+              title="Previous"
+            >
+              <ChevronLeft className="w-6 h-6" />
+            </button>
+          )}
+
+          {lightboxIndex < article.galleryImages.length - 1 && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setLightboxIndex(lightboxIndex + 1);
+              }}
+              className="absolute right-4 p-3 text-white/80 hover:text-white bg-white/10 hover:bg-white/20 rounded-full cursor-pointer z-10"
+              title="Next"
+            >
+              <ChevronRight className="w-6 h-6" />
+            </button>
+          )}
+
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="max-w-4xl max-h-[85vh] flex flex-col items-center cursor-default"
+          >
+            <img
+              src={article.galleryImages[lightboxIndex].url}
+              alt=""
+              className="max-h-[75vh] w-auto max-w-full object-contain rounded-2xl shadow-2xl"
+            />
+            {article.galleryImages[lightboxIndex].caption && (
+              <p className="text-white/90 text-center text-sm font-medium mt-3 bg-black/60 px-4 py-1.5 rounded-full">
+                {article.galleryImages[lightboxIndex].caption}
+              </p>
+            )}
+            <span className="text-white/50 text-xs mt-1">
+              {lightboxIndex + 1} / {article.galleryImages.length}
+            </span>
+          </div>
+        </div>
+      )}
     </article>
   );
 }

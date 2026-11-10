@@ -163,6 +163,7 @@ exports.createArticle = async (req, res) => {
       tags = [],
       featuredImage,
       galleryImages = [],
+      galleryVideos = [],
       status = "draft",
       scheduledAt,
       isBreaking = false,
@@ -195,6 +196,27 @@ exports.createArticle = async (req, res) => {
       publishedAt = new Date();
     }
 
+    // Clean gallery images & videos
+    const cleanGalleryImages = Array.isArray(galleryImages)
+      ? galleryImages
+          .filter((item) => item && (typeof item === "string" ? item.trim() : item.url && item.url.trim()))
+          .map((item) =>
+            typeof item === "string"
+              ? { url: item.trim(), caption: "", alt: "" }
+              : { url: item.url.trim(), caption: item.caption || "", alt: item.alt || "" }
+          )
+      : [];
+
+    const cleanGalleryVideos = Array.isArray(galleryVideos)
+      ? galleryVideos
+          .filter((item) => item && (typeof item === "string" ? item.trim() : item.url && item.url.trim()))
+          .map((item) =>
+            typeof item === "string"
+              ? { url: item.trim(), title: "", caption: "" }
+              : { url: item.url.trim(), title: item.title || "", caption: item.caption || "" }
+          )
+      : [];
+
     const newArticle = new Article({
       title,
       subtitle,
@@ -208,7 +230,8 @@ exports.createArticle = async (req, res) => {
       tags,
       author: req.user._id,
       featuredImage: featuredImage || { url: "", caption: "", alt: title },
-      galleryImages,
+      galleryImages: cleanGalleryImages,
+      galleryVideos: cleanGalleryVideos,
       status: finalStatus,
       scheduledAt: finalStatus === "scheduled" && scheduledAt ? new Date(scheduledAt) : null,
       publishedAt,
@@ -269,6 +292,8 @@ exports.updateArticle = async (req, res) => {
       tags,
       featuredImage,
       galleryImages,
+      galleryVideos,
+      location,
       status,
       scheduledAt,
       isBreaking,
@@ -290,7 +315,29 @@ exports.updateArticle = async (req, res) => {
     if (subCategory !== undefined) article.subCategory = subCategory || null;
     if (tags !== undefined) article.tags = tags;
     if (featuredImage !== undefined) article.featuredImage = featuredImage;
-    if (galleryImages !== undefined) article.galleryImages = galleryImages;
+    if (galleryImages !== undefined) {
+      article.galleryImages = Array.isArray(galleryImages)
+        ? galleryImages
+            .filter((item) => item && (typeof item === "string" ? item.trim() : item.url && item.url.trim()))
+            .map((item) =>
+              typeof item === "string"
+                ? { url: item.trim(), caption: "", alt: "" }
+                : { url: item.url.trim(), caption: item.caption || "", alt: item.alt || "" }
+            )
+        : [];
+    }
+    if (galleryVideos !== undefined) {
+      article.galleryVideos = Array.isArray(galleryVideos)
+        ? galleryVideos
+            .filter((item) => item && (typeof item === "string" ? item.trim() : item.url && item.url.trim()))
+            .map((item) =>
+              typeof item === "string"
+                ? { url: item.trim(), title: "", caption: "" }
+                : { url: item.url.trim(), title: item.title || "", caption: item.caption || "" }
+            )
+        : [];
+    }
+    if (location !== undefined) article.location = location;
 
     // Handle slug update
     if (slug && slug !== article.slug) {

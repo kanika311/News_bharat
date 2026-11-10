@@ -42,107 +42,133 @@ function uploadBufferToCloudinary(cloudinary, buffer, filename, resourceType = "
   });
 }
 
-// POST /api/media/upload
-exports.uploadMedia = async (req, res) => {
+// Helper to process and persist a single file buffer
+async function processAndSaveFile(file, req) {
+  const origExt = path.extname(file.originalname || "").toLowerCase();
+  const isVideo = (file.mimetype || "").startsWith("video/") || /mp4|webm|mov|mkv|avi|m4v/.test(origExt);
+  const isPdf = file.mimetype === "application/pdf" || origExt === ".pdf";
+  const prefix = isVideo ? "vid" : isPdf ? "pdf" : "img";
+
+  let finalFilename = `${prefix}-${Date.now()}-${Math.round(Math.random() * 1e9)}${origExt || ".jpg"}`;
+  let finalBuffer = file.buffer;
+  let finalMime = file.mimetype || (isVideo ? "video/mp4" : isPdf ? "application/pdf" : "image/jpeg");
+  let finalSize = file.size || file.buffer.length;
+
+  // Automatic WebP compression for images (saves ~75% payload)
+  if (!isVideo && !isPdf && !(file.mimetype || "").includes("svg")) {
+    try {
+      finalBuffer = await sharp(file.buffer)
+        .rotate()
+        .resize({ width: 1920, height: 1920, fit: "inside", withoutEnlargement: true })
+        .webp({ quality: 80, effort: 4 })
+        .toBuffer();
+      finalMime = "image/webp";
+      finalSize = finalBuffer.length;
+      finalFilename = `${prefix}-${Date.now()}-${Math.round(Math.random() * 1e9)}.webp`;
+    } catch (sharpErr) {
+      console.warn("[MediaController] WebP conversion fallback:", sharpErr.message);
+    }
+  }
+
+  let finalUrl = "";
+  const cloudinary = getCloudinary();
+
+  // 1. Try Cloudinary if configured
+  if (cloudinary) {
+    try {
+      const cldResult = await uploadBufferToCloudinary(
+        cloudinary,
+        finalBuffer,
+        finalFilename,
+        isVideo ? "video" : isPdf ? "raw" : "image"
+      );
+      finalUrl = cldResult.secure_url;
+    } catch (cldErr) {
+      console.warn("[MediaController] Cloudinary upload failed, using local/database fallback:", cldErr.message);
+    }
+  }
+
+  // 2. Try writing to local disk
+  if (!finalUrl) {
+    try {
+      if (!fs.existsSync(uploadDir)) {
+        fs.mkdirSync(uploadDir, { recursive: true });
+      }
+      const diskPath = path.join(uploadDir, finalFilename);
+      fs.writeFileSync(diskPath, finalBuffer);
+      finalUrl = `/uploads/${finalFilename}`;
+    } catch (diskErr) {
+      console.warn("[MediaController] Disk write bypassed (read-only filesystem):", diskErr.message);
+    }
+  }
+
+  // 3. Database Persistence
+  const mediaDoc = await Media.create({
+    filename: finalFilename,
+    originalName: file.originalname || finalFilename,
+    mimetype: finalMime,
+    size: finalSize,
+    type: isVideo ? "video" : isPdf ? "pdf" : "image",
+    url: finalUrl,
+    data: finalUrl.startsWith("http") ? undefined : finalBuffer,
+    user: req.user?._id,
+  });
+
+  if (!finalUrl) {
+    finalUrl = `/api/media/file/${mediaDoc._id}/${finalFilename}`;
+    mediaDoc.url = finalUrl;
+    await mediaDoc.save();
+  }
+
   try {
-    const file = req.file || (req.files && req.files[0]);
-    if (!file || !file.buffer) {
-      return res.status(400).json({ success: false, message: "No media file provided or empty buffer." });
-    }
-
-    const origExt = path.extname(file.originalname || "").toLowerCase();
-    const isVideo = (file.mimetype || "").startsWith("video/") || /mp4|webm|mov|mkv|avi|m4v/.test(origExt);
-    const isPdf = file.mimetype === "application/pdf" || origExt === ".pdf";
-    const prefix = isVideo ? "vid" : isPdf ? "pdf" : "img";
-
-    let finalFilename = `${prefix}-${Date.now()}-${Math.round(Math.random() * 1e9)}${origExt || ".jpg"}`;
-    let finalBuffer = file.buffer;
-    let finalMime = file.mimetype || (isVideo ? "video/mp4" : isPdf ? "application/pdf" : "image/jpeg");
-    let finalSize = file.size || file.buffer.length;
-
-    // Automatic WebP compression for images (saves ~75% payload)
-    if (!isVideo && !isPdf && !(file.mimetype || "").includes("svg")) {
-      try {
-        finalBuffer = await sharp(file.buffer)
-          .rotate()
-          .resize({ width: 1920, height: 1920, fit: "inside", withoutEnlargement: true })
-          .webp({ quality: 80, effort: 4 })
-          .toBuffer();
-        finalMime = "image/webp";
-        finalSize = finalBuffer.length;
-        finalFilename = `${prefix}-${Date.now()}-${Math.round(Math.random() * 1e9)}.webp`;
-      } catch (sharpErr) {
-        console.warn("[MediaController] WebP conversion fallback:", sharpErr.message);
-      }
-    }
-
-    let finalUrl = "";
-    const cloudinary = getCloudinary();
-
-    // 1. Try Cloudinary if configured
-    if (cloudinary) {
-      try {
-        const cldResult = await uploadBufferToCloudinary(
-          cloudinary,
-          finalBuffer,
-          finalFilename,
-          isVideo ? "video" : isPdf ? "raw" : "image"
-        );
-        finalUrl = cldResult.secure_url;
-      } catch (cldErr) {
-        console.warn("[MediaController] Cloudinary upload failed, using local/database fallback:", cldErr.message);
-      }
-    }
-
-    // 2. Try writing to local disk (succeeds on VPS/local, fails gracefully on Vercel read-only)
-    if (!finalUrl) {
-      try {
-        if (!fs.existsSync(uploadDir)) {
-          fs.mkdirSync(uploadDir, { recursive: true });
-        }
-        const diskPath = path.join(uploadDir, finalFilename);
-        fs.writeFileSync(diskPath, finalBuffer);
-        finalUrl = `/uploads/${finalFilename}`;
-      } catch (diskErr) {
-        // Expected in serverless environments (EROFS: read-only file system on Vercel)
-        console.warn("[MediaController] Disk write bypassed (read-only filesystem):", diskErr.message);
-      }
-    }
-
-    // 3. Database Persistence (Guarantees zero file loss and full Vercel compatibility)
-    const mediaDoc = await Media.create({
-      filename: finalFilename,
-      originalName: file.originalname || finalFilename,
-      mimetype: finalMime,
-      size: finalSize,
-      type: isVideo ? "video" : isPdf ? "pdf" : "image",
-      url: finalUrl,
-      data: finalUrl.startsWith("http") ? undefined : finalBuffer, // Store buffer only if not hosted on CDN
-      user: req.user?._id,
-    });
-
-    // If local disk write was read-only, serve dynamically through /api/media/file/:id
-    if (!finalUrl) {
-      finalUrl = `/api/media/file/${mediaDoc._id}/${finalFilename}`;
-      mediaDoc.url = finalUrl;
-      await mediaDoc.save();
-    }
-
     await logActivity(
       req,
       "UPLOAD_MEDIA",
       "media",
       `Uploaded ${isVideo ? "video" : isPdf ? "pdf" : "image"}: ${finalFilename}`
     );
+  } catch (e) {}
+
+  return {
+    url: finalUrl,
+    filename: finalFilename,
+    size: finalSize,
+    mimetype: finalMime,
+    type: isVideo ? "video" : isPdf ? "pdf" : "image",
+  };
+}
+
+// POST /api/media/upload (supports single or multiple file uploads)
+exports.uploadMedia = async (req, res) => {
+  try {
+    const rawFiles = req.files || (req.file ? [req.file] : []);
+    const validFiles = rawFiles.filter((f) => f && f.buffer && f.buffer.length > 0);
+
+    if (validFiles.length === 0) {
+      return res.status(400).json({ success: false, message: "No media file provided or empty buffer." });
+    }
+
+    if (validFiles.length === 1) {
+      const saved = await processAndSaveFile(validFiles[0], req);
+      return res.status(201).json({
+        success: true,
+        ...saved,
+        message: `${saved.type === "video" ? "Video" : saved.type === "pdf" ? "PDF" : "Image"} uploaded successfully`,
+      });
+    }
+
+    // Multiple files uploaded at once
+    const savedList = [];
+    for (const file of validFiles) {
+      const saved = await processAndSaveFile(file, req);
+      savedList.push(saved);
+    }
 
     return res.status(201).json({
       success: true,
-      url: finalUrl,
-      filename: finalFilename,
-      size: finalSize,
-      mimetype: finalMime,
-      type: isVideo ? "video" : isPdf ? "pdf" : "image",
-      message: `${isVideo ? "Video" : isPdf ? "PDF" : "Image"} uploaded successfully`,
+      files: savedList,
+      url: savedList[0]?.url || "",
+      message: `${savedList.length} media files uploaded successfully`,
     });
   } catch (err) {
     console.error("[MediaController] Upload error:", err);

@@ -15,6 +15,7 @@ import Link from "next/link";
 import { apiFetch } from "@/lib/api";
 import RichTextEditor from "./RichTextEditor";
 import ImageUploader from "./ImageUploader";
+import MultiMediaManager from "./MultiMediaManager";
 
 export default function ArticleForm({ initialData = null, isEdit = false }) {
   const router = useRouter();
@@ -33,6 +34,12 @@ export default function ArticleForm({ initialData = null, isEdit = false }) {
   );
   const [featuredImage, setFeaturedImage] = useState(
     initialData?.featuredImage || { url: "", caption: "", alt: "" }
+  );
+  const [galleryImages, setGalleryImages] = useState(
+    Array.isArray(initialData?.galleryImages) ? initialData.galleryImages : []
+  );
+  const [galleryVideos, setGalleryVideos] = useState(
+    Array.isArray(initialData?.galleryVideos) ? initialData.galleryVideos : []
   );
   const [status, setStatus] = useState(initialData?.status || "draft");
   const [scheduledAt, setScheduledAt] = useState(
@@ -105,6 +112,8 @@ export default function ArticleForm({ initialData = null, isEdit = false }) {
       subCategory: subCategory || null,
       tags,
       featuredImage,
+      galleryImages,
+      galleryVideos,
       status,
       scheduledAt: status === "scheduled" && scheduledAt ? new Date(scheduledAt) : null,
       isBreaking,
@@ -513,6 +522,14 @@ export default function ArticleForm({ initialData = null, isEdit = false }) {
               />
             </div>
           </div>
+
+          {/* Multiple Photos & Videos Manager */}
+          <MultiMediaManager
+            images={galleryImages}
+            onImagesChange={setGalleryImages}
+            videos={galleryVideos}
+            onVideosChange={setGalleryVideos}
+          />
         </div>
       </div>
     </form>

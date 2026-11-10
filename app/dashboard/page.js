@@ -113,9 +113,15 @@ export default function CitizenJournalistDashboard() {
   const [district, setDistrict] = useState("सुल्तानपुर");
   const [content, setContent] = useState("");
   const [imageUrl, setImageUrl] = useState("");
+  const [additionalImages, setAdditionalImages] = useState([]);
+  const [additionalVideos, setAdditionalVideos] = useState([]);
+  const [videoLinkInput, setVideoLinkInput] = useState("");
+  const [showVideoInput, setShowVideoInput] = useState(false);
+  const [uploadingReportVideo, setUploadingReportVideo] = useState(false);
   const [uploadingArticleImage, setUploadingArticleImage] = useState(false);
   const [showManualUrl, setShowManualUrl] = useState(false);
   const articleImageInputRef = useRef(null);
+  const articleVideoInputRef = useRef(null);
 
   const [sourceInfo, setSourceInfo] = useState("");
   const [submittingArticle, setSubmittingArticle] = useState(false);
@@ -314,10 +320,20 @@ export default function CitizenJournalistDashboard() {
         featuredImage: {
           url:
             imageUrl.trim() ||
-            "https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&w=800&q=80",
+            (additionalImages[0]?.url || "https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&w=800&q=80"),
           caption: sourceInfo.trim() || "ग्राउंड रिपोर्टर द्वारा प्रदत्त",
           alt: title.trim(),
         },
+        galleryImages: additionalImages.map((img) =>
+          typeof img === "string"
+            ? { url: img, caption: "", alt: "" }
+            : { url: img.url, caption: img.caption || "", alt: "" }
+        ),
+        galleryVideos: additionalVideos.map((vid) =>
+          typeof vid === "string"
+            ? { url: vid, title: "Reporter Video", caption: "" }
+            : { url: vid.url, title: vid.title || "Reporter Video", caption: vid.caption || "" }
+        ),
         status: "pending", // Citizen report goes to editorial review
       };
 
@@ -333,6 +349,8 @@ export default function CitizenJournalistDashboard() {
         setTitle("");
         setContent("");
         setImageUrl("");
+        setAdditionalImages([]);
+        setAdditionalVideos([]);
         setSourceInfo("");
 
         // Refresh user's article list
@@ -404,21 +422,70 @@ export default function CitizenJournalistDashboard() {
     });
   };
 
-  // Handle News Article Image Upload
+  // Handle News Article Image Upload (Supports Multiple Photos)
   const handleArticleImageUpload = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
     setUploadingArticleImage(true);
     setArticleErrorMsg("");
     try {
-      const url = await uploadMediaFile(file);
-      setImageUrl(url);
+      const urls = [];
+      for (const file of files) {
+        const u = await uploadMediaFile(file);
+        if (u) urls.push(u);
+      }
+
+      if (urls.length > 0) {
+        if (!imageUrl) {
+          setImageUrl(urls[0]);
+          const remaining = urls.slice(1).map((u) => ({ url: u, caption: "" }));
+          if (remaining.length > 0) {
+            setAdditionalImages((prev) => [...prev, ...remaining]);
+          }
+        } else {
+          const newImgs = urls.map((u) => ({ url: u, caption: "" }));
+          setAdditionalImages((prev) => [...prev, ...newImgs]);
+        }
+      }
     } catch (err) {
       setArticleErrorMsg("फोटो अपलोड करने में त्रुटि आई: " + err.message);
     } finally {
       setUploadingArticleImage(false);
       if (articleImageInputRef.current) articleImageInputRef.current.value = "";
     }
+  };
+
+  // Handle News Article Video Upload
+  const handleArticleVideoUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingReportVideo(true);
+    setArticleErrorMsg("");
+    try {
+      const url = await uploadMediaFile(file);
+      if (url) {
+        setAdditionalVideos((prev) => [
+          ...prev,
+          { url, title: file.name || "ग्राउंड वीडियो", caption: "रिपोर्टर वीडियो कवरेज" },
+        ]);
+      }
+    } catch (err) {
+      setArticleErrorMsg("वीडियो अपलोड करने में त्रुटि आई: " + err.message);
+    } finally {
+      setUploadingReportVideo(false);
+      if (articleVideoInputRef.current) articleVideoInputRef.current.value = "";
+    }
+  };
+
+  const handleAddVideoLink = (e) => {
+    e.preventDefault();
+    if (!videoLinkInput.trim()) return;
+    setAdditionalVideos((prev) => [
+      ...prev,
+      { url: videoLinkInput.trim(), title: "वीडियो रिपोर्ट", caption: "" },
+    ]);
+    setVideoLinkInput("");
+    setShowVideoInput(false);
   };
 
   // Handle Profile Avatar Upload
@@ -1028,62 +1095,133 @@ export default function CitizenJournalistDashboard() {
                   </div>
 
                   {/* Photo & Media Upload Section */}
-                  <div className="space-y-2 pt-1">
-                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center justify-between">
-                      <span className="flex items-center gap-1.5">
+                  <div className="space-y-3 pt-1">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
                         <Camera className="w-3.5 h-3.5 text-red-600" />
-                        <span>समाचार फोटो / मीडिया अपलोड (Media Upload)</span>
-                      </span>
-                      {imageUrl && (
+                        <span>समाचार फोटो / मीडिया (Multiple Photos & Media)</span>
+                      </label>
+                      {(imageUrl || additionalImages.length > 0) && (
                         <span className="text-[10px] text-emerald-600 font-bold flex items-center gap-1">
-                          <Check className="w-3 h-3" /> फोटो संलग्न है
+                          <Check className="w-3 h-3" /> {1 + additionalImages.length} फोटो संलग्न हैं
                         </span>
                       )}
-                    </label>
+                    </div>
 
                     <input
                       type="file"
                       ref={articleImageInputRef}
                       accept="image/*"
+                      multiple
                       onChange={handleArticleImageUpload}
                       className="hidden"
                       id="article-image-file"
                     />
 
+                    <input
+                      type="file"
+                      ref={articleVideoInputRef}
+                      accept="video/*"
+                      onChange={handleArticleVideoUpload}
+                      className="hidden"
+                      id="article-video-file"
+                    />
+
+                    {/* Primary Image Preview if present */}
                     {imageUrl ? (
-                      /* Preview of Uploaded Image */
-                      <div className="relative rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 p-3 flex items-center gap-3">
-                        <div className="w-24 h-16 rounded-xl overflow-hidden bg-black shrink-0 relative border border-slate-300 dark:border-slate-600">
-                          <img
-                            src={imageUrl}
-                            alt="Uploaded preview"
-                            className="w-full h-full object-cover"
-                          />
+                      <div className="space-y-3">
+                        <div className="relative rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 p-3 flex items-center gap-3">
+                          <div className="w-24 h-16 rounded-xl overflow-hidden bg-black shrink-0 relative border border-slate-300 dark:border-slate-600">
+                            <img
+                              src={imageUrl}
+                              alt="Primary preview"
+                              className="w-full h-full object-cover"
+                            />
+                            <span className="absolute bottom-1 left-1 bg-red-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded">
+                              मुख्य फोटो
+                            </span>
+                          </div>
+                          <div className="flex-1 min-w-0 text-xs">
+                            <p className="font-bold text-slate-900 dark:text-white truncate">
+                              मुख्य कवर फोटो (Primary Photo)
+                            </p>
+                            <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium truncate">
+                              ✓ वेब कंप्रेस्ड एवं तैयार
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-2 shrink-0">
+                            <button
+                              type="button"
+                              onClick={() => articleImageInputRef.current?.click()}
+                              className="px-3 py-1.5 text-xs font-bold bg-white dark:bg-slate-700 hover:bg-slate-100 text-slate-700 dark:text-slate-200 rounded-xl border border-slate-200 dark:border-slate-600 cursor-pointer transition-colors"
+                            >
+                              + और फोटो जोड़ें
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (additionalImages.length > 0) {
+                                  setImageUrl(additionalImages[0].url);
+                                  setAdditionalImages(additionalImages.slice(1));
+                                } else {
+                                  setImageUrl("");
+                                }
+                              }}
+                              className="p-1.5 text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-xl transition-colors cursor-pointer"
+                              title="फोटो हटाएं"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          </div>
                         </div>
-                        <div className="flex-1 min-w-0 text-xs">
-                          <p className="font-bold text-slate-900 dark:text-white truncate">
-                            फोटो सफलतापूर्वक अपलोड हो गई है
-                          </p>
-                          <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium truncate">
-                            ✓ वेब कंप्रेस्ड एवं तैयार ({imageUrl})
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-2 shrink-0">
-                          <label
-                            htmlFor="article-image-file"
-                            className="px-3 py-1.5 text-xs font-bold bg-white dark:bg-slate-700 hover:bg-slate-100 text-slate-700 dark:text-slate-200 rounded-xl border border-slate-200 dark:border-slate-600 cursor-pointer transition-colors"
-                          >
-                            बदलें
-                          </label>
-                          <button
-                            type="button"
-                            onClick={() => setImageUrl("")}
-                            className="p-1.5 text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-xl transition-colors cursor-pointer"
-                            title="फोटो हटाएं"
-                          >
-                            <X className="w-4 h-4" />
-                          </button>
-                        </div>
+
+                        {/* Additional Photos Grid */}
+                        {additionalImages.length > 0 && (
+                          <div className="space-y-1.5">
+                            <span className="text-[11px] font-bold text-slate-500 block">
+                              अतिरिक्त फोटो गैलरी ({additionalImages.length}):
+                            </span>
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                              {additionalImages.map((img, aIdx) => (
+                                <div
+                                  key={aIdx}
+                                  className="relative rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 overflow-hidden group shadow-2xs"
+                                >
+                                  <div className="h-20 w-full rounded-lg overflow-hidden bg-black/90 relative">
+                                    <img
+                                      src={img.url}
+                                      alt=""
+                                      className="w-full h-full object-cover"
+                                    />
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        setAdditionalImages(
+                                          additionalImages.filter((_, i) => i !== aIdx)
+                                        )
+                                      }
+                                      className="absolute top-1 right-1 p-1 bg-red-600 hover:bg-red-700 text-white rounded-md cursor-pointer shadow-xs"
+                                      title="हटाएं"
+                                    >
+                                      <X className="w-3 h-3" />
+                                    </button>
+                                  </div>
+                                  <input
+                                    type="text"
+                                    value={img.caption || ""}
+                                    onChange={(e) => {
+                                      const updated = [...additionalImages];
+                                      updated[aIdx] = { ...updated[aIdx], caption: e.target.value };
+                                      setAdditionalImages(updated);
+                                    }}
+                                    placeholder="कैप्शन लिखें..."
+                                    className="w-full text-[10px] mt-1 px-1.5 py-0.5 border border-slate-200 dark:border-slate-700 rounded bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200 focus:outline-none"
+                                  />
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     ) : (
                       /* Direct Media File Upload Dropzone */
@@ -1095,7 +1233,7 @@ export default function CitizenJournalistDashboard() {
                           <div className="flex flex-col items-center justify-center py-2 space-y-2">
                             <Loader2 className="w-6 h-6 text-red-600 animate-spin" />
                             <span className="text-xs font-bold text-slate-600 dark:text-slate-300">
-                              फोटो अपलोड व कंप्रेस हो रही है...
+                              फोटो अपलोड व कंप्रेस हो रही हैं...
                             </span>
                           </div>
                         ) : (
@@ -1104,15 +1242,97 @@ export default function CitizenJournalistDashboard() {
                               <Upload className="w-5 h-5" />
                             </div>
                             <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
-                              यहाँ क्लिक करके गैलरी या कैमरे से फोटो अपलोड करें (Media Upload)
+                              यहाँ क्लिक करके एक या अधिक फोटो अपलोड करें (Multi-Photo Upload)
                             </span>
                             <span className="text-[10px] text-slate-400">
-                              सपोर्टेड: JPG, PNG, WEBP, GIF (ऑटोमेटिक वेब कंप्रेस्ड)
+                              सपोर्टेड: JPG, PNG, WEBP, GIF (एक साथ कई फोटो चुनें)
                             </span>
                           </div>
                         )}
                       </div>
                     )}
+
+                    {/* Video Attachment Strip */}
+                    <div className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                          <Video className="w-3.5 h-3.5 text-red-600" />
+                          <span>वीडियो कवरेज संलग्न करें (Attach Video)</span>
+                        </span>
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => articleVideoInputRef.current?.click()}
+                            disabled={uploadingReportVideo}
+                            className="text-[11px] font-bold text-red-600 hover:underline cursor-pointer flex items-center gap-1"
+                          >
+                            {uploadingReportVideo ? (
+                              <Loader2 className="w-3 h-3 animate-spin" />
+                            ) : (
+                              <Upload className="w-3 h-3" />
+                            )}
+                            <span>वीडियो फाइल अपलोड करें</span>
+                          </button>
+                          <span className="text-slate-300">|</span>
+                          <button
+                            type="button"
+                            onClick={() => setShowVideoInput(!showVideoInput)}
+                            className="text-[11px] font-bold text-slate-600 dark:text-slate-300 hover:underline cursor-pointer"
+                          >
+                            {showVideoInput ? "लिंक छुपाएं" : "+ YouTube / वीडियो लिंक"}
+                          </button>
+                        </div>
+                      </div>
+
+                      {showVideoInput && (
+                        <div className="flex items-center gap-2 pt-1">
+                          <input
+                            type="url"
+                            value={videoLinkInput}
+                            onChange={(e) => setVideoLinkInput(e.target.value)}
+                            placeholder="YouTube / Video link: https://youtube.com/watch?v=..."
+                            className="flex-1 px-3 py-1.5 text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl"
+                          />
+                          <button
+                            type="button"
+                            onClick={handleAddVideoLink}
+                            className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-xl"
+                          >
+                            जोड़ें
+                          </button>
+                        </div>
+                      )}
+
+                      {additionalVideos.length > 0 && (
+                        <div className="space-y-1.5 pt-1">
+                          {additionalVideos.map((vid, vIdx) => (
+                            <div
+                              key={vIdx}
+                              className="p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 flex items-center justify-between text-xs"
+                            >
+                              <div className="flex items-center gap-2 truncate">
+                                <Video className="w-3.5 h-3.5 text-red-600 shrink-0" />
+                                <span className="font-semibold text-slate-800 dark:text-slate-200 truncate">
+                                  {vid.title || vid.url}
+                                </span>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setAdditionalVideos(
+                                    additionalVideos.filter((_, i) => i !== vIdx)
+                                  )
+                                }
+                                className="text-red-600 hover:text-red-700 p-1 cursor-pointer"
+                                title="हटाएं"
+                              >
+                                <X className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
 
                     {/* Optional URL Toggle & Source Details */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">

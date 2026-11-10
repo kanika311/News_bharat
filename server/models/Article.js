@@ -78,8 +78,16 @@ const ArticleSchema = new mongoose.Schema(
     },
     galleryImages: [
       {
-        url: String,
-        caption: String,
+        url: { type: String, default: "" },
+        caption: { type: String, default: "" },
+        alt: { type: String, default: "" },
+      },
+    ],
+    galleryVideos: [
+      {
+        url: { type: String, default: "" },
+        title: { type: String, default: "" },
+        caption: { type: String, default: "" },
       },
     ],
     status: {
