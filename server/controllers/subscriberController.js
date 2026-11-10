@@ -1,28 +1,55 @@
 const Subscriber = require("../models/Subscriber");
 const { logActivity } = require("../utils/activity");
 
-// POST /api/subscribers (Public newsletter subscription)
+// POST /api/subscribers & POST /api/subscribers/subscribe (Public newsletter subscription)
 exports.subscribe = async (req, res) => {
   try {
-    const { email } = req.body;
-    if (!email || !email.includes("@")) {
-      return res.status(400).json({ success: false, message: "Please provide a valid email address." });
+    const { email } = req.body || {};
+    if (!email || typeof email !== "string" || !email.includes("@")) {
+      return res.status(400).json({
+        success: false,
+        message: "कृपया एक वैध ईमेल पता दर्ज करें (Please provide a valid email address).",
+      });
     }
 
-    const existing = await Subscriber.findOne({ email: email.toLowerCase() });
+    const cleanEmail = email.trim().toLowerCase();
+
+    const existing = await Subscriber.findOne({ email: cleanEmail });
     if (existing) {
       if (!existing.isActive) {
         existing.isActive = true;
         await existing.save();
+
+        try {
+          await logActivity(req, "SUBSCRIBE", "subscriber", `Reactivated newsletter subscription: ${cleanEmail}`);
+        } catch (e) {}
+
+        return res.json({
+          success: true,
+          message: "आपकी सदस्यता पुनः सक्रिय कर दी गई है! (Your subscription has been reactivated!)",
+        });
       }
-      return res.json({ success: true, message: "You are already subscribed to Swar Media newsletter!" });
+
+      return res.json({
+        success: true,
+        message: "आप पहले से ही दैनिक बुलेटिन से जुड़े हैं! (You are already subscribed to Swar Media bulletins!)",
+      });
     }
 
-    const sub = new Subscriber({ email: email.toLowerCase() });
+    const sub = new Subscriber({ email: cleanEmail, isActive: true });
     await sub.save();
 
-    return res.status(201).json({ success: true, message: "Thank you for subscribing to daily news bulletins!" });
+    // Log activity so subscriber immediately appears in Admin Activity Logs & dashboard
+    try {
+      await logActivity(req, "SUBSCRIBE", "subscriber", `New newsletter subscriber: ${cleanEmail}`);
+    } catch (e) {}
+
+    return res.status(201).json({
+      success: true,
+      message: "दैनिक बुलेटिन की सदस्यता लेने के लिए धन्यवाद! (Thank you for subscribing to daily news bulletins!)",
+    });
   } catch (err) {
+    console.error("[Subscriber Error]", err);
     return res.status(500).json({ success: false, message: err.message });
   }
 };

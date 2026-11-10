@@ -16,6 +16,7 @@ import {
   ChevronRight,
   Loader2,
   CheckCircle,
+  AlertCircle,
   User,
   Radio,
   Tv,
@@ -35,6 +36,7 @@ export default function Footer() {
   const [email, setEmail] = useState("");
   const [subscribing, setSubscribing] = useState(false);
   const [subMessage, setSubMessage] = useState("");
+  const [subStatus, setSubStatus] = useState(null); // "success" | "error"
 
   useEffect(() => {
     // 1. Fetch live site settings from MongoDB
@@ -54,19 +56,48 @@ export default function Footer() {
 
   const handleSubscribe = async (e) => {
     e.preventDefault();
-    if (!email) return;
+    const cleanEmail = (email || "").trim().toLowerCase();
+    if (!cleanEmail || !cleanEmail.includes("@")) {
+      setSubStatus("error");
+      setSubMessage(lang === "hi" ? "कृपया एक वैध ईमेल पता दर्ज करें।" : "Please enter a valid email address.");
+      return;
+    }
+
     setSubscribing(true);
     setSubMessage("");
+    setSubStatus(null);
 
     try {
       const res = await apiFetch("/api/subscribers", {
         method: "POST",
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email: cleanEmail }),
       });
-      setSubMessage(res.message || "Thank you for subscribing!");
-      setEmail("");
+      if (res && res.success) {
+        setSubStatus("success");
+        setSubMessage(
+          res.message ||
+            (lang === "hi"
+              ? "दैनिक बुलेटिन की सदस्यता के लिए धन्यवाद!"
+              : "Thank you for subscribing!")
+        );
+        setEmail("");
+      } else {
+        setSubStatus("error");
+        setSubMessage(
+          res?.message ||
+            (lang === "hi"
+              ? "सदस्यता दर्ज नहीं हो सकी, कृपया पुनः प्रयास करें।"
+              : "Failed to subscribe, please try again.")
+        );
+      }
     } catch (err) {
-      setSubMessage(err.message || "Failed to subscribe");
+      setSubStatus("error");
+      setSubMessage(
+        err.message ||
+          (lang === "hi"
+            ? "सदस्यता दर्ज नहीं हो सकी, कृपया पुनः प्रयास करें।"
+            : "Failed to subscribe, please try again.")
+      );
     } finally {
       setSubscribing(false);
     }
@@ -122,8 +153,16 @@ export default function Footer() {
               </button>
             </div>
             {subMessage && (
-              <p className="text-xs text-emerald-700 font-bold mt-2 pl-2 flex items-center gap-1">
-                <CheckCircle className="w-3.5 h-3.5 text-emerald-600" />
+              <p
+                className={`text-xs font-bold mt-2 pl-2 flex items-center gap-1.5 ${
+                  subStatus === "success" ? "text-emerald-700" : "text-rose-600"
+                }`}
+              >
+                {subStatus === "success" ? (
+                  <CheckCircle className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                ) : (
+                  <AlertCircle className="w-3.5 h-3.5 text-rose-600 shrink-0" />
+                )}
                 <span>{subMessage}</span>
               </p>
             )}
