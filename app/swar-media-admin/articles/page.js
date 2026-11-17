@@ -544,6 +544,7 @@ export default function ArticlesListPage() {
         onClose={() => setShareModalArticle(null)}
         article={shareModalArticle}
         settings={settings}
+        onSettingsUpdate={(newSettings) => setSettings(newSettings)}
       />
     </div>
   );

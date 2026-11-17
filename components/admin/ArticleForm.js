@@ -724,6 +724,7 @@ export default function ArticleForm({ initialData = null, isEdit = false }) {
         article={shareModalArticle}
         settings={settings}
         selectedPlatforms={selectedSocials}
+        onSettingsUpdate={(newSettings) => setSettings(newSettings)}
       />
     </form>
   );
