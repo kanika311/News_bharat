@@ -109,3 +109,29 @@ html, body {
   margin-left: 1.5rem;
   margin-bottom: 1.25rem;
 }
+.article-prose figure {
+  margin: 1.75rem 0;
+  clear: both;
+}
+.article-prose figure img {
+  border-radius: 1rem;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+  display: block;
+  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.08);
+}
+.article-prose figure figcaption {
+  font-size: 0.825rem;
+  color: #64748b;
+  margin-top: 0.5rem;
+  font-style: italic;
+  text-align: center;
+}
+.article-prose img {
+  border-radius: 1rem;
+  max-width: 100%;
+  height: auto;
+  margin: 1.5rem auto;
+  display: block;
+}
