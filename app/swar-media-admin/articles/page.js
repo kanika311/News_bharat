@@ -407,6 +407,11 @@ export default function ArticlesListPage() {
                                   TOP STORY
                                 </span>
                               )}
+                              {art.location && (
+                                <span className="text-[10px] font-medium text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.2 rounded inline-flex items-center gap-0.5">
+                                  📍 {art.location}
+                                </span>
+                              )}
                             </div>
                           </div>
                         </div>

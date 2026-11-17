@@ -16,9 +16,11 @@ import {
   Facebook,
   Instagram,
   Send,
+  MapPin,
 } from "lucide-react";
 import Link from "next/link";
 import { apiFetch } from "@/lib/api";
+import { INDIAN_STATES, POPULAR_DISTRICTS } from "@/lib/locations";
 import RichTextEditor from "./RichTextEditor";
 import ImageUploader from "./ImageUploader";
 import MultiMediaManager from "./MultiMediaManager";
@@ -48,6 +50,21 @@ export default function ArticleForm({ initialData = null, isEdit = false }) {
   const [galleryVideos, setGalleryVideos] = useState(
     Array.isArray(initialData?.galleryVideos) ? initialData.galleryVideos : []
   );
+
+  // Structured Location State (Country, State, City/District, Pin Code)
+  const [country, setCountry] = useState(
+    initialData?.locationDetails?.country || "भारत (India)"
+  );
+  const [stateName, setStateName] = useState(
+    initialData?.locationDetails?.state || "उत्तर प्रदेश"
+  );
+  const [city, setCity] = useState(
+    initialData?.locationDetails?.city || initialData?.location || "सुल्तानपुर"
+  );
+  const [pincode, setPincode] = useState(
+    initialData?.locationDetails?.pincode || ""
+  );
+
   const [status, setStatus] = useState(initialData?.status || "draft");
   const [scheduledAt, setScheduledAt] = useState(
     initialData?.scheduledAt ? new Date(initialData.scheduledAt).toISOString().slice(0, 16) : ""
@@ -135,6 +152,13 @@ export default function ArticleForm({ initialData = null, isEdit = false }) {
       featuredImage,
       galleryImages,
       galleryVideos,
+      location: [city.trim(), stateName.trim()].filter(Boolean).join(", ") || country || "सुल्तानपुर",
+      locationDetails: {
+        country: (country || "India").trim(),
+        state: stateName.trim(),
+        city: city.trim(),
+        pincode: pincode.trim(),
+      },
       status,
       scheduledAt: status === "scheduled" && scheduledAt ? new Date(scheduledAt) : null,
       isBreaking,
@@ -529,6 +553,96 @@ export default function ArticleForm({ initialData = null, isEdit = false }) {
                 })}
               </div>
             </div>
+          </div>
+
+          {/* Location & Geography Box */}
+          <div className="p-6 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+                <MapPin className="w-4 h-4 text-red-600" />
+                <span>घटना स्थल / स्थान (Location)</span>
+              </h3>
+              {(city || stateName) && (
+                <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 px-2.5 py-0.5 rounded-full truncate max-w-[140px]">
+                  📍 {[city, stateName].filter(Boolean).join(", ")}
+                </span>
+              )}
+            </div>
+
+            {/* Country & State Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                  देश (Country)
+                </label>
+                <input
+                  type="text"
+                  value={country}
+                  onChange={(e) => setCountry(e.target.value)}
+                  placeholder="भारत / India"
+                  className="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-red-500 text-slate-800 dark:text-slate-100"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                  राज्य (State)
+                </label>
+                <select
+                  value={stateName}
+                  onChange={(e) => setStateName(e.target.value)}
+                  className="w-full px-3 py-2 text-xs font-medium bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-red-500 text-slate-800 dark:text-slate-100"
+                >
+                  <option value="">-- राज्य चुनें (Select State) --</option>
+                  {INDIAN_STATES.map((st) => (
+                    <option key={st.code} value={st.nameHi}>
+                      {st.nameHi} ({st.nameEn})
+                    </option>
+                  ))}
+                  <option value="Other">अन्य (Other)</option>
+                </select>
+              </div>
+            </div>
+
+            {/* City / District & Pin Code Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                  शहर / ज़िला (City / District)
+                </label>
+                <input
+                  type="text"
+                  list="admin-district-datalist"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  placeholder="उदा. सुल्तानपुर, लखनऊ, आगरा"
+                  className="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-red-500 text-slate-800 dark:text-slate-100"
+                />
+                <datalist id="admin-district-datalist">
+                  {POPULAR_DISTRICTS.map((d) => (
+                    <option key={d} value={d} />
+                  ))}
+                </datalist>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                  पिन कोड (Pin Code)
+                </label>
+                <input
+                  type="text"
+                  maxLength={6}
+                  value={pincode}
+                  onChange={(e) => setPincode(e.target.value.replace(/[^0-9]/g, "").slice(0, 6))}
+                  placeholder="उदा. 228001"
+                  className="w-full px-3 py-2 text-xs font-mono bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-red-500 text-slate-800 dark:text-slate-100"
+                />
+              </div>
+            </div>
+
+            <p className="text-[10px] text-slate-400">
+              * यह स्थान लाइव पोर्टल पर खबर कार्ड एवं हेडर में 📍 बैज के रूप में प्रदर्शित होगा।
+            </p>
           </div>
 
           {/* Featured Image Box */}

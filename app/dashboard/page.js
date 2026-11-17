@@ -35,6 +35,7 @@ import {
   X,
 } from "lucide-react";
 import { apiFetch } from "@/lib/api";
+import { INDIAN_STATES, POPULAR_DISTRICTS } from "@/lib/locations";
 import { useLang } from "@/lib/langContext";
 import { useAuth } from "@/lib/authContext";
 
@@ -110,7 +111,10 @@ export default function CitizenJournalistDashboard() {
   // New News Submission Form State (Editorial CMS)
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("");
+  const [country, setCountry] = useState("भारत (India)");
+  const [stateName, setStateName] = useState("उत्तर प्रदेश");
   const [district, setDistrict] = useState("सुल्तानपुर");
+  const [pincode, setPincode] = useState("");
   const [content, setContent] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [additionalImages, setAdditionalImages] = useState([]);
@@ -315,7 +319,13 @@ export default function CitizenJournalistDashboard() {
         title: title.trim(),
         content: content.trim(),
         category,
-        location: district || "सुल्तानपुर",
+        location: [district.trim(), stateName.trim()].filter(Boolean).join(", ") || country || "सुल्तानपुर",
+        locationDetails: {
+          country: (country || "India").trim(),
+          state: stateName.trim(),
+          city: district.trim(),
+          pincode: pincode.trim(),
+        },
         language: "hi",
         featuredImage: {
           url:
@@ -352,6 +362,7 @@ export default function CitizenJournalistDashboard() {
         setAdditionalImages([]);
         setAdditionalVideos([]);
         setSourceInfo("");
+        setPincode("");
 
         // Refresh user's article list
         if (user?._id) {
@@ -1046,36 +1057,107 @@ export default function CitizenJournalistDashboard() {
                     />
                   </div>
 
-                  {/* Category & District Grid */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div className="space-y-1">
-                      <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                        श्रेणी (Category) <span className="text-red-500">*</span>
+                  {/* Category Selection */}
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                      श्रेणी (Category) <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      value={category}
+                      onChange={(e) => setCategory(e.target.value)}
+                      className="w-full px-3 py-2.5 text-xs font-semibold bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500"
+                    >
+                      {categories.map((cat) => (
+                        <option key={cat._id} value={cat._id}>
+                          {cat.nameHi || cat.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Location Details Box (Country, State, City/District, Pin Code) */}
+                  <div className="p-4 bg-slate-50/70 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                        <MapPin className="w-3.5 h-3.5 text-red-600" />
+                        <span>घटना स्थल का विवरण (News Location Details)</span>
                       </label>
-                      <select
-                        value={category}
-                        onChange={(e) => setCategory(e.target.value)}
-                        className="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500"
-                      >
-                        {categories.map((cat) => (
-                          <option key={cat._id} value={cat._id}>
-                            {cat.nameHi || cat.name}
-                          </option>
-                        ))}
-                      </select>
+                      {(district || stateName) && (
+                        <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/70 border border-emerald-200 dark:border-emerald-800 px-2 py-0.5 rounded-full">
+                          📍 {[district, stateName].filter(Boolean).join(", ")}
+                        </span>
+                      )}
                     </div>
 
-                    <div className="space-y-1">
-                      <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                        ज़िला / स्थान (District / Location)
-                      </label>
-                      <input
-                        type="text"
-                        value={district}
-                        onChange={(e) => setDistrict(e.target.value)}
-                        placeholder="उदा. सुल्तानपुर, लखनऊ, वाराणसी"
-                        className="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500"
-                      />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {/* Country */}
+                      <div className="space-y-1">
+                        <label className="text-[11px] font-semibold text-slate-600 dark:text-slate-400">
+                          देश (Country)
+                        </label>
+                        <input
+                          type="text"
+                          value={country}
+                          onChange={(e) => setCountry(e.target.value)}
+                          placeholder="भारत / India"
+                          className="w-full px-3 py-2 text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500"
+                        />
+                      </div>
+
+                      {/* State */}
+                      <div className="space-y-1">
+                        <label className="text-[11px] font-semibold text-slate-600 dark:text-slate-400">
+                          राज्य (State) <span className="text-red-500">*</span>
+                        </label>
+                        <select
+                          value={stateName}
+                          onChange={(e) => setStateName(e.target.value)}
+                          className="w-full px-3 py-2 text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 font-medium"
+                        >
+                          <option value="">-- राज्य चुनें (Select State) --</option>
+                          {INDIAN_STATES.map((st) => (
+                            <option key={st.code} value={st.nameHi}>
+                              {st.nameHi} ({st.nameEn})
+                            </option>
+                          ))}
+                          <option value="Other">अन्य (Other)</option>
+                        </select>
+                      </div>
+
+                      {/* City / District */}
+                      <div className="space-y-1">
+                        <label className="text-[11px] font-semibold text-slate-600 dark:text-slate-400">
+                          शहर / ज़िला (City / District) <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          list="journalist-district-datalist"
+                          value={district}
+                          onChange={(e) => setDistrict(e.target.value)}
+                          placeholder="उदा. सुल्तानपुर, लखनऊ, आगरा"
+                          className="w-full px-3 py-2 text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500"
+                        />
+                        <datalist id="journalist-district-datalist">
+                          {POPULAR_DISTRICTS.map((d) => (
+                            <option key={d} value={d} />
+                          ))}
+                        </datalist>
+                      </div>
+
+                      {/* Pin Code */}
+                      <div className="space-y-1">
+                        <label className="text-[11px] font-semibold text-slate-600 dark:text-slate-400">
+                          पिन कोड (Pin Code)
+                        </label>
+                        <input
+                          type="text"
+                          maxLength={6}
+                          value={pincode}
+                          onChange={(e) => setPincode(e.target.value.replace(/[^0-9]/g, "").slice(0, 6))}
+                          placeholder="उदा. 228001"
+                          className="w-full px-3 py-2 text-xs font-mono bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500"
+                        />
+                      </div>
                     </div>
                   </div>
 

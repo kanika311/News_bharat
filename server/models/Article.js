@@ -39,6 +39,28 @@ const ArticleSchema = new mongoose.Schema(
       default: "",
       trim: true,
     },
+    locationDetails: {
+      country: {
+        type: String,
+        default: "India",
+        trim: true,
+      },
+      state: {
+        type: String,
+        default: "",
+        trim: true,
+      },
+      city: {
+        type: String,
+        default: "",
+        trim: true,
+      },
+      pincode: {
+        type: String,
+        default: "",
+        trim: true,
+      },
+    },
     category: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Category",

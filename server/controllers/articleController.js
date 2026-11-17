@@ -158,6 +158,7 @@ exports.createArticle = async (req, res) => {
       content,
       excerpt,
       location,
+      locationDetails,
       category,
       subCategory,
       tags = [],
@@ -218,6 +219,35 @@ exports.createArticle = async (req, res) => {
           )
       : [];
 
+    // Parse structured location (country, state, city, pincode)
+    let locCountry = "India";
+    let locState = "";
+    let locCity = "";
+    let locPincode = "";
+    let locDisplay = "";
+
+    if (locationDetails && typeof locationDetails === "object") {
+      locCountry = locationDetails.country ? String(locationDetails.country).trim() : "India";
+      locState = locationDetails.state ? String(locationDetails.state).trim() : "";
+      locCity = locationDetails.city ? String(locationDetails.city).trim() : "";
+      locPincode = locationDetails.pincode ? String(locationDetails.pincode).trim() : "";
+    }
+
+    if (typeof location === "string" && location.trim()) {
+      locDisplay = location.trim();
+      if (!locCity) locCity = locDisplay;
+    } else if (typeof location === "object" && location !== null) {
+      if (location.country) locCountry = String(location.country).trim();
+      if (location.state) locState = String(location.state).trim();
+      if (location.city) locCity = String(location.city).trim();
+      if (location.pincode) locPincode = String(location.pincode).trim();
+    }
+
+    if (!locDisplay) {
+      const parts = [locCity, locState].filter(Boolean);
+      locDisplay = parts.join(", ") || locCountry || "सुल्तानपुर";
+    }
+
     const newArticle = new Article({
       title,
       subtitle,
@@ -225,7 +255,13 @@ exports.createArticle = async (req, res) => {
       language,
       content,
       excerpt: excerpt || title,
-      location: location || "सुल्तानपुर",
+      location: locDisplay || "सुल्तानपुर",
+      locationDetails: {
+        country: locCountry || "India",
+        state: locState,
+        city: locCity,
+        pincode: locPincode,
+      },
       category,
       subCategory: subCategory || null,
       tags,
@@ -296,6 +332,7 @@ exports.updateArticle = async (req, res) => {
       galleryImages,
       galleryVideos,
       location,
+      locationDetails,
       status,
       scheduledAt,
       isBreaking,
@@ -340,7 +377,39 @@ exports.updateArticle = async (req, res) => {
             )
         : [];
     }
-    if (location !== undefined) article.location = location;
+    if (location !== undefined || locationDetails !== undefined) {
+      let locCountry = article.locationDetails?.country || "India";
+      let locState = article.locationDetails?.state || "";
+      let locCity = article.locationDetails?.city || "";
+      let locPincode = article.locationDetails?.pincode || "";
+      let locDisplay = article.location || "";
+
+      if (locationDetails && typeof locationDetails === "object") {
+        if (locationDetails.country !== undefined) locCountry = String(locationDetails.country).trim();
+        if (locationDetails.state !== undefined) locState = String(locationDetails.state).trim();
+        if (locationDetails.city !== undefined) locCity = String(locationDetails.city).trim();
+        if (locationDetails.pincode !== undefined) locPincode = String(locationDetails.pincode).trim();
+      }
+
+      if (typeof location === "string") {
+        locDisplay = location.trim();
+        if (locDisplay && !locCity) locCity = locDisplay;
+      } else if (typeof location === "object" && location !== null) {
+        if (location.country !== undefined) locCountry = String(location.country).trim();
+        if (location.state !== undefined) locState = String(location.state).trim();
+        if (location.city !== undefined) locCity = String(location.city).trim();
+        if (location.pincode !== undefined) locPincode = String(location.pincode).trim();
+      }
+
+      const parts = [locCity, locState].filter(Boolean);
+      article.location = parts.join(", ") || locDisplay || locCountry || "";
+      article.locationDetails = {
+        country: locCountry || "India",
+        state: locState,
+        city: locCity,
+        pincode: locPincode,
+      };
+    }
 
     // Handle slug update
     if (slug && slug !== article.slug) {

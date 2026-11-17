@@ -235,9 +235,17 @@ export default function ArticleDetailPage() {
         <div className="lg:col-span-8 space-y-6 min-w-0">
           {/* Headline & Subhead */}
           <div className="space-y-3">
-            <span className="inline-block px-3 py-1 rounded-full text-xs font-black uppercase text-white bg-red-600">
-              {lang === "hi" && article.category?.nameHi ? article.category.nameHi : article.category?.name}
-            </span>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="inline-block px-3 py-1 rounded-full text-xs font-black uppercase text-white bg-red-600">
+                {lang === "hi" && article.category?.nameHi ? article.category.nameHi : article.category?.name}
+              </span>
+              {article.location && (
+                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold text-amber-800 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-800">
+                  📍 {article.location}
+                  {article.locationDetails?.pincode ? ` (${article.locationDetails.pincode})` : ""}
+                </span>
+              )}
+            </div>
 
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-slate-900 dark:text-white leading-tight tracking-tight">
               {article.title}
